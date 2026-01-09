@@ -33,14 +33,17 @@ builder.Services.AddScoped<EmailService>();
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHealthEndpoints();
+app.MapAuthEndpoints();
 
+/*
 app.MapGet("/api/health/db", async (Db db) =>
 {
     var ok = await db.IsDbAliveAsync();
     return Results.Ok(new { ok });
 });
 
-
+*/
 // =======================
 // LEAD API (סט ראשון בלבד)
 // =======================
@@ -217,7 +220,7 @@ app.MapPost("/api/lead/instances/{instanceId:int}/send-availability-reminder", a
 // =======================
 // OTP
 // =======================
-
+/*
 app.MapPost("/api/auth/otp/request", async (
     HttpContext ctx,
     OtpRequestDto dto,
@@ -345,7 +348,7 @@ app.MapPost("/api/auth/impersonate", async (HttpContext ctx, Db db, ImpersonateR
     return Results.Ok(new { ok = true });
 });
 
-
+*/
 // =======================
 // Calendar / Gantt / Activities / Courses / Instructors (כמו אצלך)
 // =======================
