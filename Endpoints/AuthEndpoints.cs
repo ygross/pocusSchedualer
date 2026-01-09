@@ -1,7 +1,5 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Net;
-using System.Net.Mail;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -16,11 +14,12 @@ public static class AuthEndpoints
             HttpContext ctx,
             OtpRequestDto dto,
             Db db,
-            IConfiguration cfg) =>
+            IConfiguration cfg,
+            EmailService emailSvc) =>
         {
             var email = dto.Email?.Trim().ToLowerInvariant();
-            if (string.IsNullOrEmpty(email))
-                return Results.BadRequest();
+            if (string.IsNullOrWhiteSpace(email))
+                return Results.BadRequest(new { ok = false, error = "Missing email" });
 
             var me = await db.GetMeByEmailAsync(email);
             if (me == null)
@@ -49,21 +48,25 @@ public static class AuthEndpoints
   <div>תוקף הקוד: {minutes} דקות.</div>
 </div>";
 
-            // תמיד שומרים ב-Outbox
-            await db.EnqueueEmailAsync(email, subject, body, "OtpCodes", otpId.ToString());
+            // Queue + try send now (דרך EmailService)
+            var emailId = await emailSvc.QueueAsync(email, subject, body, "OtpCodes", otpId.ToString());
 
-            // ניסיון SMTP מיידי (כמו שהיה אצלך)
-            try
-            {
-                await SendEmailSmtpAsync(cfg, email, subject, body);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("[SMTP ERROR] " + ex);
+            var sent = await emailSvc.TrySendQueuedNowAsync(
+                ctx,
+                emailId,
+                email,
+                subject,
+                body,
+                relatedEntity: "OtpCodes",
+                relatedId: otpId.ToString(),
+                actorInstructorId: null,
+                attemptNo: 1
+            );
+
+            if (!sent)
                 return Results.Problem("Failed to send OTP email");
-            }
 
-            return Results.Ok(new { ok = true });
+            return Results.Ok(new { ok = true, emailId });
         });
 
         // =======================
@@ -77,11 +80,12 @@ public static class AuthEndpoints
             var email = dto.Email?.Trim().ToLowerInvariant();
             var code = dto.Code?.Trim();
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-                return Results.BadRequest();
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
+                return Results.BadRequest(new { ok = false, error = "Missing email/code" });
 
             var otp = await db.GetLatestOtpAsync(email);
-            if (otp == null) return Results.Unauthorized();
+            if (otp == null)
+                return Results.Unauthorized();
 
             var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
 
@@ -98,7 +102,8 @@ public static class AuthEndpoints
             await db.MarkOtpUsedAsync(email);
 
             var me = await db.GetMeByEmailAsync(email);
-            if (me == null) return Results.Unauthorized();
+            if (me == null)
+                return Results.Unauthorized();
 
             var claims = new List<Claim>
             {
@@ -119,17 +124,22 @@ public static class AuthEndpoints
         });
 
         // =======================
-        // Impersonate (כמו שהיה)
+        // Impersonate
         // =======================
-        app.MapPost("/api/auth/impersonate", async (HttpContext ctx, Db db, ImpersonateReq req) =>
+        app.MapPost("/api/auth/impersonate", async (
+            HttpContext ctx,
+            Db db,
+            ImpersonateReq req) =>
         {
             var email = (req.Email ?? "").Trim().ToLowerInvariant();
 
+            // ⚠️ זה עדיין “קשיח” כמו שהיה אצלך
             if (email != "ygross@bgu.ac.il")
                 return Results.Forbid();
 
             var me = await db.ImpersonateByEmailAsync(email);
-            if (me == null) return Results.Unauthorized();
+            if (me == null)
+                return Results.Unauthorized();
 
             var claims = new List<Claim>
             {
@@ -140,38 +150,9 @@ public static class AuthEndpoints
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
             return Results.Ok(new { ok = true });
         });
-    }
-
-    private static async Task SendEmailSmtpAsync(
-        IConfiguration cfg,
-        string to,
-        string subject,
-        string bodyHtml)
-    {
-        var host = cfg["Smtp:Host"] ?? throw new Exception("Missing Smtp:Host");
-        var port = int.Parse(cfg["Smtp:Port"] ?? "587");
-        var enableSsl = bool.Parse(cfg["Smtp:EnableSsl"] ?? "true");
-        var user = cfg["Smtp:User"] ?? "";
-        var pass = cfg["Smtp:Pass"] ?? "";
-        var from = cfg["Smtp:From"] ?? user;
-
-        using var client = new SmtpClient(host, port)
-        {
-            EnableSsl = enableSsl,
-            Credentials = new NetworkCredential(user, pass),
-        };
-
-        using var msg = new MailMessage(from, to, subject, bodyHtml)
-        {
-            IsBodyHtml = true
-        };
-
-        await client.SendMailAsync(msg);
     }
 }
