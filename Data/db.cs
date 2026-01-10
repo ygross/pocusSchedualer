@@ -1341,6 +1341,8 @@ END";
         return (false, "DB error: " + ex.Message);
     }
 }
+
+/*
 public async Task<(bool Ok, string? Error, int SentCount)> SendLeadAvailabilityReminderAsync(
     int instanceId,
     int actorInstructorId,
@@ -1430,13 +1432,141 @@ ORDER BY i.FullName;";
         await EnqueueEmailAsync(ins.Email, subject, body, "AvailabilityReminder", instanceId.ToString());
 
         try { await sendSmtpAsync(cfg, ins.Email, subject, body); }
-        catch { /* נשאר באאוטבוקס */ }
+        catch {  }
 
         sent++;
     }
 
     return (true, null, sent);
+}*/
+/*
+public async Task<(bool Ok, string? Error, List<EmailPayload> Emails)> BuildLeadAvailabilityReminderEmailsAsync(
+    int instanceId,
+    int actorInstructorId,
+    bool isAdmin,
+    bool onlyNotResponded,
+    IConfiguration cfg)
+{
+    const string sqlHeader = @"
+SELECT TOP 1
+  a.ActivityId,
+  a.ActivityName,
+  a.CourseId,
+  c.CourseName,
+  a.LeadInstructorId,
+  inst.StartUtc,
+  inst.EndUtc
+FROM dbo.ActivityInstances inst
+JOIN dbo.Activities a ON a.ActivityId = inst.ActivityId
+LEFT JOIN dbo.Courses c ON c.CourseId = a.CourseId
+WHERE inst.InstanceId = @instanceId;";
+
+    const string sqlEligible = @"
+SELECT i.InstructorId, i.Email
+FROM dbo.Instructors i
+JOIN dbo.InstructorCourses ic ON ic.InstructorId = i.InstructorId
+JOIN dbo.ActivityInstances inst ON inst.InstanceId = @instanceId
+JOIN dbo.Activities a ON a.ActivityId = inst.ActivityId
+WHERE ic.CourseId = a.CourseId
+  AND i.Status = 'Active';";
+
+    const string sqlResponded = @"
+SELECT InstructorId
+FROM dbo.AvailabilityRequests
+WHERE InstanceId = @instanceId;";
+
+    await using var c = Open();
+
+    var h = await c.QueryFirstOrDefaultAsync(sqlHeader, new { instanceId });
+    if (h == null) return (false, "Instance not found", new List<EmailPayload>());
+
+    int leadId = (int)(h.LeadInstructorId ?? 0);
+    if (!isAdmin && leadId != actorInstructorId)
+        return (false, "Forbidden: not lead of this activity", new List<EmailPayload>());
+
+    var eligible = (await c.QueryAsync(sqlEligible, new { instanceId })).ToList();
+
+    HashSet<int> responded = new();
+    if (onlyNotResponded)
+        responded = (await c.QueryAsync<int>(sqlResponded, new { instanceId })).ToHashSet();
+
+    string fmtIL(DateTime utc)
+    {
+        try
+        {
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("Israel Standard Time");
+            var local = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), tz);
+            return local.ToString("dd/MM/yyyy HH:mm");
+        }
+        catch { return utc.ToString("dd/MM/yyyy HH:mm") + " UTC"; }
+    }
+
+    var startUtc = (DateTime)h.StartUtc;
+    var endUtc   = (DateTime)h.EndUtc;
+
+    var baseUrl = cfg["App:BaseUrl"] ?? "";
+    var link = string.IsNullOrWhiteSpace(baseUrl) ? "" : $"{baseUrl.TrimEnd('/')}/availability.html?instanceId={instanceId}";
+
+    var emails = new List<EmailPayload>();
+
+    foreach (var ins in eligible)
+    {
+        int instructorId = (int)ins.InstructorId;
+        string email = (string)ins.Email;
+
+        if (string.IsNullOrWhiteSpace(email)) continue;
+        if (onlyNotResponded && responded.Contains(instructorId)) continue;
+
+        var subject = $"בקשת זמינות: {h.ActivityName} ({fmtIL(startUtc)})";
+        var body = $@"
+<div style=""font-family:Arial;direction:rtl"">
+  <h2>בקשת זמינות למופע</h2>
+  <div><b>פעילות:</b> {h.ActivityName}</div>
+  <div><b>קורס:</b> {h.CourseName}</div>
+  <div><b>מועד:</b> {fmtIL(startUtc)} – {fmtIL(endUtc)}</div>
+  <hr/>
+  <p>נא להיכנס ולהציע זמינות.</p>
+  {(string.IsNullOrWhiteSpace(link) ? "" : $@"<p><a href=""{link}"">לחץ/י כאן להגשת זמינות</a></p>")}
+  <div style=""color:#6b7280;font-size:12px"">InstanceId: {instanceId}</div>
+</div>";
+
+        emails.Add(new EmailPayload(
+            ToEmail: email,
+            Subject: subject,
+            BodyHtml: body,
+            RelatedEntity: "AvailabilityReminder",
+            RelatedId: instanceId.ToString()
+        ));
+    }
+
+    return (true, null, emails);
+}*/
+public async Task<(bool Ok, string? Error, List<ActivityEmailDto> Emails)>
+BuildLeadAvailabilityReminderEmailsAsync(
+    int instanceId,
+    int actorInstructorId,
+    bool isAdmin,
+    bool onlyNotResponded,
+    IConfiguration cfg)
+{
+    // כאן אתה לוקח את הלוגיקה הקיימת
+    // אבל במקום לשלוח – רק בונה רשימת מיילים
+
+    var emails = new List<ActivityEmailDto>();
+
+    // לדוגמה:
+    emails.Add(new ActivityEmailDto
+    {
+        ToEmail = "test@bgu.ac.il",
+        Subject = "בדיקת זמינות",
+        BodyHtml = "<b>נא להגיש זמינות</b>",
+        RelatedEntity = "ActivityInstance",
+        RelatedId = instanceId.ToString()
+    });
+
+    return (true, null, emails);
 }
+
 public async Task<(bool Ok, string? Error)> DeleteActivityAsync(
     int activityId,
     int actorInstructorId,
@@ -1585,6 +1715,13 @@ ORDER BY inst.StartUtc;";
         activityTypeId
     });
 }
+public sealed record EmailPayload(
+    string ToEmail,
+    string Subject,
+    string BodyHtml,
+    string? RelatedEntity,
+    string? RelatedId
+);
 
 
     // ≡≡ קורסים לפי סוג פעילות ≡≡

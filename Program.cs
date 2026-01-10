@@ -6,8 +6,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Cryptography;
-using System.Net;
-using System.Net.Mail;
+
+
 using PocusSchedualer.Services;
 using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +24,16 @@ builder.Services
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", p => p.RequireRole(Roles.Admin));
+    options.AddPolicy("CourseManagerOnly", p => p.RequireRole(Roles.CourseManager));
+    options.AddPolicy("InstructorOnly", p => p.RequireRole(Roles.Instructor));
+
+    // למי שמותר להיכנס בכלל (כל אחד מהתפקידים)
+    options.AddPolicy("AnyUser", p => p.RequireRole(Roles.Admin, Roles.CourseManager, Roles.Instructor));
+});
+
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<EmailService>();
 
@@ -35,6 +44,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapHealthEndpoints();
 app.MapAuthEndpoints();
+app.MapActivitiesEndpoints();
 
 /*
 app.MapGet("/api/health/db", async (Db db) =>
@@ -196,7 +206,9 @@ app.MapPost("/api/lead/instances/{instanceId:int}/send-availability-reminder", a
     int instanceId,
     ReminderReq body,
     Db db,
-    IConfiguration cfg) =>
+    IConfiguration cfg,
+    EmailService emailSvc,
+    AuditService audit) =>
 {
     var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
     if (!isAuth) return Results.Unauthorized();
@@ -204,17 +216,41 @@ app.MapPost("/api/lead/instances/{instanceId:int}/send-availability-reminder", a
 
     var onlyNotResponded = body?.OnlyNotResponded ?? true;
 
-    var (ok, err, sent) = await db.SendLeadAvailabilityReminderAsync(
+    var (ok, err, emails) = await db.BuildLeadAvailabilityReminderEmailsAsync(
         instanceId,
         actorInstructorId: myId ?? 0,
         isAdmin: isAdmin,
         onlyNotResponded: onlyNotResponded,
-        cfg: cfg,
-        sendSmtpAsync: SendEmailSmtpAsync
+        cfg: cfg
     );
 
-    return ok ? Results.Ok(new { ok = true, sent }) : Results.BadRequest(err);
+    if (!ok) return Results.BadRequest(err);
+
+    int sentNow = 0;
+    foreach (var e in emails)
+    {
+        var emailId = await emailSvc.QueueAsync(e.ToEmail, e.Subject, e.BodyHtml, e.RelatedEntity, e.RelatedId);
+        var sent = await emailSvc.TrySendQueuedNowAsync(
+            ctx,
+            emailId,
+            e.ToEmail,
+            e.Subject,
+            e.BodyHtml,
+            e.RelatedEntity,
+            e.RelatedId,
+            actorInstructorId: myId,
+            attemptNo: 1
+        );
+
+        if (sent) sentNow++;
+    }
+
+    await audit.WriteAsync(ctx, myId, "SendAvailabilityReminder", "ActivityInstance", instanceId.ToString(),
+        new { onlyNotResponded, queued = emails.Count, sentNow });
+
+    return Results.Ok(new { ok = true, queued = emails.Count, sentNow });
 });
+
 
 
 // =======================
@@ -580,140 +616,10 @@ app.MapDelete("/api/activity-types/{id:int}", async (int id, Db db) =>
     }
 });
 
-app.MapPost("/api/activities/create", async (ActivityCreateDto dto, Db db, IConfiguration cfg) =>
-{
-    try
-    {
-        if (string.IsNullOrWhiteSpace(dto.ActivityName))
-            return Results.BadRequest("ActivityName is required");
-        if (dto.ActivityTypeId <= 0)
-            return Results.BadRequest("ActivityTypeId is required");
-        if (dto.CourseId <= 0)
-            return Results.BadRequest("CourseId is required");
-        if (dto.LeadInstructorId <= 0)
-            return Results.BadRequest("LeadInstructorId is required");
-        if (dto.Instances == null || dto.Instances.Count == 0)
-            return Results.BadRequest("At least one instance is required");
-
-        var activityId = await db.CreateActivityAsync(dto);
-
-        var header = await db.GetActivityEmailHeaderAsync(activityId);
-        if (header != null && !string.IsNullOrWhiteSpace(header.LeadInstructorEmail))
-        {
-            var instances = (await db.GetActivityInstancesForEmailAsync(activityId)).ToList();
-
-            string FormatIL(DateTime utc)
-            {
-                try
-                {
-                    var tz = TimeZoneInfo.FindSystemTimeZoneById("Israel Standard Time");
-                    var local = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), tz);
-                    return local.ToString("dd/MM/yyyy HH:mm");
-                }
-                catch
-                {
-                    return utc.ToString("dd/MM/yyyy HH:mm") + " UTC";
-                }
-            }
-
-            var rows = string.Join("", instances.Select((x, idx) => $@"
-<tr>
-  <td>{idx + 1}</td>
-  <td>{FormatIL(x.StartUtc)}</td>
-  <td>{FormatIL(x.EndUtc)}</td>
-  <td>{(x.RoomsCount?.ToString() ?? "-")}</td>
-  <td>{x.RequiredInstructors}</td>
-  <td>{x.InstanceId}</td>
-</tr>"));
-
-            var subject = $"📌 פעילות חדשה נשמרה: {header.ActivityName}";
-            var body = $@"
-<div style=""font-family:Arial;direction:rtl"">
-  <h2>נוצרה פעילות חדשה במערכת</h2>
-
-  <div><b>שם פעילות:</b> {header.ActivityName}</div>
-  <div><b>סוג פעילות:</b> {header.TypeName}</div>
-  <div><b>קורס:</b> {(header.CourseName ?? "-")}</div>
-  <div><b>מדריך מרכז:</b> {(header.LeadInstructorName ?? "-")}</div>
-  <div><b>דדליין הרשמה:</b> {(header.ApplicationDeadlineUtc.HasValue ? header.ApplicationDeadlineUtc.Value.ToString("dd/MM/yyyy HH:mm") : "-")}</div>
-
-  <hr/>
-  <h3>מופעים שנוצרו</h3>
-  <table style=""width:100%;border-collapse:collapse"" border=""1"" cellpadding=""6"">
-    <thead style=""background:#f3f4f6"">
-      <tr>
-        <th>#</th>
-        <th>התחלה</th>
-        <th>סיום</th>
-        <th>חדרים</th>
-        <th>מדריכים נדרשים</th>
-        <th>InstanceId</th>
-      </tr>
-    </thead>
-    <tbody>
-      {rows}
-    </tbody>
-  </table>
-
-  <p style=""margin-top:12px;color:#6b7280"">
-    ActivityId: {header.ActivityId}
-  </p>
-</div>";
-
-            await db.EnqueueEmailAsync(
-                header.LeadInstructorEmail,
-                subject,
-                body,
-                "Activities",
-                activityId.ToString()
-            );
-
-            try
-            {
-                await SendEmailSmtpAsync(cfg, header.LeadInstructorEmail, subject, body);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("[SMTP ERROR Activity Create] " + ex);
-            }
-        }
-
-        return Results.Ok(new { status = "Created", activityId, instances = dto.Instances.Count });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message);
-    }
-});
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.Run();
 
-static async Task SendEmailSmtpAsync(
-    IConfiguration cfg,
-    string to,
-    string subject,
-    string bodyHtml)
-{
-    var host = cfg["Smtp:Host"] ?? throw new Exception("Missing Smtp:Host");
-    var port = int.Parse(cfg["Smtp:Port"] ?? "587");
-    var enableSsl = bool.Parse(cfg["Smtp:EnableSsl"] ?? "true");
-    var user = cfg["Smtp:User"] ?? "";
-    var pass = cfg["Smtp:Pass"] ?? "";
-    var from = cfg["Smtp:From"] ?? user;
 
-    using var client = new SmtpClient(host, port)
-    {
-        EnableSsl = enableSsl,
-        Credentials = new NetworkCredential(user, pass),
-    };
-
-    using var msg = new MailMessage(from, to, subject, bodyHtml)
-    {
-        IsBodyHtml = true
-    };
-
-    await client.SendMailAsync(msg);
-}
