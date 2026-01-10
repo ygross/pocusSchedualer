@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Cryptography;
 
-
 using PocusSchedualer.Services;
 using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // שירות ה-DB
@@ -37,14 +37,13 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<EmailService>();
 
-
-
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapHealthEndpoints();
 app.MapAuthEndpoints();
-app.MapActivitiesEndpoints();
+app.MapAvailabilityEndpoints();
 
 /*
 app.MapGet("/api/health/db", async (Db db) =>
@@ -52,8 +51,8 @@ app.MapGet("/api/health/db", async (Db db) =>
     var ok = await db.IsDbAliveAsync();
     return Results.Ok(new { ok });
 });
-
 */
+
 // =======================
 // LEAD API (סט ראשון בלבד)
 // =======================
@@ -81,6 +80,7 @@ app.MapGet("/api/lead/activities", async (
 
     return Results.Ok(rows);
 });
+
 app.MapGet("/api/lead/instances/{instanceId:int}/fairness", async (
     HttpContext ctx,
     int instanceId,
@@ -252,144 +252,12 @@ app.MapPost("/api/lead/instances/{instanceId:int}/send-availability-reminder", a
 });
 
 
-
-// =======================
-// OTP
-// =======================
-/*
-app.MapPost("/api/auth/otp/request", async (
-    HttpContext ctx,
-    OtpRequestDto dto,
-    Db db,
-    IConfiguration cfg) =>
-{
-    var email = dto.Email?.Trim().ToLowerInvariant();
-    if (string.IsNullOrEmpty(email))
-        return Results.BadRequest();
-
-    var me = await db.GetMeByEmailAsync(email);
-    if (me == null)
-        return Results.Unauthorized();
-
-    var minutes = cfg.GetValue("Otp:ExpireMinutes", 10);
-
-    var code = Db.GenerateOtpCode();
-    var salt = Db.GenerateSalt();
-    var hash = Db.HashOtp(code, salt);
-
-    var expiresUtc = DateTime.UtcNow.AddMinutes(minutes);
-    var ip = ctx.Connection.RemoteIpAddress?.ToString();
-    var ua = ctx.Request.Headers.UserAgent.ToString();
-
-    var otpId = await db.CreateOtpAsync(
-        email, hash, salt, expiresUtc, ip, ua, maxAttempts: 6
-    );
-
-    var subject = "Pocus Scheduler - קוד התחברות (OTP)";
-    var body = $@"
-<div style=""font-family:Arial;direction:rtl"">
-  <h3>קוד התחברות למערכת</h3>
-  <div>הקוד שלך הוא:</div>
-  <div style=""font-size:28px;font-weight:bold;letter-spacing:3px;margin:10px 0"">{code}</div>
-  <div>תוקף הקוד: {minutes} דקות.</div>
-</div>";
-
-    await db.EnqueueEmailAsync(email, subject, body, "OtpCodes", otpId.ToString());
-
-    try
-    {
-        await SendEmailSmtpAsync(cfg, email, subject, body);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("[SMTP ERROR] " + ex);
-        return Results.Problem("Failed to send OTP email");
-    }
-
-    return Results.Ok(new { ok = true });
-});
-
-app.MapPost("/api/auth/otp/verify", async (
-    HttpContext ctx,
-    OtpVerifyDto dto,
-    Db db) =>
-{
-    var email = dto.Email?.Trim().ToLowerInvariant();
-    var code = dto.Code?.Trim();
-
-    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-        return Results.BadRequest();
-
-    var otp = await db.GetLatestOtpAsync(email);
-    if (otp == null) return Results.Unauthorized();
-
-    var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
-
-    if (used || attempts >= maxAttempts || DateTime.UtcNow > expires)
-        return Results.Unauthorized();
-
-    var calc = Db.HashOtp(code, salt);
-    if (!CryptographicOperations.FixedTimeEquals(calc, hash))
-    {
-        await db.IncrementOtpAttemptsAsync(email);
-        return Results.Unauthorized();
-    }
-
-    await db.MarkOtpUsedAsync(email);
-
-    var me = await db.GetMeByEmailAsync(email);
-    if (me == null) return Results.Unauthorized();
-
-    var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Email, me.Email),
-        new Claim(ClaimTypes.Role, me.RoleName),
-        new Claim("fullName", me.FullName),
-        new Claim("department", me.Department ?? ""),
-        new Claim("instructorId", me.InstructorId.ToString())
-    };
-
-    var id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    await ctx.SignInAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        new ClaimsPrincipal(id)
-    );
-
-    return Results.Ok(new { ok = true, me });
-});
-
-app.MapPost("/api/auth/impersonate", async (HttpContext ctx, Db db, ImpersonateReq req) =>
-{
-    var email = (req.Email ?? "").Trim().ToLowerInvariant();
-
-    if (email != "ygross@bgu.ac.il")
-        return Results.Forbid();
-
-    var me = await db.ImpersonateByEmailAsync(email);
-    if (me == null) return Results.Unauthorized();
-
-    var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Email, me.Email),
-        new Claim("fullName", me.FullName),
-        new Claim(ClaimTypes.Role, me.RoleName),
-        new Claim("department", me.Department ?? "")
-    };
-
-    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    var principal = new ClaimsPrincipal(identity);
-
-    await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-    return Results.Ok(new { ok = true });
-});
-
-*/
 // =======================
 // Calendar / Gantt / Activities / Courses / Instructors (כמו אצלך)
 // =======================
 
 app.MapGet("/api/activities/calendar", async (
+    HttpContext ctx,
     DateTime from,
     DateTime to,
     int? activityTypeId,
@@ -397,10 +265,16 @@ app.MapGet("/api/activities/calendar", async (
 {
     try
     {
+        var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+        if (!isAuth) return Results.Unauthorized();
+
         var fromUtc = DateTime.SpecifyKind(from, DateTimeKind.Local).ToUniversalTime();
         var toUtc = DateTime.SpecifyKind(to, DateTimeKind.Local).ToUniversalTime();
 
-        var rows = await db.GetActivitiesCalendarAsync(fromUtc, toUtc, activityTypeId);
+        // Admin רואה הכל => null, אחרים רק את עצמם
+        int? myInstructorId = isAdmin ? null : myId;
+
+        var rows = await db.GetActivitiesCalendarAsync(fromUtc, toUtc, activityTypeId, myInstructorId);
         return Results.Ok(rows);
     }
     catch (Exception ex)
@@ -616,10 +490,37 @@ app.MapDelete("/api/activity-types/{id:int}", async (int id, Db db) =>
     }
 });
 
+// =======================
+// HARD DELETE Activity (Admin only)
+// =======================
+app.MapDelete("/api/admin/activities/{activityId:int}", async (
+    HttpContext ctx,
+    int activityId,
+    Db db) =>
+{
+    var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+    if (!isAuth) return Results.Unauthorized();
+    if (!isAdmin || myId == null) return Results.Forbid();
+
+    var result = await db.DeleteActivityAsync(
+        activityId,
+        myId.Value,
+        "HardDelete by Admin"
+    );
+
+    return result.Ok
+        ? Results.Ok(new { ok = true })
+        : result.Error == "NotFound"
+            ? Results.NotFound()
+            : Results.BadRequest(result.Error);
+});
+
+var api = app.MapGroup("/api/api");
+var apiAdmin = app.MapGroup("/api/api/admin");
+
+apiAdmin.MapAdminEndpoints();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.Run();
-
-
