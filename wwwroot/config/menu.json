@@ -1,0 +1,184 @@
+{
+  "defaults": {
+    "Instructor": "my-assignments.html",
+    "CourseManager": "activities-calendar.html",
+    "Admin": "admin-hours-report.html"
+  },
+  "items": [
+    {
+      "id": "myAssignments",
+      "icon": "🧑‍🏫",
+      "label": "המשימות שלי",
+      "fileLabel": "my-assignments.html",
+      "page": "my-assignments.html",
+      "roles": ["Instructor"],
+      "group": "Instructor"
+    },
+    {
+      "id": "activitiesCalendar",
+      "icon": "🗓️",
+      "label": "יומן פעילויות",
+      "fileLabel": "activitiesCalendar.html",
+      "page": "activitiesCalendar.html",
+      "roles": ["Instructor", "CourseManager", "Admin"],
+      "group": "Instructor"
+    },
+    {
+      "id": "activitiesList",
+      "icon": "📅",
+      "label": "רשימת פעילויות",
+      "fileLabel": "activitiesList.html",
+      "page": "activitiesList.html",
+      "roles": ["Instructor", "Admin"],
+      "group": "Instructor"
+    },
+
+    {
+      "id": "updateActivities",
+      "icon": "✏️",
+      "label": "עריכת פעילות",
+      "fileLabel": "updateactivities.html",
+      "page": "updateactivities.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager"
+    },
+{
+  "id": "leadAssignment",
+  "icon": "👤",
+  "label": " שיבוץ פעילות",
+  "fileLabel": "lead-Assignment.html",
+  "page": "lead-Assignment.html",
+  "roles": ["CourseManager", "Admin"],
+  "group": "CourseManager"
+},
+{
+  "id": "adminUpdateDeleteActivities",
+  "icon": "👤",
+  "label": "  עדכון /מחיקה פעילויות",
+  "fileLabel": "adminUpdateDeleteActivities.html",
+  "page": "adminUpdateDeleteActivities.html",
+  "roles": [ "Admin"],
+  "group": "Admin"
+},
+{
+  "id": "AdminActivityAssignment",
+  "icon": "👤",
+  "label": " שיבוץ פעילות",
+  "fileLabel": "AdminActivityAssignment.html",
+  "page": "AdminActivityAssignment.html",
+  "roles": [ "Admin"],
+  "group": "Admin"
+},
+    {
+      "id": "assignActivities",
+      "icon": "🔗",
+      "label": "שיוך פעילויות",
+      "fileLabel": "assign-activities.html",
+      "page": "assign-activities.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager"
+    },
+    {
+      "id": "assignments",
+      "icon": "📋",
+      "label": "שיבוצים",
+      "fileLabel": "assignments.html",
+      "page": "assignments.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager"
+    },
+
+    {
+      "id": "gantt",
+      "icon": "📊",
+      "label": "גאנט פעילויות",
+      "fileLabel": "gantt.html",
+      "page": "gantt.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "ganttReport",
+      "icon": "📈",
+      "label": "דוח גאנט",
+      "fileLabel": "ganttreport.html",
+      "page": "ganttreport.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "activityTypes",
+      "icon": "🧩",
+      "label": "סוגי פעילויות",
+      "fileLabel": "activityTypes.html",
+      "page": "activityTypes.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "addActivities",
+      "icon": "➕",
+      "label": "הוספת פעילות",
+      "fileLabel": "addactivities.html",
+      "page": "addactivities.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "courseInstructors",
+      "icon": "🎓",
+      "label": "ניהול מדריכים",
+      "fileLabel": "courseInstructors.html",
+      "page": "courseInstructors.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "createInstructor",
+      "icon": "👤➕",
+      "label": "הוספת מדריך",
+      "fileLabel": "CreateInstructor.html",
+      "page": "CreateInstructor.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+   
+    {
+      "id": "adminAssignment",
+      "icon": "🛠️",
+      "label": "שיבוץ מנהלתי",
+      "fileLabel": "admin-assignment.html",
+      "page": "admin-assignment.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "adminHoursReport",
+      "icon": "⏱️",
+      "label": "דוח שעות מנהלה",
+      "fileLabel": "admin-hours-report.html",
+      "page": "admin-hours-report.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+    {
+      "id": "loadReport",
+      "icon": "⬇️",
+      "label": "טעינת דוחות",
+      "fileLabel": "loadreport.html",
+      "page": "loadreport.html",
+      "roles": ["Admin"],
+      "group": "Admin"
+    },
+
+    {
+      "id": "help",
+      "icon": "❓",
+      "label": "עזרה",
+      "fileLabel": "help.html",
+      "page": "help.html",
+      "roles": ["Instructor", "CourseManager", "Admin"],
+      "group": "Instructor"
+    }
+  ]
+}

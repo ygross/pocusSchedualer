@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ADMIN – עדכון/מחיקה פעילות ומופעים</title>
+  <style>
+    :root{
+      --navy:#0b2a5b; --navy2:#082247;
+      --bg:#f5f7fb; --card:#fff; --line:#e5e7eb;
+      --muted:#64748b;
+      --ok:#065f46; --okbg:#ecfdf5;
+      --err:#991b1b; --errbg:#fef2f2;
+      --warn:#92400e; --warnbg:#fffbeb;
+      --btn:#2563eb; --btn2:#eef2ff; --danger:#b91c1c;
+      --r:14px; --shadow:0 6px 18px rgba(15,23,42,.06);
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#0f172a}
+    a{color:inherit}
+    header{background:linear-gradient(180deg,var(--navy),var(--navy2));color:#fff;padding:14px 16px}
+    header .top{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+    .purpose{font-size:12px;opacity:.95;line-height:1.35}
+    .title{font-size:18px;font-weight:900;margin-top:6px}
+    .subRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:800}
+    .dot{width:9px;height:9px;border-radius:50%}
+    .dot.ok{background:#22c55e}
+    .dot.err{background:#ef4444}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+    main{max-width:1220px;margin:16px auto;padding:0 12px;display:flex;flex-direction:column;gap:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+    h2{margin:0 0 10px 0;font-size:16px}
+    h3{margin:0 0 10px 0;font-size:14px}
+    label{display:block;font-size:12px;color:#334155;margin-bottom:6px;font-weight:800}
+    input,select,button{font:inherit}
+    input,select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff}
+    input[readonly]{background:#f8fafc}
+    button{border:0;border-radius:10px;padding:10px 12px;font-weight:900;cursor:pointer}
+    button.primary{background:var(--btn);color:#fff}
+    button.secondary{background:var(--btn2);color:#1d4ed8;border:1px solid #c7d2fe}
+    button.danger{background:var(--danger);color:#fff}
+    button.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.22)}
+    button:disabled{opacity:.6;cursor:not-allowed}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    .field{flex:1;min-width:220px}
+    .field.wide{flex:2;min-width:320px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+
+    .msg{margin-top:10px;border-radius:12px;border:1px solid transparent;padding:10px 12px;font-size:13px;display:none;line-height:1.35}
+    .msg.ok{display:block;background:var(--okbg);border-color:#10b981;color:var(--ok)}
+    .msg.err{display:block;background:var(--errbg);border-color:#ef4444;color:var(--err)}
+    .msg.warn{display:block;background:var(--warnbg);border-color:#f59e0b;color:var(--warn)}
+    .tiny{font-size:12px;color:var(--muted);line-height:1.35}
+
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+    th{background:#f8fafc;font-size:12px;color:#475569;position:sticky;top:0;z-index:1}
+    .tableWrap{overflow:auto;border-radius:10px;border:1px solid var(--line);max-height:42vh}
+    .tableWrap.small{max-height:none}
+    .pill2{display:inline-block;padding:2px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:900}
+
+    .split{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:980px){
+      .split{grid-template-columns:1.25fr .75fr}
+    }
+    .panel{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+    .panel.dangerZone{border-color:#fecaca;background:#fffafa}
+    .dangerTitle{color:#b91c1c}
+    .confirmRow{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    .checkLine{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .checkLine input{width:auto}
+
+    .gate{
+      position:fixed;inset:0;background:rgba(15,23,42,.68);
+      display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;
+    }
+    .gate .box{
+      width:min(520px,100%);background:#fff;border-radius:16px;padding:16px;
+      box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid #e5e7eb
+    }
+    .gate .box h2{margin:0 0 6px 0}
+    .gate .box p{margin:0;color:#334155;line-height:1.4}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div>
+      <div class="purpose">ייעוד הדף: ADMIN בלבד – חיפוש פעילות, עדכון פרטי פעילות, הוספה/מחיקה/עדכון מופעים, ומחיקה מלאה (Hard Delete) של פעילות כולל מופעים לאחר אישור “DELETE &lt;id&gt;”.</div>
+      <div class="title">SimPocus • Admin Update/Delete Activities</div>
+      <div class="subRow">
+        <span class="pill"><span class="dot ok" id="sessionDot"></span><span>Session</span></span>
+        <span class="pill"><span class="dot err" id="adminDot"></span><span id="adminLabel">בודק הרשאות…</span></span>
+        <span class="pill mono">API: <span id="apiBaseLabel">...</span></span>
+      </div>
+    </div>
+
+    <div style="text-align:left;min-width:240px">
+      <div id="meLine" class="purpose">משתמש: טוען…</div>
+      <div id="roleLine" class="purpose">תפקיד: טוען…</div>
+      <div class="subRow" style="justify-content:flex-start">
+        <button id="btnLogoutHint" class="ghost" type="button" title="אם אתה לא רואה נתונים – נסה להתחבר מחדש">בדיקת התחברות</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>חיפוש פעילות</h2>
+
+    <div class="row">
+      <div class="field">
+        <label>ActivityId</label>
+        <input id="sActivityId" type="number" min="1" placeholder="למשל 22" />
+      </div>
+
+      <div class="field wide">
+        <label>שם פעילות (מכיל)</label>
+        <input id="sName" type="text" placeholder="למשל OSCE / POCUS / סדנה..." />
+      </div>
+
+      <div class="field">
+        <label>סוג פעילות</label>
+        <select id="sType"></select>
+      </div>
+
+      <div class="actions">
+        <button id="btnSearch" class="primary" type="button">חפש</button>
+        <button id="btnClearSearch" class="secondary" type="button">נקה</button>
+      </div>
+    </div>
+
+    <div id="searchMsg" class="msg"></div>
+
+    <div class="tableWrap" style="margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px">ID</th>
+            <th>שם פעילות</th>
+            <th style="width:160px">סוג</th>
+            <th style="width:220px">קורס</th>
+            <th style="width:220px">מדריך מרכז</th>
+            <th style="width:170px">מופע קרוב</th>
+            <th style="width:120px">פעולה</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr><td colspan="7" class="tiny">בצע חיפוש…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="editCard" style="display:none">
+    <div class="row" style="align-items:center">
+      <div style="flex:1">
+        <h2 style="margin:0">
+          עריכת פעילות
+          <span id="selectedPill" class="pill2">-</span>
+        </h2>
+        <div class="tiny" style="margin-top:6px">
+          מחיקת מופע מהטבלה מסירה אותו מהרשימה. המחיקה/עדכון בשרת מתבצעים בפועל רק אחרי “שמור שינויים”.
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnReload" class="secondary" type="button">טען מחדש</button>
+        <button id="btnSave" class="primary" type="button">שמור שינויים</button>
+      </div>
+    </div>
+
+    <div id="editMsg" class="msg"></div>
+
+    <div class="split" style="margin-top:10px">
+
+      <div class="panel">
+        <h3>פרטי פעילות</h3>
+
+        <div class="row">
+          <div class="field wide">
+            <label>שם פעילות</label>
+            <input id="eName" type="text" />
+          </div>
+          <div class="field">
+            <label>סוג פעילות</label>
+            <select id="eType"></select>
+          </div>
+          <div class="field">
+            <label>קורס</label>
+            <select id="eCourse"></select>
+          </div>
+          <div class="field">
+            <label>מדריך מרכז</label>
+            <select id="eLead"></select>
+          </div>
+          <div class="field">
+            <label>דדליין להגשה (אופציונלי)</label>
+            <input id="eDeadline" type="datetime-local" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="actions" style="width:100%">
+            <button id="btnAddInst" class="secondary" type="button">+ הוסף מופע</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top:14px">מופעים</h3>
+        <div class="tiny" style="margin-top:-6px">
+          זמנים מוצגים ונערכים <b>בלוקאלי</b>, ונשלחים לשרת כ־UTC.
+        </div>
+
+        <div class="tableWrap small" style="margin-top:10px">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px">#</th>
+                <th style="width:240px">Start (Local)</th>
+                <th style="width:240px">End (Local)</th>
+                <th style="width:120px">Rooms</th>
+                <th style="width:160px">Required</th>
+                <th style="width:180px">InstanceId</th>
+                <th style="width:140px">פעולות</th>
+              </tr>
+            </thead>
+            <tbody id="instBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel dangerZone">
+        <h3 class="dangerTitle">מחיקה מלאה (Hard Delete)</h3>
+        <div class="tiny">
+          מוחק פיזית מה־DB: פעילות + כל המופעים + נתונים תלויים (אם השרת תומך).  
+          כדי למחוק, הקלד בדיוק: <span class="mono"><b>DELETE &lt;ActivityId&gt;</b></span> (לדוגמה: <span class="mono">DELETE 22</span>)
+        </div>
+
+        <div class="confirmRow" style="margin-top:12px">
+          <div class="field" style="flex:1;min-width:220px">
+            <label>אישור מחיקה</label>
+            <input id="deleteConfirm" placeholder="DELETE 22" class="mono" />
+          </div>
+        </div>
+
+        <div class="checkLine">
+          <input id="deleteAck" type="checkbox" />
+          <label for="deleteAck" style="margin:0;font-weight:800">אני מבין/ה שזה מוחק פעילות ומופעים לצמיתות</label>
+        </div>
+
+        <div class="actions" style="margin-top:12px;justify-content:flex-start">
+          <button id="btnDeleteActivity" class="danger" type="button">מחק פעילות מה־DB</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<div class="gate" id="adminGate">
+  <div class="box">
+    <h2>גישה מוגבלת</h2>
+    <p>
+      הדף הזה מיועד ל־<b>Admin</b> בלבד.  
+      נראה שאתה לא מחובר/ת כאדמין או שאין הרשאות מתאימות.
+    </p>
+    <div class="tiny" style="margin-top:10px">
+      פתרון מהיר: התחבר מחדש דרך מערכת ה־OTP ואז חזור לדף.
+    </div>
+  </div>
+</div>
+
+<script src="js/adminUpdateDeleteActivities.js"></script>
+</body>
+</html>

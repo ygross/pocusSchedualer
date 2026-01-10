@@ -1,0 +1,60 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>גאנט – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <iframe src="menu.html" style="border:0;width:100%;height:100vh"></iframe>
+  </div>
+  <div class="content">
+    <div class="topbar">
+      <div>גאנט</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">דף גאנט המציג פעילויות לפי שם פעילות (לא לפי מופע), עם פילטרים בסיסיים. בדמו מוצגים טווחים וסטטוסים.</p>
+      <hr>
+      <h2>גאנט פעילויות (דמו)</h2>
+<p class="p">הצגה בגאנט לפי שם פעילות (לא לפי מופע). כולל פילטר שבוע/חודש/שנה (דמו). תכונות מומלצות בהמשך: Zoom/Drag, קו "היום", קיבוץ לפי סוג פעילות/מחלקה/סטטוס, וייצוא PDF/Excel.</p>
+
+<div class="row">
+  <button class="btn light" onclick="alert('דמו: שבוע')">שבוע</button>
+  <button class="btn light" onclick="alert('דמו: חודש')">חודש</button>
+  <button class="btn light" onclick="alert('דמו: שנה')">שנה</button>
+</div>
+
+<table>
+  <thead><tr><th>שם פעילות</th><th>טווח</th><th>סטטוס</th></tr></thead>
+  <tbody>
+    <tr><td>ATLS</td><td>2026-01-05 עד 2026-01-20</td><td><span class="badge red">חסר מדריכים</span></td></tr>
+    <tr><td>ALS</td><td>2026-01-08 עד 2026-01-30</td><td><span class="badge green">מלא</span></td></tr>
+    <tr><td>קורס ארצי</td><td>2026-01-10 עד 2026-02-10</td><td><span class="badge red">חסר מדריכים</span></td></tr>
+    <tr><td>ראש צוואר</td><td>2026-01-13 עד 2026-01-27</td><td><span class="badge red">חסר מדריכים</span></td></tr>
+  </tbody>
+</table>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

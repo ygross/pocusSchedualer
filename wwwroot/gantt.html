@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>דוח גאנט – פעילויות | PocusSchedualer (דמו)</title>
+  <style>
+    :root{
+      --navy:#0b2c66;
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --muted:#64748b;
+      --shadow:0 10px 25px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+      background:var(--bg);
+      color:#0f172a;
+    }
+    .page{max-width:1320px;margin:0 auto;padding:18px}
+    h1{margin:0;color:var(--navy);font-size:22px;font-weight:1000}
+    .sub{margin:6px 0 14px;color:var(--muted);font-size:13px;font-weight:900}
+
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:14px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,.04);
+      margin-bottom:14px;
+    }
+    .note{
+      border:1px solid var(--line);
+      background:#eef1f8;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:900;
+      font-size:12.5px;
+      color:#334155;
+      margin-top:10px;
+    }
+    .list{margin:8px 0 0 0;padding-right:18px;font-size:13px;font-weight:800;line-height:1.6}
+
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:end
+    }
+    .toolbar > div{flex:1;min-width:200px}
+    .toolbar .actions{display:flex;gap:10px;justify-content:flex-end;flex:1;min-width:280px}
+    @media(max-width:980px){.toolbar .actions{justify-content:flex-start}}
+
+    label{display:block;font-size:12.5px;font-weight:1000;margin:0 0 6px}
+    input,select{
+      width:100%;
+      padding:10px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      font-size:13.5px;
+      outline:none;
+      background:#fff;
+    }
+    input:focus,select:focus{
+      border-color:#94a3b8;
+      box-shadow:0 0 0 3px rgba(148,163,184,.25)
+    }
+
+    .btn{
+      border:1px solid #cbd5e1;background:#fff;color:#0f172a;
+      border-radius:10px;padding:10px 14px;font-weight:1000;font-size:13px;cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn.primary{background:var(--navy);color:#fff;border-color:transparent}
+
+    /* Gantt */
+    .ganttWrap{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .ganttHead{
+      display:grid;
+      grid-template-columns: 330px 1fr;
+      border-bottom:1px solid var(--line);
+      background:#eef1f8;
+    }
+    .leftHead,.rightHead{
+      padding:10px;
+      font-weight:1000;
+      font-size:12.5px;
+    }
+    .leftHead{border-left:1px solid var(--line)}
+    .timeline{
+      position:relative;
+      height:38px;
+      display:flex;
+      direction:ltr; /* timeline is easier LTR */
+      overflow:hidden;
+    }
+    .tick{
+      flex:1;
+      border-left:1px solid rgba(0,0,0,.06);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding-bottom:6px;
+      font-size:11px;
+      font-weight:1000;
+      color:#334155;
+      white-space:nowrap;
+    }
+    .tick:first-child{border-left:0}
+
+    .ganttBody{
+      max-height: 70vh;
+      overflow:auto;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 330px 1fr;
+      border-bottom:1px solid var(--line);
+      min-height:64px;
+    }
+    .row:last-child{border-bottom:0}
+    .meta{
+      padding:10px;
+      border-left:1px solid var(--line);
+    }
+    .meta b{display:block;font-size:14px;font-weight:1000;color:#0f172a}
+    .meta .m{font-size:12.5px;font-weight:900;color:var(--muted);margin-top:4px;line-height:1.45}
+    .lane{
+      position:relative;
+      padding:10px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .laneGrid{
+      position:absolute;inset:0;
+      display:flex;
+      direction:ltr;
+      pointer-events:none;
+    }
+    .laneGrid .g{flex:1;border-left:1px solid rgba(0,0,0,.05)}
+    .laneGrid .g:first-child{border-left:0}
+
+    .bar{
+      position:relative;
+      height:34px;
+      border-radius:10px;
+      padding:7px 10px;
+      font-weight:1000;
+      font-size:12.5px;
+      color:#0f172a;
+      box-shadow:0 8px 18px rgba(0,0,0,.10);
+      border:1px solid rgba(0,0,0,.08);
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      direction:rtl;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .bar small{font-weight:1000;opacity:.8}
+    .barWrap{
+      position:relative;
+      direction:ltr; /* bar placement */
+      height:34px;
+    }
+
+    .empty{
+      padding:14px;
+      color:var(--muted);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;font-weight:1000;font-size:12px;
+      border:1px solid var(--line);background:#fff;white-space:nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>דוח גאנט – פעילויות (דמו)</h1>
+    <div class="sub">מציג את כל הפעילויות על ציר זמן · פילטר: שבוע / חודש / שנה · נתוני דמה בלבד</div>
+
+    <div class="card">
+      <b>מה הדף עושה?</b>
+      <ul class="list">
+        <li>מציג גאנט של פעילויות לפי תאריך ושעת התחלה/סיום.</li>
+        <li>פילטר טווח: <b>שבוע</b> (7 ימים), <b>חודש</b> (30 ימים), <b>שנה</b> (12 חודשים).</li>
+        <li>חיפוש לפי שם פעילות (לדוגמה: קורס ארצי, ATLS, ALS, ראש צוואר).</li>
+        <li>מעל כל שורה מופיע בר עם טווח זמן יחסי בתוך הטווח שנבחר.</li>
+      </ul>
+      <b style="display:block;margin-top:10px">המלצות לשיפורים</b>
+      <ul class="list">
+        <li>Zoom/Drag על הציר, ו"היום" כקו אנכי.</li>
+        <li>קיבוץ לפי סוג פעילות / מחלקה / סטטוס (חסר מדריכים / מלא).</li>
+        <li>ייצוא PDF/Excel + קישור לקלנדרים.</li>
+      </ul>
+      <div class="note">דמו: אין חיבור ל-Airtable בשלב זה. בהמשך פשוט מחליפים את מערך הנתונים בקריאה מה-API.</div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <label>טווח</label>
+          <select id="range">
+            <option value="week">שבוע</option>
+            <option value="month" selected>חודש</option>
+            <option value="year">שנה</option>
+          </select>
+        </div>
+        <div>
+          <label>תאריך התחלה</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div>
+          <label>חיפוש</label>
+          <input id="q" placeholder="חפש לפי שם פעילות…" />
+        </div>
+        <div class="actions">
+          <button class="btn" id="todayBtn" type="button">התחלה = היום</button>
+          <button class="btn primary" id="applyBtn" type="button">הצג</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start">
+        <span class="pill" id="summaryPill">—</span>
+      </div>
+    </div>
+
+    <div class="card ganttWrap">
+      <div class="ganttHead">
+        <div class="leftHead">פעילות</div>
+        <div class="rightHead">
+          <div class="timeline" id="timelineHead"></div>
+        </div>
+      </div>
+
+      <div class="ganttBody" id="ganttBody"></div>
+    </div>
+  </div>
+
+<script>
+  // ===========================
+  // Demo Data (activities)
+  // ===========================
+  const activities = [
+    { id:"a1", name:"קורס ארצי", start:"2025-12-18T08:00:00", end:"2025-12-18T12:00:00", instructorsNeeded:3 },
+    { id:"a2", name:"ATLS",     start:"2025-12-22T09:00:00", end:"2025-12-22T13:00:00", instructorsNeeded:2 },
+    { id:"a3", name:"ALS",      start:"2026-01-06T08:00:00", end:"2026-01-06T10:00:00", instructorsNeeded:2 },
+    { id:"a4", name:"ראש צוואר",start:"2026-01-14T10:00:00", end:"2026-01-14T14:00:00", instructorsNeeded:2 },
+    { id:"a5", name:"ALS",      start:"2026-02-04T08:00:00", end:"2026-02-04T12:00:00", instructorsNeeded:2 },
+    { id:"a6", name:"ATLS",     start:"2026-03-10T09:00:00", end:"2026-03-10T12:00:00", instructorsNeeded:3 },
+  ];
+
+  // ===========================
+  // Utils
+  // ===========================
+  const $ = (id)=>document.getElementById(id);
+  const pad2 = (n)=>String(n).padStart(2,"0");
+  const toDate = (d)=> new Date(d);
+  const fmtDate = (d)=> `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const fmtTime = (d)=> `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+  function addDays(d, n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+  function addMonths(d, n){ const x=new Date(d); x.setMonth(x.getMonth()+n); return x; }
+
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+  // Range definition
+  function rangeEnd(start, range){
+    if(range==="week") return addDays(start, 7);
+    if(range==="month") return addDays(start, 30);
+    // year: 12 months from start
+    return addMonths(start, 12);
+  }
+
+  // Build timeline ticks
+  function buildTicks(start, end, range){
+    const ticks = [];
+    if(range==="week"){
+      for(let i=0;i<7;i++){
+        const d = addDays(start,i);
+        ticks.push({ label: `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}`, at: d });
+      }
+      return ticks;
+    }
+    if(range==="month"){
+      // 10 ticks across 30 days
+      const steps = 10;
+      for(let i=0;i<steps;i++){
+        const d = addDays(start, Math.round((30/steps)*i));
+        ticks.push({ label: `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}`, at: d });
+      }
+      return ticks;
+    }
+    // year: months
+    for(let i=0;i<12;i++){
+      const d = addMonths(start, i);
+      ticks.push({ label: `${pad2(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`, at: d });
+    }
+    return ticks;
+  }
+
+  // Color by activity name (stable)
+  function barColor(name){
+    // simple deterministic palette by hash (without setting explicit CSS colors per instruction? -> This is internal UI; still ok.
+    // We'll keep it minimal and subtle via HSL computed.
+    let h=0; for(const ch of name) h=(h*31 + ch.charCodeAt(0))%360;
+    return `hsl(${h} 70% 85%)`;
+  }
+
+  function render(){
+    const range = $("range").value;
+    const q = ($("q").value||"").trim().toLowerCase();
+
+    const startStr = $("startDate").value;
+    const start = startStr ? new Date(startStr+"T00:00:00") : new Date();
+    const end = rangeEnd(start, range);
+
+    // timeline header
+    const ticks = buildTicks(start, end, range);
+    $("timelineHead").innerHTML = ticks.map(()=> `<div class="tick"></div>`).join("");
+    // set labels (rtl page but timeline LTR)
+    const tickEls = $("timelineHead").querySelectorAll(".tick");
+    tickEls.forEach((el, i)=> el.textContent = ticks[i].label);
+
+    // Filter activities in range + search
+    const items = activities
+      .map(a=>({ ...a, s: new Date(a.start), e: new Date(a.end) }))
+      .filter(a=>{
+        if(q && !a.name.toLowerCase().includes(q)) return false;
+        // overlap with [start, end)
+        return a.e > start && a.s < end;
+      })
+      .sort((a,b)=> a.s - b.s);
+
+    $("summaryPill").textContent =
+      `טווח: ${fmtDate(start)} → ${fmtDate(end)} | פעילויות מוצגות: ${items.length}`;
+
+    const body = $("ganttBody");
+    if(items.length===0){
+      body.innerHTML = `<div class="empty">אין פעילויות בטווח/חיפוש הנוכחי.</div>`;
+      return;
+    }
+
+    body.innerHTML = items.map(a=>{
+      // compute relative positions
+      const total = (end - start);
+      const left = clamp01((a.s - start)/total);
+      const right = clamp01((a.e - start)/total);
+      const width = Math.max(0.01, right - left);
+
+      const bg = barColor(a.name);
+
+      return `
+        <div class="row">
+          <div class="meta">
+            <b>${a.name}</b>
+            <div class="m">
+              תאריך: ${fmtDate(a.s)}<br/>
+              שעות: ${fmtTime(a.s)}–${fmtTime(a.e)}<br/>
+              נדרשים מדריכים: ${a.instructorsNeeded}
+            </div>
+          </div>
+          <div class="lane">
+            <div class="laneGrid">${ticks.map(()=>`<div class="g"></div>`).join("")}</div>
+            <div class="barWrap">
+              <div class="bar"
+                title="${a.name} | ${fmtDate(a.s)} ${fmtTime(a.s)}–${fmtTime(a.e)}"
+                style="
+                  background:${bg};
+                  width:${(width*100).toFixed(2)}%;
+                  margin-left:${(left*100).toFixed(2)}%;
+                ">
+                <span>${a.name}</span>
+                <small>${fmtTime(a.s)}–${fmtTime(a.e)}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Init defaults
+  (function init(){
+    const today = new Date();
+    $("startDate").value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+    $("todayBtn").addEventListener("click", ()=>{
+      const t = new Date();
+      $("startDate").value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
+      render();
+    });
+    $("applyBtn").addEventListener("click", render);
+    $("range").addEventListener("change", render);
+    $("q").addEventListener("input", ()=> render());
+    $("startDate").addEventListener("change", render);
+    render();
+  })();
+</script>
+</body>
+</html>

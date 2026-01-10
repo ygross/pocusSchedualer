@@ -1,0 +1,95 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menu</title>
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    body{margin:0;background:#0b2f63;color:#fff;font-family:system-ui,Segoe UI,Arial}
+    .wrap{padding:18px 16px}
+    .brand{font-weight:800;font-size:26px;letter-spacing:.2px;text-align:right}
+    .sub{opacity:.85;margin-top:6px}
+    .hr{height:1px;background:rgba(255,255,255,.22);margin:16px 0}
+    .secTitle{opacity:.8;font-weight:700;margin:10px 0 8px}
+    .btn{
+      width:100%;border:0;border-radius:12px;padding:12px 12px;margin:7px 0;
+      background:rgba(255,255,255,.10);color:#fff;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .btn:hover{background:rgba(255,255,255,.16)}
+    .foot{position:fixed;right:0;bottom:0;width:360px;padding:12px 16px;box-sizing:border-box;
+      background:linear-gradient(to top, rgba(11,47,99,1), rgba(11,47,99,.88));
+      border-top:1px solid rgba(255,255,255,.18)}
+    .link{color:#fff;text-decoration:none;opacity:.9}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">PocusSchedualer</div>
+  <div class="sub">תפריט מערכת</div>
+
+  <div class="hr"></div>
+
+  <div class="secTitle">מרכז פעילות (Coordinator)</div>
+
+  <button class="btn" onclick="go('addactivities.html')">
+    <span>הוסף פעילות</span><span>➕</span>
+  </button>
+
+  <button class="btn" onclick="go('updateactivity.html')">
+    <span>עדכון/מחיקה פעילויות</span><span>🗑️</span>
+  </button>
+
+  <button class="btn" onclick="go('assignments.html')">
+    <span>שיבוצים (בחירה מזמינים)</span><span>✅</span>
+  </button>
+
+  <button class="btn" onclick="go('loadreport.html')">
+    <span>דוח שעות</span><span>📊</span>
+  </button>
+
+  <button class="btn" onclick="go('ganttreport.html')">
+    <span>גאנט</span><span>📆</span>
+  </button>
+
+  <button class="btn" onclick="go('instructors.html')">
+    <span>מדריכים</span><span>👥</span>
+  </button>
+
+  <div class="hr"></div>
+
+  <div class="secTitle">מדריך (Instructor)</div>
+
+  <button class="btn" onclick="go('activities.html')">
+    <span>פעילויות (קלנדר)</span><span>🗓️</span>
+  </button>
+
+  <button class="btn" onclick="go('assign-activities.html')">
+    <span>הגש זמינות</span><span>🛒</span>
+  </button>
+
+  <button class="btn" onclick="go('my-assignments.html')">
+    <span>השיבוצים שלי</span><span>🧾</span>
+  </button>
+</div>
+
+<div class="foot">
+  <a class="link" href="#" onclick="go('help.html');return false;">עזרה / הסבר על המערכת</a>
+</div>
+
+<script>
+  function go(page){
+    // קורא לפונקציה שנמצאת ב-app.html (בחלון האב)
+    if (window.parent && typeof window.parent.loadPage === "function"){
+      window.parent.loadPage(page);
+    } else {
+      // fallback אם פותחים menu.html לבד
+      location.href = page;
+    }
+  }
+</script>
+
+</body>
+</html>

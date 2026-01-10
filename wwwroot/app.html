@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>SimPocus Scheduler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="css/app.css?v=3" />
+  <script src="js/app.js?v=3" defer></script>
+</head>
+
+<body>
+  <div class="purpose">
+    ייעוד הדף: APP מרכזי שמנהל Header+Menu ותוכן מרכזי ב-iframe לפי הרשאות (role) שמגיעות מ-/api/me.
+  </div>
+
+  <div class="app">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="headerLeft">
+        <div class="brand">SimPocus Scheduler</div>
+        <div class="pageLine">דף פעיל: <span id="pageText">help.html</span></div>
+
+        <div id="authBanner" class="authBanner">
+          <span id="authMsg"></span>
+          <button id="goLoginBtn" class="btn light" type="button">מעבר להתחברות</button>
+        </div>
+      </div>
+
+      <div class="headerCenter">
+        <div class="statusBlock">
+          <span class="statusLabel">Session</span>
+          <span id="sessionDot" class="dot"></span>
+          <span id="sessionText" class="statusText">בודק…</span>
+        </div>
+
+        <div class="statusBlock">
+          <span class="statusLabel">DB</span>
+          <span id="dbDot" class="dot"></span>
+          <span id="dbText" class="statusText">לא נבדק</span>
+        </div>
+      </div>
+
+      <div class="headerRight">
+        <div class="userName" id="userName">—</div>
+        <div class="userRole" id="userRole">—</div>
+
+        <div class="headerBtns">
+          <button id="themeToggle" class="btn light" type="button" title="מצב כהה / בהיר">🌙</button>
+          <button id="logoutBtn" class="btn danger" type="button">התנתקות</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- CONTENT -->
+      <main class="content">
+        <iframe id="contentFrame" title="Content"></iframe>
+      </main>
+
+      <!-- MENU (ימין) -->
+      <aside class="menu">
+        <div class="menuTop">
+          <div class="menuTitle">תפריט</div>
+          <div id="menuRoleLine" class="menuSub">תפקיד: —</div>
+        </div>
+
+        <div id="menuContainer" class="menuContainer"></div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

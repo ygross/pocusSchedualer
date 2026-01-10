@@ -1,0 +1,305 @@
+﻿:root{
+  --navy:#0b2c5f;
+  --navy2:#0b3a66;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --line:#e5e7eb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --ok:#22c55e;
+  --warn:#f59e0b;
+  --err:#b91c1c;
+  --shadow:0 4px 12px rgba(15,23,42,.12);
+}
+
+/* ===== DARK MODE ===== */
+:root[data-theme="dark"]{
+  --bg:#0b1220;
+  --card:#0f172a;
+  --line:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --shadow:0 6px 18px rgba(0,0,0,.35);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: Arial, sans-serif;
+  overflow:hidden; /* אין גלילה כללית */
+}
+
+/* ===== PURPOSE BAR ===== */
+.purpose{
+  background:var(--card);
+  border-bottom:1px solid var(--line);
+  padding:6px 12px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* ===== APP WRAPPER ===== */
+.app{
+  height:calc(100vh - 34px);
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+/* ===== HEADER ===== */
+.header{
+  height:76px;
+  flex:0 0 76px;
+  background:var(--navy);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 14px;
+  box-sizing:border-box;
+  gap:14px;
+}
+
+.headerLeft,.headerCenter,.headerRight{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.headerLeft{ min-width:300px; }
+.headerCenter{
+  flex-direction:row;
+  gap:12px;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+.headerRight{
+  min-width:240px;
+  align-items:flex-start;
+}
+
+.brand{
+  font-weight:900;
+  font-size:16px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.pageLine{
+  font-size:12px;
+  opacity:.9;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Auth banner */
+.authBanner{
+  display:none;
+  gap:8px;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+  font-size:12px;
+  max-width:60vw;
+}
+
+/* ===== STATUS ===== */
+.statusBlock{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.12);
+}
+.statusLabel{ font-weight:900; font-size:12px; }
+.statusText{ font-size:12px; }
+.dot{
+  width:12px; height:12px; border-radius:50%;
+  background:var(--warn);
+}
+.dot.ok{ background:var(--ok); }
+.dot.err{ background:var(--err); }
+
+/* ===== USER ===== */
+.userName{ font-weight:900; font-size:14px; white-space:nowrap; }
+.userRole{ font-size:12px; opacity:.9; white-space:nowrap; }
+
+/* ===== BUTTONS ===== */
+.headerBtns{ display:flex; gap:8px; }
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn.light{ background:#e5e7eb; color:#111827; }
+:root[data-theme="dark"] .btn.light{ background:#1f2937; color:#e5e7eb; }
+.btn.danger{ background:#ef4444; color:#fff; }
+
+/* ===== MAIN LAYOUT ===== */
+.main{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:row-reverse; /* MENU בימין */
+}
+
+/* ===== MENU ===== */
+.menu{
+  width:340px;
+  flex:0 0 340px;
+  background:var(--card);
+  border-left:1px solid var(--line);
+  padding:14px;
+  box-sizing:border-box;
+  overflow:auto; /* גלילה פנימית */
+  min-height:0;
+}
+
+.menuTop{
+  position:sticky;
+  top:0;
+  background:var(--card);
+  padding-bottom:10px;
+  margin-bottom:10px;
+  border-bottom:1px solid var(--line);
+  z-index:2;
+}
+
+.menuTitle{ font-weight:900; font-size:14px; }
+.menuSub{ margin-top:4px; font-size:12px; color:var(--muted); }
+
+.menuContainer{ display:flex; flex-direction:column; }
+
+/* ===== GROUP TITLES (Accordion) ===== */
+.menuGroupTitle{
+  margin:12px 0 6px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:var(--navy2);
+  color:#fff;
+  font-weight:900;
+  font-size:14px; /* קצת יותר גדול */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  user-select:none;
+}
+
+.menuGroupTitle .right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.menuGroupTitle .count{
+  font-size:12px;
+  opacity:.9;
+  font-weight:800;
+  background:rgba(255,255,255,.16);
+  padding:3px 8px;
+  border-radius:999px;
+}
+
+.menuGroupTitle .chev{
+  width:26px;
+  height:26px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.14);
+  font-size:14px;
+  transition:transform .18s ease;
+}
+
+.menuGroupTitle.open .chev{
+  transform:rotate(90deg);
+}
+
+.menuGroupDivider{
+  height:1px;
+  background:var(--line);
+  margin:10px 0 4px;
+}
+
+/* ===== GROUP ITEMS WRAP (Animated) ===== */
+.menuGroupItems{
+  overflow:hidden;
+  max-height:0;
+  opacity:.95;
+  transition:max-height .25s ease, opacity .2s ease;
+  padding:0;
+  margin:0;
+}
+.menuGroupItems.open{
+  max-height:900px; /* מספיק לפריטים */
+  opacity:1;
+}
+
+/* ===== MENU ITEM (Compact + Bigger Font) ===== */
+.menuItem{
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:10px;
+  padding:6px 8px;   /* קטן יותר */
+  margin:4px 0;      /* פחות רווח */
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+
+.menuItem:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(15,23,42,.14);
+}
+
+.menuItem.active{
+  border:2px solid var(--navy2);
+}
+
+/* שורה יחידה בלבד */
+.menuItem .row1{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.menuItem .icon{
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#dbeafe;
+  font-size:16px;
+}
+:root[data-theme="dark"] .menuItem .icon{ background:#1f2937; }
+
+.menuItem .label{
+  font-weight:900;
+  font-size:16px; /* גדול יותר */
+}
+
+/* ===== CONTENT ===== */
+.content{
+  flex:1 1 auto;
+  min-width:0;
+  min-height:0;
+  background:var(--bg);
+}
+#contentFrame{
+  width:100%;
+  height:100%;
+  border:0;
+  background:var(--card);
+}

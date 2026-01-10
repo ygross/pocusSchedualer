@@ -1,0 +1,141 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PocusSchedualer – AdminAssignment</title>
+<style>
+  :root{--nav:#0b2c66;--bg:#f3f4f6;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--bad:#dc2626;--ok:#16a34a;--warn:#b45309;--overlay:rgba(15,23,42,.55)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eaf1ff,#f3f4f6);color:#0f172a}
+  header{background:var(--nav);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .purpose{font-size:12px;opacity:.95}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .page{max-width:1200px;margin:auto;padding:18px}
+  h1{margin:0;color:var(--nav);font-size:24px;font-weight:1000}
+  .sub{margin:6px 0 14px;color:var(--muted);font-size:13px;font-weight:900}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 14px 34px rgba(15,23,42,.08)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+  label{font-size:13px;font-weight:900;display:block;margin-bottom:6px}
+  select,input{width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;font-weight:900}
+  .field{min-width:220px;flex:1}
+  .btn{border:1px solid var(--nav);background:#fff;color:var(--nav);border-radius:14px;padding:10px 12px;font-weight:1000;cursor:pointer}
+  .btn.primary{background:var(--nav);color:#fff}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+  thead th{background:#f8fafc;padding:12px;border-bottom:1px solid var(--line);text-align:right;font-weight:1000;white-space:nowrap}
+  tbody td{padding:12px;border-bottom:1px solid var(--line);font-weight:800;text-align:right;vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:1000;font-size:12px;white-space:nowrap}
+  .pill.bad{border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.08);color:var(--bad)}
+  .pill.ok{border-color:rgba(22,163,74,.25);background:rgba(22,163,74,.08);color:var(--ok)}
+  .pill.warn{border-color:rgba(180,83,9,.25);background:rgba(180,83,9,.08);color:var(--warn)}
+  .muted{color:var(--muted);font-weight:900}
+  .msg{margin-top:10px;font-size:13px;color:var(--muted)}
+  .msg.ok{color:var(--ok)}
+  .msg.err{color:var(--bad)}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:18px;z-index:999}
+  .modal{max-width:980px;width:100%;background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+  .modalHead{padding:14px 16px;background:#f8fafc;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .modalBody{padding:14px 16px}
+  .cand{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}
+  .cand b{margin-left:6px}
+  .right{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="purpose">ייעוד הדף: ADMIN – בחירת פעילות ומופע, שיבוץ מדריכים (גם בלי זמינות) + המלצה לפי “צדק”.</div>
+    <div style="font-weight:1000;font-size:18px">SimPocus Scheduler • AdminAssignment</div>
+    <div class="purpose">API בסיס: <span id="apiBaseLabel" class="mono">…</span></div>
+  </div>
+  <div style="text-align:left;font-size:12px;opacity:.95">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+  </div>
+</header>
+
+<div class="page">
+  <h1>Admin Assignment</h1>
+  <div class="sub">
+    בחר פעילות → תראה מופעים עם: נדרש / שובצו / זמינויות / חסר.  
+    “שבץ (גם בלי זמינות)” פותח מודל עם כל המדריכים הרלוונטיים לקורס, כולל המלצה לפי צדק.
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field" style="flex:2;min-width:320px">
+        <label>בחר פעילות</label>
+        <select id="activitySel"></select>
+      </div>
+      <div class="field">
+        <label>פילטר סוג פעילות</label>
+        <select id="typeSel"></select>
+      </div>
+      <div class="field">
+        <button id="btnReload" class="btn" type="button">רענן פעילויות</button>
+      </div>
+    </div>
+    <div id="activityMsg" class="msg"></div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>מופע</th><th>תאריך</th><th>שעה</th>
+          <th>נדרש</th><th>שובצו</th><th>זמינויות</th><th>חסר</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="instancesBody"></tbody>
+    </table>
+    <div id="instancesMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modalHead">
+      <div>
+        <div style="font-weight:1000" id="mTitle">שיבוץ</div>
+        <div class="muted" id="mSub">—</div>
+      </div>
+      <div class="right">
+        <button class="btn" id="btnAutoPick" type="button">בחר אוטומטי לפי צדק</button>
+        <button class="btn primary" id="btnApprove" type="button">אשר שיבוץ</button>
+        <button class="btn" id="btnClose" type="button">סגור</button>
+      </div>
+    </div>
+    <div class="modalBody">
+      <div class="row">
+        <div class="field">
+          <label>חיפוש מדריך (שם/מייל)</label>
+          <input id="mSearch" placeholder="הקלד לסינון...">
+        </div>
+        <div class="field">
+          <label>הצג רק חסרים (לפי Required)</label>
+          <select id="mLimit">
+            <option value="1">כן</option>
+            <option value="0">לא</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>הערה (DecisionNote)</label>
+          <input id="mNote" placeholder="אופציונלי">
+        </div>
+      </div>
+
+      <div class="msg" id="mMsg"></div>
+      <div id="mList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/AdminActivityAssignment.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PocusSchedualer – שיבוצים (אדמין)</title>
+<style>
+  :root{--nav:#0b2c66;--bg:#f3f4f6;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--bad:#dc2626;--ok:#16a34a;--warn:#b45309;--overlay:rgba(15,23,42,.55)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eaf1ff,#f3f4f6);color:#0f172a}
+  .page{max-width:1200px;margin:auto;padding:18px}
+  h1{margin:0;color:var(--nav);font-size:24px;font-weight:1000}
+  .sub{margin:6px 0 14px;color:var(--muted);font-size:13px;font-weight:900}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 14px 34px rgba(15,23,42,.08)}
+  table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+  thead th{background:#f8fafc;padding:12px;border-bottom:1px solid var(--line);text-align:right;font-weight:1000;white-space:nowrap}
+  tbody td{padding:12px;border-bottom:1px solid var(--line);font-weight:800;text-align:right;vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:1000;font-size:12px;white-space:nowrap}
+  .pill.bad{border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.08);color:var(--bad)}
+  .pill.ok{border-color:rgba(22,163,74,.25);background:rgba(22,163,74,.08);color:var(--ok)}
+  .pill.warn{border-color:rgba(180,83,9,.25);background:rgba(180,83,9,.08);color:var(--warn)}
+  .btn{border:1px solid var(--nav);background:#fff;color:var(--nav);border-radius:14px;padding:10px 12px;font-weight:1000;cursor:pointer}
+  .btn.primary{background:var(--nav);color:#fff}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .box{border:1px dashed #cbd5e1;background:#f8fafc;border-radius:16px;padding:12px}
+  .cand{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}
+  .cand b{margin-left:6px}
+  .muted{color:var(--muted);font-weight:900}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>שיבוצים (אדמין)</h1>
+  <div class="sub">הדף מציג זמינויות שהוגשו (Pending). האדמין בוחר מדריכים לאישור לפי “טבלת צדק” (פחות שיבוצים מאושרים קודם).</div>
+
+  <div class="card">
+    <div class="muted">טבלת צדק (דמו): מספר שיבוצים מאושרים בחודש הנוכחי לכל מדריך מחושב מה־localStorage.</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>מופע</th><th>תאריך</th><th>שעה</th>
+          <th>נדרש</th><th>שובצו</th><th>זמינות</th><th>חסר</th>
+          <th>מגישי זמינות (Pending)</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const K_ACT="ps_activities", K_AV="ps_availability", K_ASG="ps_assignments_approved";
+const acts = ()=>JSON.parse(localStorage.getItem(K_ACT)||"[]");
+const avs  = ()=>JSON.parse(localStorage.getItem(K_AV)||"[]");
+const asg  = ()=>JSON.parse(localStorage.getItem(K_ASG)||"[]");
+const saveAv = (v)=>localStorage.setItem(K_AV, JSON.stringify(v));
+const saveAct= (v)=>localStorage.setItem(K_ACT, JSON.stringify(v));
+const saveAsg= (v)=>localStorage.setItem(K_ASG, JSON.stringify(v));
+
+function seed(){
+  if(!localStorage.getItem(K_ACT)){
+    localStorage.setItem(K_ACT, JSON.stringify([
+      {id:"A1", activity:"קורס ארצי", date:"2025-12-18", start:"08:00", end:"10:00", required:5, assigned:2},
+      {id:"A2", activity:"ATLS",      date:"2025-12-21", start:"10:00", end:"12:00", required:3, assigned:1},
+    ]));
+  }
+  if(!localStorage.getItem(K_AV)) localStorage.setItem(K_AV, JSON.stringify([
+    {id:"AV1", activityId:"A1", instructorName:"גל סער", instructorEmail:"gal.saar@bgu.ac.il", availability:"AVAILABLE", status:"PENDING", createdAt:new Date().toISOString()},
+    {id:"AV2", activityId:"A1", instructorName:"אביתר מושלי", instructorEmail:"evyatar@bgu.ac.il", availability:"AVAILABLE", status:"PENDING", createdAt:new Date().toISOString()},
+    {id:"AV3", activityId:"A1", instructorName:"שמעון דמתי", instructorEmail:"shimon@bgu.ac.il", availability:"MAYBE", status:"PENDING", createdAt:new Date().toISOString()},
+    {id:"AV4", activityId:"A2", instructorName:"עמית אשכנזי", instructorEmail:"amit@bgu.ac.il", availability:"AVAILABLE", status:"PENDING", createdAt:new Date().toISOString()},
+  ]));
+  if(!localStorage.getItem(K_ASG)) localStorage.setItem(K_ASG, JSON.stringify([]));
+}
+seed();
+
+function fmtHe(iso){const [y,m,d]=iso.split("-");return `${d}-${m}-${y}`;}
+function monthKey(iso){ return iso.slice(0,7); } // YYYY-MM
+
+// fairness: approved assignments count in same month as activity date
+function fairnessScore(instructorEmail, activityDate){
+  const month = monthKey(activityDate);
+  return asg().filter(x=>x.instructorEmail===instructorEmail && monthKey(x.date)===month).length;
+}
+
+// sort candidates by fairness (ascending) then by availability preference
+function availabilityRank(a){
+  // AVAILABLE best, MAYBE second, NOT_AVAILABLE last
+  return a==="AVAILABLE" ? 0 : a==="MAYBE" ? 1 : 2;
+}
+
+function approve(activityId, selectedEmails){
+  const A = acts();
+  const AV = avs();
+  const AS = asg();
+
+  const act = A.find(x=>x.id===activityId);
+  if(!act) return;
+
+  const missing = Math.max(0, act.required - act.assigned);
+  if(selectedEmails.length > missing){
+    alert("בחרת יותר מדריכים מכמות החסרים.");
+    return;
+  }
+
+  // approve selected
+  selectedEmails.forEach(email=>{
+    const rec = AV.find(x=>x.activityId===activityId && x.instructorEmail===email && x.status==="PENDING");
+    if(rec){
+      rec.status="APPROVED";
+      AS.push({
+        id:"AS"+Math.random().toString(16).slice(2),
+        activityId,
+        instructorName:rec.instructorName,
+        instructorEmail:rec.instructorEmail,
+        date:act.date,
+        start:act.start,
+        end:act.end,
+        activity:act.activity,
+        approvedAt:new Date().toISOString()
+      });
+    }
+  });
+
+  // update assigned count
+  act.assigned += selectedEmails.length;
+
+  saveAv(AV);
+  saveAsg(AS);
+  saveAct(A);
+
+  alert("אושרו שיבוצים (דמו) + עודכן שובצו. (שליחת מייל תתווסף בהמשך)");
+  render();
+}
+
+function render(){
+  const tbody = document.getElementById("tb");
+  const A = acts();
+  const AV = avs();
+
+  // show future-ish only
+  const list = A.slice().sort((a,b)=>a.date.localeCompare(b.date));
+
+  tbody.innerHTML = list.map(act=>{
+    const pending = AV.filter(x=>x.activityId===act.id && x.status==="PENDING");
+    const availAll = AV.filter(x=>x.activityId===act.id).length;
+    const missing = Math.max(0, act.required - act.assigned);
+
+    // sort by fairness
+    const sorted = pending.slice().sort((p,q)=>{
+      const fp = fairnessScore(p.instructorEmail, act.date);
+      const fq = fairnessScore(q.instructorEmail, act.date);
+      if(fp!==fq) return fp-fq;
+      return availabilityRank(p.availability)-availabilityRank(q.availability);
+    });
+
+    const candHtml = missing<=0
+      ? `<span class="pill ok">אין חסרים</span>`
+      : (sorted.length===0
+          ? `<span class="pill bad">אין מגישי זמינות</span>`
+          : `
+            <div class="box">
+              <div class="muted">בחר עד ${missing} מדריכים לאישור (מסודר לפי צדק):</div>
+              ${sorted.map(c=>{
+                const score = fairnessScore(c.instructorEmail, act.date);
+                const label = c.availability==="AVAILABLE"?"זמין":c.availability==="MAYBE"?"אולי":"לא זמין";
+                return `
+                  <label class="cand">
+                    <input type="checkbox" class="pick_${act.id}" value="${c.instructorEmail}">
+                    <b>${c.instructorName}</b>
+                    <span class="pill warn">זמינות: ${label}</span>
+                    <span class="pill">צדק: ${score}</span>
+                  </label>
+                `;
+              }).join("")}
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap">
+                <button class="btn" onclick="autoPick('${act.id}', ${missing})">בחר אוטומטי לפי צדק</button>
+                <button class="btn primary" onclick="approveFromUI('${act.id}')">אשר שיבוץ</button>
+              </div>
+            </div>
+          `
+        );
+
+    return `
+      <tr>
+        <td>${act.activity}</td>
+        <td>${fmtHe(act.date)}</td>
+        <td>${act.start}–${act.end}</td>
+        <td>${act.required}</td>
+        <td>${act.assigned}</td>
+        <td><span class="pill warn">${availAll}</span></td>
+        <td><span class="pill ${missing>0?'bad':'ok'}">${missing}</span></td>
+        <td>${candHtml}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function autoPick(activityId, missing){
+  const boxes = Array.from(document.querySelectorAll(`.pick_${activityId}`));
+  boxes.forEach(b=>b.checked=false);
+  // check first "missing" candidates (already sorted in UI)
+  boxes.slice(0, missing).forEach(b=>b.checked=true);
+}
+
+function approveFromUI(activityId){
+  const checked = Array.from(document.querySelectorAll(`.pick_${activityId}:checked`)).map(x=>x.value);
+  if(checked.length===0){ alert("לא נבחרו מדריכים."); return; }
+  approve(activityId, checked);
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>הסמכות מדריכים לקורסים - SimPocus Scheduler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f3f4f6;margin:0}
+    .purpose{background:#fff;border-bottom:1px solid #e5e7eb;padding:8px 14px;font-size:12px;color:#334155}
+    header{background:linear-gradient(90deg,#0f172a,#1e293b);color:#f9fafb;padding:16px 24px;box-shadow:0 2px 8px rgba(15,23,42,.6)}
+    header h1{margin:0;font-size:1.35rem}
+    header .subtitle{font-size:.9rem;opacity:.85;margin-top:4px}
+    main{max-width:1200px;margin:18px auto 40px;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:0 6px 14px rgba(15,23,42,.12)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+    .field{display:flex;flex-direction:column;min-width:260px;flex:1}
+    label{font-size:.85rem;color:#374151;margin-bottom:4px}
+    input[type="text"]{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d1d5db;background:#f9fafb}
+    input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.25);background:#fff}
+    .msg{margin-top:8px;font-size:.85rem;color:#6b7280}
+    .msg.error{color:#b91c1c}
+    .msg.ok{color:#166534}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .instCard{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#ffffff}
+    .instTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .name{font-weight:800;color:#0f172a}
+    .email{font-size:.85rem;color:#64748b;direction:ltr;text-align:left}
+    .badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:3px 10px;font-size:.78rem}
+    .chip.muted{background:#f1f5f9;color:#475569}
+    button{border-radius:999px;border:none;padding:7px 14px;cursor:pointer;font-size:.85rem;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+    .primary{background:linear-gradient(90deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 4px 10px rgba(37,99,235,.35)}
+    .secondary{background:#e5e7eb;color:#111827}
+    .danger{background:#ef4444;color:#fff}
+    .rightBtns{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* Modal */
+    .backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999}
+    .modal{width:min(920px,100%);background:#fff;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.25);overflow:hidden}
+    .modalHeader{background:#0f172a;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .modalHeader .title{font-weight:900}
+    .modalBody{padding:14px 16px}
+    .modalFooter{padding:12px 16px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-start;gap:10px;flex-wrap:wrap}
+    .coursesBox{border:1px solid #e5e7eb;border-radius:12px;background:#f9fafb;max-height:420px;overflow:auto;padding:8px}
+    .courseRow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid #e5e7eb}
+    .courseRow:last-child{border-bottom:none}
+    .courseName{font-weight:700;color:#0f172a}
+    .courseMeta{font-size:.8rem;color:#64748b;direction:ltr;text-align:left}
+    .small{font-size:.8rem;color:#64748b}
+  </style>
+</head>
+<body>
+  <div class="purpose">ייעוד הדף: הצגת כל המדריכים ולכל מדריך רשימת הקורסים שהוא מוסמך אליהם, כולל עריכה (הוספה/הסרה) באמצעות ה-API הקיים.</div>
+
+  <header>
+    <h1>הסמכות מדריכים לקורסים</h1>
+    <div class="subtitle">תצוגה: מדריך → קורסים מוסמכים · עריכה ושמירה</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div class="field">
+          <label for="q">חיפוש מדריך</label>
+          <input id="q" type="text" placeholder="שם / מייל" />
+          <div class="small">טיפ: חפש לפי ygross או יוסי</div>
+        </div>
+
+        <div class="rightBtns">
+          <button id="btnRefresh" class="secondary" type="button">🔄 רענן נתונים</button>
+        </div>
+      </div>
+
+      <div id="status" class="msg">טוען…</div>
+    </section>
+
+    <section class="card">
+      <div class="msg" id="counters"></div>
+      <div id="grid" class="grid"></div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div id="backdrop" class="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHeader">
+        <div>
+          <div class="title" id="modalTitle">עריכת הסמכות</div>
+          <div class="small" id="modalSub"></div>
+        </div>
+        <button id="btnClose" class="secondary" type="button">✖ סגור</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="row">
+          <div class="field">
+            <label for="courseFilter">סינון קורסים</label>
+            <input id="courseFilter" type="text" placeholder="חיפוש לפי שם קורס / ספק" />
+          </div>
+          <div class="rightBtns">
+            <button id="btnSelectAllCourses" class="secondary" type="button">סמן הכל</button>
+            <button id="btnClearAllCourses" class="secondary" type="button">נקה הכל</button>
+          </div>
+        </div>
+
+        <div class="coursesBox" id="coursesBox"></div>
+        <div id="modalMsg" class="msg"></div>
+      </div>
+
+      <div class="modalFooter">
+        <button id="btnSave" class="primary" type="button">💾 שמור הסמכות</button>
+        <button id="btnCancel" class="secondary" type="button">ביטול</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/courseInstructors.js"></script>
+</body>
+</html>

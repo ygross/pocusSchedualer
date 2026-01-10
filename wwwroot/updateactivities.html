@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UpdateActivities</title>
+  <style>
+    :root{
+      --navy:#003366; --bg:#f5f7fa; --card:#fff; --line:#e5e7eb;
+      --muted:#6b7280; --ok:#2e7d32; --err:#c62828;
+      --btn:#0078d4; --btn2:#e0e0e0; --danger:#d9534f;
+      --shadow:0 2px 10px rgba(0,0,0,.08); --r:14px;
+    }
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#111827}
+    header{background:var(--navy);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .purpose{font-size:12px;opacity:.95}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px}
+    h2{margin:0 0 10px 0;font-size:16px;border-bottom:1px solid var(--line);padding-bottom:8px}
+    label{font-size:13px;font-weight:900;display:block;margin-bottom:6px}
+    .input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+    .field{flex:1;min-width:220px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:0;border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:900;font-size:14px;background:var(--btn);color:#fff}
+    .btn.light{background:var(--btn2);color:#111827}
+    .btn.danger{background:var(--danger);color:#fff}
+    .msg{margin-top:10px;font-size:13px;color:var(--muted)}
+    .msg.ok{color:var(--ok)}
+    .msg.err{color:var(--err)}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+    th{background:#fafafa;position:sticky;top:0;z-index:1}
+    tr:hover td{background:#fcfcff}
+    .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--navy);color:#fff;font-size:12px}
+    .instCard{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#fff}
+    .instGrid{display:grid;gap:8px;grid-template-columns:1fr 1fr 1fr 1fr auto;align-items:end}
+    @media(max-width:980px){ .instGrid{grid-template-columns:1fr 1fr} th{position:static} }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="purpose">ייעוד הדף: הצגת כל הפעילויות + חיפוש לפי קוד/שם + בחירה + עדכון מלא כולל מופעים.</div>
+    <div style="font-weight:1000;font-size:18px">SimPocus Scheduler • UpdateActivities</div>
+    <div class="purpose">API בסיס: <span id="apiBaseLabel" class="mono">…</span></div>
+  </div>
+  <div style="text-align:left;font-size:12px;opacity:.95">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>חיפוש / הצגת פעילויות</h2>
+
+    <div class="row">
+      <div class="field">
+        <label>קוד פעילות (ActivityId)</label>
+        <input id="sActivityId" class="input" type="number" min="1" placeholder="למשל 123" />
+      </div>
+
+      <div class="field" style="flex:2;min-width:320px">
+        <label>שם פעילות (מכיל)</label>
+        <input id="sName" class="input" type="text" placeholder="OSCE / אולטרסאונד / סדנה..." />
+      </div>
+
+      <div class="field">
+        <label>סוג פעילות (פילטר)</label>
+        <select id="sType" class="input"></select>
+      </div>
+
+      <div class="actions">
+        <button id="btnSearch" class="btn" type="button">חפש</button>
+        <button id="btnShowAll" class="btn light" type="button">הצג את כל הפעילויות</button>
+        <button id="btnClearSearch" class="btn light" type="button">נקה</button>
+      </div>
+    </div>
+
+    <div id="searchMsg" class="msg"></div>
+
+    <div style="overflow:auto;max-height:42vh;border-radius:10px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:90px">קוד</th>
+            <th>שם פעילות</th>
+            <th style="width:170px">סוג</th>
+            <th style="width:240px">קורס</th>
+            <th style="width:190px">מופע קרוב</th>
+            <th style="width:120px">פעולה</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>עריכת פעילות <span id="selectedPill" class="pill">לא נבחרה</span></h2>
+
+    <div class="row">
+      <div class="field" style="flex:2;min-width:320px">
+        <label>שם פעילות</label>
+        <input id="eName" class="input" type="text" />
+      </div>
+
+      <div class="field">
+        <label>סוג פעילות</label>
+        <select id="eType" class="input"></select>
+      </div>
+
+      <div class="field">
+        <label>קורס</label>
+        <select id="eCourse" class="input"></select>
+      </div>
+
+      <div class="field">
+        <label>מדריך מוביל</label>
+        <select id="eLead" class="input"></select>
+      </div>
+
+      <div class="field">
+        <label>דדליין להגשה (אופציונלי)</label>
+        <input id="eDeadline" class="input" type="datetime-local"/>
+      </div>
+
+      <div class="actions">
+        <button id="btnAddInst" class="btn light" type="button">+ הוסף מופע</button>
+        <button id="btnSave" class="btn" type="button">שמור עדכון</button>
+      </div>
+    </div>
+
+    <h3 style="margin:16px 0 8px 0">מופעים</h3>
+    <div id="instWrap"></div>
+    <div id="editMsg" class="msg"></div>
+  </section>
+
+</main>
+
+<!-- חשוב: אין פה app.js / demo-auth / ui / requireUser -->
+<script src="js/UpdateActivities.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>קלנדר פעילויות (חודשי)</title>
+  <link rel="stylesheet" href="css/activitiesCalendar.css" />
+</head>
+<body>
+
+  <!-- ייעוד הדף -->
+  <div class="page-purpose">ייעוד הדף: הצגת קלנדר חודשי של מופעי פעילויות למדריך כולל פרטי מופע והצעת זמינות.</div>
+
+  <div class="wrap">
+    <header class="top">
+      <div class="title">
+        <div class="h1">קלנדר פעילויות (חודשי)</div>
+        <div class="sub">
+          משתמש: <span id="meName">טוען...</span> · תפקיד: <span id="meRole">...</span>
+          <span class="muted">· API: <span id="apiBase">...</span></span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <label class="field">
+          <span>בחירת חודש</span>
+          <input id="monthPicker" type="month" />
+        </label>
+
+        <label class="field">
+          <span>סוג פעילות</span>
+          <select id="activityTypeId">
+            <option value="">הכל</option>
+          </select>
+        </label>
+
+        <div class="btns">
+          <button id="btnToday" class="btn">היום</button>
+          <button id="btnReload" class="btn primary">טען</button>
+        </div>
+      </div>
+    </header>
+
+    <div id="status" class="msg"></div>
+
+    <section class="cal">
+      <div class="cal-head" id="calTitle"></div>
+
+      <div class="dow">
+        <div>א</div><div>ב</div><div>ג</div><div>ד</div><div>ה</div><div>ו</div><div>ש</div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </section>
+  </div>
+
+  <script src="js/activitiesCalendar.js"></script>
+</body>
+</html>

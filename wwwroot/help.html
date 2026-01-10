@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>עזרה – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">עמוד עזרה מרכזי: מסביר את מטרת המערכת, זרימת עבודה, ומה עושה כל דף.</p>
+      <hr>
+      <h2>סיכום קצר</h2>
+<p class="p">
+PocusSchedualer היא מערכת לניהול פעילויות והגשת זמינות מדריכים. מדריכים <b>לא משבצים את עצמם</b> אלא מגישים זמינות, ומרכז הפעילות בוחר משובצים לפי טבלת צדק.
+</p>
+
+<h2>פירוט דפים</h2>
+<table>
+  <thead><tr><th>דף</th><th>למי</th><th>מה הוא עושה</th></tr></thead>
+  <tbody>
+    <tr><td>activities.html</td><td>כולם</td><td>קלנדר מרכזי: נדרש/שובצו/זמינות/חסר. לחיצה על "חסר" מאפשרת הגשת זמינות.</td></tr>
+    <tr><td>assign-activities.html</td><td>מדריך</td><td>רשימת מופעים שחסרים מדריכים + סל זמינות + הגשה לאישור.</td></tr>
+    <tr><td>my-assignments.html</td><td>מדריך</td><td>השיבוצים שלי, פילטר חודשים/חיפוש, סיכום שעות ושליחה במייל.</td></tr>
+    <tr><td>addactivity.html</td><td>מרכז פעילות</td><td>יצירת פעילויות ומופעים (כולל חזרתיות, 2 מופעים בשבוע × 5 שבועות), מחיקה לפני שמירה.</td></tr>
+    <tr><td>updateactivity.html</td><td>מרכז פעילות</td><td>עדכון/ביטול מופעים (Soft Delete) + הדמיית הודעת מייל למדריכים.</td></tr>
+    <tr><td>assignments.html</td><td>מרכז פעילות</td><td>בחירת משובצים מתוך מגישי זמינות לפי צדק + סל שיבוצים + שליחה.</td></tr>
+    <tr><td>loadreport.html</td><td>מרכז פעילות</td><td>דוח עומסים לפי טווח זמן + פירוט מופעים + כפתור שליחה במייל.</td></tr>
+    <tr><td>ganttreport.html</td><td>מרכז פעילות</td><td>גאנט פעילויות לפי שם פעילות + סטטוס (חסר/מלא) בדמו.</td></tr>
+  </tbody>
+</table>
+
+<p class="hint">לינק זה זמין לכל המשתמשים דרך התפריט.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+
+<script>requireUser();</script>
+</body>
+</html>

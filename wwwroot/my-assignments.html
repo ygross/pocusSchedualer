@@ -1,0 +1,163 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>השיבוצים שלי – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <iframe src="menu.html" style="border:0;width:100%;height:100vh"></iframe>
+  </div>
+  <div class="content">
+    <div class="topbar">
+      <div>השיבוצים שלי</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">דף אישי למדריך המציג את כל המופעים אליהם שובץ, עם פילטרים וסיכום שעות. בדמו מוצגים מופעים לדוגמה ופעולת ביטול מדמה שליחת בקשה.</p>
+      <hr>
+      <h2>השיבוצים שלי (דמו)</h2>
+<p class="p">מציג את כל המופעים אליהם המדריך שובץ (דמו). ניתן לסנן חופשי, ולבחור: החודש הנוכחי / החודש הבא / הכל. בתחתית מוצג סיכום שעות לפי הפילטר.</p>
+
+<div class="row">
+  <div class="field">
+    <label>פילטר חופשי</label>
+    <input id="q2" placeholder="חפש..." oninput="filterTable('tblM','#q2');calcHours();">
+  </div>
+  <div class="field" style="max-width:420px">
+    <label>פילטר חודשים</label>
+    <div class="row" style="gap:8px">
+      <button class="btn light" onclick="setMonthFilter('this')">חודש נוכחי</button>
+      <button class="btn light" onclick="setMonthFilter('next')">חודש הבא</button>
+      <button class="btn light" onclick="setMonthFilter('all')">הכל</button>
+    </div>
+  </div>
+</div>
+
+<table id="tblM">
+  <thead><tr><th>תאריך</th><th>שעה</th><th>פעילות</th><th>שעות</th><th>בטל</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<hr>
+
+<div class="row" style="justify-content:space-between;align-items:center">
+  <div>
+    <span class="badge" id="hoursBadge">0 שעות</span>
+    <span class="hint" id="filterNote"></span>
+  </div>
+  <button class="btn" onclick="sendToAdmin()">שלח לאדמין</button>
+</div>
+
+<script>
+const u = getUser();
+const monthNow = "2026-01";   // דמו
+const monthNext = "2026-02";  // דמו
+let monthFilter = "all";
+
+const ALL = [
+  {date:"2026-01-05", time:"08:00-12:00", name:"ATLS", hours:4},
+  {date:"2026-01-08", time:"08:00-12:00", name:"ALS", hours:4},
+  {date:"2026-02-03", time:"12:00-16:00", name:"קורס ארצי", hours:4}
+];
+
+function render(){
+  const tb = document.querySelector("#tblM tbody");
+  tb.innerHTML = "";
+
+  const list = ALL.filter(x=>{
+    if(monthFilter==="this") return x.date.startsWith(monthNow);
+    if(monthFilter==="next") return x.date.startsWith(monthNext);
+    return true;
+  });
+
+  list.forEach((x,i)=>{
+    tb.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${x.date}</td><td>${x.time}</td><td>${x.name}</td><td>${x.hours}</td>
+        <td><button class="btn danger" onclick="cancel(${i})">בטל שיבוץ</button></td>
+      </tr>
+    `);
+  });
+
+  document.getElementById("filterNote").textContent =
+    monthFilter==="this" ? "פילטר: חודש נוכחי" :
+    monthFilter==="next" ? "פילטר: חודש הבא" : "פילטר: הכל";
+
+  calcHours();
+}
+
+function setMonthFilter(v){
+  monthFilter=v;
+  render();
+}
+
+function calcHours(){
+  // hours from rows currently shown + free-text filter effect (visible rows)
+  let sum=0;
+  document.querySelectorAll("#tblM tbody tr").forEach(tr=>{
+    if(tr.style.display==="none") return;
+    const h = parseFloat(tr.children[3].innerText)||0;
+    sum += h;
+  });
+  document.getElementById("hoursBadge").textContent = `${sum} שעות`;
+}
+
+function cancel(i){
+  alert("דמו: בקשת ביטול שיבוץ תישלח למרכז פעילות + תעודכן מערכת.");
+}
+
+function sendToAdmin(){
+  // מייל עם פירוט הטבלה המוצגת + סיכום שעות
+  const rows = [];
+  document.querySelectorAll("#tblM tbody tr").forEach(tr=>{
+    if(tr.style.display==="none") return;
+    rows.push(`- ${tr.children[0].innerText} ${tr.children[1].innerText} | ${tr.children[2].innerText} (${tr.children[3].innerText} שעות)`);
+  });
+
+  const sum = document.getElementById("hoursBadge").textContent;
+
+  const mail =
+`To: simcenterbgu@gmail.com
+Subject: דוח שעות – ${u.fullName}
+
+שלום,
+מצורף פירוט שיבוצים לפי הפילטר הנוכחי:
+
+${rows.join("\\n")}
+
+סיכום: ${sum}
+
+תודה,
+PocusSchedualer`;
+
+  document.getElementById("modalMail").textContent = mail;
+  openModal("#modal1");
+}
+
+render();
+</script>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

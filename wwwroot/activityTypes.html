@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Activity Types</title>
+  <style>
+    :root{
+      --navy:#003366;
+      --bg:#f5f7fa;
+      --card:#fff;
+      --line:#e5e7eb;
+      --ok:#2e7d32;
+      --err:#c62828;
+      --muted:#6b7280;
+      --btn:#0078d4;
+      --btn2:#e0e0e0;
+      --danger:#d9534f;
+      --shadow:0 2px 10px rgba(0,0,0,.08);
+      --r:12px;
+    }
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#111827}
+    header{background:var(--navy);color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .hcol{display:flex;flex-direction:column;gap:4px}
+    .purpose{font-size:12px;opacity:.95}
+    .userbox{font-size:12px;opacity:.95;text-align:left}
+    main{max-width:1100px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px}
+    .card h2{margin:0 0 10px 0;font-size:16px;border-bottom:1px solid var(--line);padding-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .badge{background:var(--navy);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;white-space:nowrap}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:260px;flex:1}
+    label{font-size:13px;font-weight:700}
+    input[type="text"]{padding:10px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none}
+    input[type="text"]:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(147,197,253,.35)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button{border:0;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:14px;font-weight:800}
+    button.primary{background:var(--btn);color:#fff}
+    button.secondary{background:var(--btn2);color:#111827}
+    button.danger{background:var(--danger);color:#fff}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .msg{margin-top:10px;font-size:13px}
+    .msg.ok{color:var(--ok)}
+    .msg.err{color:var(--err)}
+    .msg.muted{color:var(--muted)}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right}
+    th{background:#fafafa;position:sticky;top:0;z-index:1}
+    tr:hover td{background:#fcfcff}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    @media(max-width:760px){th{position:static}.field{min-width:100%}.userbox{text-align:right}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="hcol">
+    <div class="purpose">ייעוד הדף: ניהול סוגי פעילויות (Activity Types) – הוספה, עריכה ומחיקה מול ה־API.</div>
+    <div style="font-weight:800">SimPocus Scheduler • Activity Types</div>
+    <div class="purpose">API בסיס: <span class="mono" id="apiBaseLabel">...</span></div>
+  </div>
+  <div class="userbox">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+    <div id="healthLine">DB: טוען…</div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>
+      <span>הוספה / עריכה</span>
+      <span class="badge" id="modeBadge">מצב: חדש</span>
+    </h2>
+
+    <div class="row">
+      <div class="field">
+        <label for="typeName">שם סוג פעילות</label>
+        <input id="typeName" type="text" placeholder="לדוגמה: חיצוני / פקולטה / מד״א / אולטרסאונד..." />
+        <div class="msg muted">נשמר בטבלה: <span class="mono">dbo.ActivityTypes.TypeName</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="btnSave" type="button">שמור</button>
+        <button class="secondary" id="btnClear" type="button">נקה</button>
+      </div>
+    </div>
+
+    <div class="msg muted" id="formMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>
+      <span>רשימה</span>
+      <span class="badge" id="countBadge">סה״כ: 0</span>
+    </h2>
+
+    <div class="row">
+      <div class="field" style="min-width:320px;flex:2">
+        <label for="q">חיפוש</label>
+        <input id="q" type="text" placeholder="חיפוש לפי שם סוג פעילות..." />
+      </div>
+      <div class="actions">
+        <button class="secondary" id="btnRefresh" type="button">רענן</button>
+      </div>
+    </div>
+
+    <div style="overflow:auto;max-height:55vh;border-radius:10px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">#</th>
+            <th>שם סוג פעילות</th>
+            <th style="width:240px">פעולות</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+
+    <div class="msg muted" id="listMsg"></div>
+  </section>
+
+</main>
+
+<script src="js/activityTypes.js"></script>
+</body>
+</html>

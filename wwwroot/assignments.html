@@ -1,0 +1,128 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>שיבוצים – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <iframe src="menu.html" style="border:0;width:100%;height:100vh"></iframe>
+  </div>
+  <div class="content">
+    <div class="topbar">
+      <div>שיבוצים</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">דף למרכז פעילות לבחירת משובצים מתוך מגישי זמינות לפי טבלת צדק. הבחירות נצברות לסל, ובשליחה יוצגו הודעות מייל לדוגמה.</p>
+      <hr>
+      <h2>שיבוצים (בחירה מזמינים) – דמו</h2>
+<p class="p">מרכז פעילות רואה מי הגיש זמינות לכל מופע ובוחר משובצים לפי "טבלת צדק" (מי שקיבל הכי פחות מופעים). הבחירות מצטברות ל"סל שיבוצים". שליחה מציגה מודל מיילים (למשובצים וללא-נבחרים אם רוצים).</p>
+
+<table id="tblS">
+  <thead>
+    <tr><th>מופע</th><th>נדרש</th><th>מגישי זמינות</th><th>טבלת צדק</th><th>הוסף לסל</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ATLS מופע 1 (2026-01-05 08:00-12:00)</td>
+      <td><span class="badge">5</span></td>
+      <td>גל סער, אביתר מושלי, שמעון דמתי, עמית אשכנזי</td>
+      <td>
+        גל סער: 1<br>
+        אביתר מושלי: 0<br>
+        שמעון דמתי: 2<br>
+        עמית אשכנזי: 0
+      </td>
+      <td><button class="btn" onclick="addAssign('ATLS מופע 1','אביתר מושלי')">הוסף אביתר</button></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>סל שיבוצים</h2>
+<table id="tblAssignCart">
+  <thead><tr><th>מופע</th><th>מדריך</th><th>הסר</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+  <button class="btn" onclick="sendAssignments()">שלח שיבוצים</button>
+</div>
+
+<script>
+const CARTK="PS_ASSIGN_CART";
+
+function getC(){ const r=localStorage.getItem(CARTK); return r?JSON.parse(r):[]; }
+function setC(v){ localStorage.setItem(CARTK,JSON.stringify(v)); render(); }
+
+function addAssign(instance,instructor){
+  const c=getC();
+  const key=instance+"|"+instructor;
+  if(c.some(x=>x.key===key)) return;
+  c.push({key, instance, instructor});
+  setC(c);
+}
+
+function rm(key){
+  setC(getC().filter(x=>x.key!==key));
+}
+
+function render(){
+  const tb=document.querySelector("#tblAssignCart tbody");
+  const c=getC();
+  tb.innerHTML = c.length? "" : "<tr><td colspan='3' class='hint'>הסל ריק</td></tr>";
+  c.forEach(x=>{
+    tb.insertAdjacentHTML("beforeend", `
+      <tr><td>${x.instance}</td><td>${x.instructor}</td>
+      <td><button class="btn light" onclick="rm('${x.key}')">הסר</button></td></tr>
+    `);
+  });
+}
+
+function sendAssignments(){
+  const c=getC();
+  if(!c.length){ alert("הסל ריק"); return; }
+  const mail =
+`Subject: שיבוצים אושרו ונשלחו (דמו)
+
+שיבוצים שנשלחו:
+${c.map(x=>`- ${x.instance} => ${x.instructor}`).join("\\n")}
+
+מיילים יישלחו ל:
+1) מדריכים שנבחרו (פרטי מופע + תזכורת)
+2) מרכז פעילות (סיכום)
+(אופציונלי) למגישים שלא נבחרו.
+
+PocusSchedualer`;
+  document.getElementById("modalMail").textContent = mail;
+  openModal("#modal1");
+}
+
+render();
+</script>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PocusSchedualer – דוח שעות מדריכים (אדמין)</title>
+  <style>
+    :root{
+      --nav:#0b2c66;
+      --bg:#eef3ff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --good:#16a34a;
+      --bad:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+      background:linear-gradient(180deg,#eaf1ff 0%, #f6f8ff 55%, #f3f4f6 100%);
+      color:var(--text);
+    }
+
+    /* Layout like SimLoan: right menu + content */
+    .layout{display:flex;min-height:100vh}
+    .menu{
+      width:360px;
+      background:var(--nav);
+      color:#fff;
+      padding:28px 22px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+    }
+    .menu h1{margin:0;font-size:38px;letter-spacing:.2px}
+    .menu .sub{opacity:.85;margin-top:6px;font-weight:700}
+    .menu .sectionTitle{
+      margin:24px 0 10px 0;
+      font-weight:900;
+      opacity:.9;
+    }
+    .menu a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      text-decoration:none;
+      color:#fff;
+      padding:14px 14px;
+      border-radius:14px;
+      margin:8px 0;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .menu a:hover{background:rgba(255,255,255,.14)}
+    .menu a.active{background:rgba(255,255,255,.18);outline:2px solid rgba(255,255,255,.14)}
+    .menu .icon{font-size:18px;opacity:.95}
+    .menu .label{font-weight:900}
+    .menu .spacer{height:10px}
+    .menu .footer{
+      margin-top:26px;
+      opacity:.85;
+      font-weight:800;
+      border-top:1px solid rgba(255,255,255,.16);
+      padding-top:16px;
+    }
+
+    .content{
+      flex:1;
+      padding:26px 26px 36px 26px;
+    }
+
+    .pageTitle{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+    }
+    .pageTitle h2{margin:0;font-size:28px}
+    .pageTitle .hint{color:var(--muted);font-weight:700}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:0 14px 34px rgba(15,23,42,.08);
+      padding:18px;
+      margin-bottom:14px;
+    }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--line);
+      background:#f8fafc;
+      color:#111827;
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn:hover{filter:brightness(.98)}
+    .btn.primary{
+      background:#0b2c66;
+      color:#fff;
+      border-color:#0b2c66;
+    }
+    .btn.ghost{
+      background:#fff;
+    }
+    .search{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:280px;
+      flex:1;
+      justify-content:flex-end;
+    }
+    .search input{
+      width:min(420px,100%);
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      font-size:14px;
+      outline:none;
+    }
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    .kpi{
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+    .kpi .k{color:var(--muted);font-weight:800}
+    .kpi .v{font-size:26px;font-weight:1000;margin-top:4px}
+    .kpi .s{color:var(--muted);font-weight:800;margin-top:2px}
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:16px;
+    }
+    thead th{
+      background:#f8fafc;
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      text-align:right;
+      font-weight:1000;
+      color:#111827;
+      white-space:nowrap;
+      font-size:14px;
+    }
+    tbody td{
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      font-weight:800;
+      font-size:14px;
+    }
+    tbody tr:last-child td{border-bottom:none}
+    .muted{color:var(--muted);font-weight:800}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .pill.good{border-color:rgba(22,163,74,.25);background:rgba(22,163,74,.08);color:var(--good)}
+    .pill.bad{border-color:rgba(220,38,38,.25);background:rgba(220,38,38,.08);color:var(--bad)}
+    .small{font-size:12px;font-weight:900;color:var(--muted);line-height:1.35;margin-top:4px}
+
+    .rightNote{
+      margin-top:10px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:13px;
+    }
+
+    @media (max-width: 980px){
+      .menu{display:none}
+      .content{padding:18px}
+      .summary{grid-template-columns:1fr}
+      .pageTitle{flex-direction:column;align-items:flex-start}
+      .search{justify-content:flex-start;min-width:0;width:100%}
+      .search input{width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- Right Menu (dummy) -->
+    <aside class="menu">
+      <h1>PocusSchedualer</h1>
+      <div class="sub">ניהול שיבוצים – דמו</div>
+
+      <div class="sectionTitle">מנהל מערכת</div>
+      <a href="addactivity.html"><span class="label">הוסף פעילות</span><span class="icon">➕</span></a>
+      <a href="javascript:void(0)"><span class="label">עדכן פעילויות</span><span class="icon">✏️</span></a>
+      <a href="javascript:void(0)"><span class="label">גאנט</span><span class="icon">📊</span></a>
+      <a href="activities-calendar.html"><span class="label">לוח שנה</span><span class="icon">🗓️</span></a>
+      <a href="javascript:void(0)"><span class="label">מצב שיבוצים</span><span class="icon">✅</span></a>
+      <a href="javascript:void(0)"><span class="label">מדריכים</span><span class="icon">👥</span></a>
+      <a class="active" href="admin-hours-report.html"><span class="label">דוח שעות</span><span class="icon">⏱️</span></a>
+
+      <div class="sectionTitle">משתמש</div>
+      <a href="my-assignments.html"><span class="label">השיבוצים שלי</span><span class="icon">🧾</span></a>
+      <a href="assign.html"><span class="label">שיבוץ לפעילויות</span><span class="icon">🛒</span></a>
+
+      <div class="footer">מרכז הסימולציה · דמו</div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+      <div class="pageTitle">
+        <div>
+          <h2>דוח שעות עבודה למדריכים</h2>
+          <div class="hint">דמו בלבד · חישוב שעות לפי מופעים (Start-End) · מבוסס פילטרים</div>
+        </div>
+        <div class="hint" id="rangeLabel"></div>
+      </div>
+
+      <div class="card">
+        <div class="filters">
+          <div class="btnRow">
+            <button class="btn primary" data-range="all">הכל</button>
+            <button class="btn" data-range="week">שבוע נוכחי</button>
+            <button class="btn" data-range="month">חודש נוכחי</button>
+            <button class="btn" data-range="nextmonth">חודש הבא</button>
+          </div>
+
+          <div class="search">
+            <span class="muted">חיפוש:</span>
+            <input id="q" type="text" placeholder="שם מדריך / פעילות (למשל: גל, ATLS)" />
+            <button class="btn ghost" id="clearBtn" type="button">נקה</button>
+          </div>
+        </div>
+
+        <div class="summary">
+          <div class="kpi">
+            <div class="k">סה״כ שעות (לפי פילטר)</div>
+            <div class="v" id="kpiHours">0</div>
+            <div class="s">שעות</div>
+          </div>
+          <div class="kpi">
+            <div class="k">סה״כ מופעים</div>
+            <div class="v" id="kpiShifts">0</div>
+            <div class="s">מופעים</div>
+          </div>
+          <div class="kpi">
+            <div class="k">מס׳ מדריכים פעילים בדוח</div>
+            <div class="v" id="kpiInstructors">0</div>
+            <div class="s">מדריכים</div>
+          </div>
+        </div>
+
+        <div class="rightNote">
+          טיפ: בדוח אמיתי אפשר להוסיף: יצוא ל-Excel, פילטר לפי מחלקה/Role, והתרעות על חריגות שעות.
+        </div>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>מדריך</th>
+              <th>תפקיד</th>
+              <th>פעילויות בדוח</th>
+              <th>סה״כ מופעים</th>
+              <th>סה״כ שעות</th>
+              <th>סטטוס</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:1000;margin-bottom:10px">פירוט מופעים (דמו)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>תאריך</th>
+              <th>שעה</th>
+              <th>פעילות</th>
+              <th>מדריך</th>
+              <th>משך</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDetails"></tbody>
+        </table>
+        <div class="small">הערה: בדוח אמיתי אפשר להסתיר פירוט ולהציג אותו בפתיחת שורה / מודל.</div>
+      </div>
+    </main>
+  </div>
+
+<script>
+  // ======================
+  // Fake Data (דמו)
+  // ======================
+  // פעילויות: קורס ארצי, ATLS, ALS, ראש צוואר
+  // מדריכים: גל סער, אביתר מושלי, שמעון דמתי, עמית אשכנזי
+  const shifts = [
+    // December 2025
+    { date:"2025-12-14", start:"08:00", end:"10:00", activity:"ATLS", instructor:"גל סער", role:"Senior" },
+    { date:"2025-12-14", start:"08:00", end:"10:00", activity:"ATLS", instructor:"אביתר מושלי", role:"Instructor" },
+    { date:"2025-12-16", start:"12:00", end:"14:00", activity:"ALS", instructor:"שמעון דמתי", role:"Instructor" },
+    { date:"2025-12-18", start:"08:00", end:"11:00", activity:"ראש צוואר", instructor:"עמית אשכנזי", role:"Instructor" },
+
+    // January 2026
+    { date:"2026-01-06", start:"08:00", end:"10:00", activity:"קורס ארצי", instructor:"גל סער", role:"Senior" },
+    { date:"2026-01-06", start:"08:00", end:"10:00", activity:"קורס ארצי", instructor:"אביתר מושלי", role:"Instructor" },
+    { date:"2026-01-14", start:"10:00", end:"12:00", activity:"ATLS", instructor:"עמית אשכנזי", role:"Instructor" },
+
+    // February 2026
+    { date:"2026-02-14", start:"08:00", end:"09:00", activity:"ALS", instructor:"שמעון דמתי", role:"Instructor" },
+    { date:"2026-02-14", start:"08:00", end:"09:00", activity:"ALS", instructor:"גל סער", role:"Senior" },
+  ];
+
+  // ======================
+  // Helpers
+  // ======================
+  function parseDate(d){ // yyyy-mm-dd
+    const [y,m,day]=d.split("-").map(Number);
+    return new Date(y, m-1, day);
+  }
+  function parseTime(t){ // HH:MM
+    const [h,mm]=t.split(":").map(Number);
+    return {h, mm};
+  }
+  function durationHours(start,end){
+    const s=parseTime(start), e=parseTime(end);
+    const mins=(e.h*60+e.mm) - (s.h*60+s.mm);
+    return Math.max(0, mins/60);
+  }
+  function fmtRangeLabel(from,to){
+    const f = from ? from.toLocaleDateString("he-IL") : "—";
+    const t = to ? to.toLocaleDateString("he-IL") : "—";
+    return `טווח: ${f} עד ${t}`;
+  }
+  function startOfWeek(date){
+    // שבוע ישראלי (ראשון=0)
+    const d=new Date(date);
+    const day=d.getDay(); // 0=Sun
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate()-day);
+    return d;
+  }
+  function endOfWeek(date){
+    const s=startOfWeek(date);
+    const e=new Date(s);
+    e.setDate(e.getDate()+6);
+    e.setHours(23,59,59,999);
+    return e;
+  }
+  function startOfMonth(date){
+    const d=new Date(date.getFullYear(), date.getMonth(), 1);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function endOfMonth(date){
+    const d=new Date(date.getFullYear(), date.getMonth()+1, 0);
+    d.setHours(23,59,59,999);
+    return d;
+  }
+
+  // ======================
+  // State
+  // ======================
+  let currentRange = "all";
+  let query = "";
+
+  // ======================
+  // Filtering
+  // ======================
+  function getRange(){
+    const now = new Date();
+    now.setHours(0,0,0,0);
+
+    if(currentRange==="week"){
+      return { from:startOfWeek(now), to:endOfWeek(now) };
+    }
+    if(currentRange==="month"){
+      return { from:startOfMonth(now), to:endOfMonth(now) };
+    }
+    if(currentRange==="nextmonth"){
+      const next = new Date(now.getFullYear(), now.getMonth()+1, 1);
+      return { from:startOfMonth(next), to:endOfMonth(next) };
+    }
+    return { from:null, to:null }; // all
+  }
+
+  function matchesQuery(s){
+    if(!query) return true;
+    const q=query.toLowerCase().trim();
+    return (
+      (s.instructor||"").toLowerCase().includes(q) ||
+      (s.activity||"").toLowerCase().includes(q) ||
+      (s.role||"").toLowerCase().includes(q)
+    );
+  }
+
+  function inRange(s, range){
+    if(!range.from || !range.to) return true;
+    const d=parseDate(s.date);
+    return d>=range.from && d<=range.to;
+  }
+
+  // ======================
+  // Render
+  // ======================
+  function render(){
+    const range = getRange();
+    document.getElementById("rangeLabel").textContent = range.from ? fmtRangeLabel(range.from, range.to) : "טווח: הכל";
+
+    // filter shifts
+    const filtered = shifts
+      .filter(s => inRange(s, range))
+      .filter(s => matchesQuery(s));
+
+    // Aggregate by instructor
+    const map = new Map();
+    for(const s of filtered){
+      const key = s.instructor;
+      const hrs = durationHours(s.start, s.end);
+      if(!map.has(key)){
+        map.set(key, { instructor:key, role:s.role, hours:0, count:0, activities:new Set() });
+      }
+      const row = map.get(key);
+      row.hours += hrs;
+      row.count += 1;
+      row.activities.add(s.activity);
+    }
+
+    // KPIs
+    const totalHours = filtered.reduce((a,s)=>a+durationHours(s.start,s.end),0);
+    document.getElementById("kpiHours").textContent = totalHours.toFixed(1);
+    document.getElementById("kpiShifts").textContent = filtered.length;
+    document.getElementById("kpiInstructors").textContent = map.size;
+
+    // Main table
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    const rows = Array.from(map.values()).sort((a,b)=>b.hours-a.hours);
+    for(const r of rows){
+      const activities = Array.from(r.activities).join(", ");
+      const statusPill = r.hours >= 8
+        ? `<span class="pill good">✅ עומס טוב</span>`
+        : `<span class="pill bad">⚠️ מעט שעות</span>`;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.instructor}</td>
+        <td><span class="pill">${r.role}</span></td>
+        <td class="muted">${activities || "—"}</td>
+        <td>${r.count}</td>
+        <td>${r.hours.toFixed(1)}</td>
+        <td>${statusPill}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    if(rows.length===0){
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td colspan="6" class="muted">אין תוצאות לפי הפילטרים.</td>`;
+      tbody.appendChild(tr);
+    }
+
+    // Details table
+    const tbodyDetails = document.getElementById("tbodyDetails");
+    tbodyDetails.innerHTML = "";
+    const details = filtered
+      .slice()
+      .sort((a,b)=> parseDate(a.date)-parseDate(b.date) || a.start.localeCompare(b.start));
+
+    for(const s of details){
+      const dur = durationHours(s.start,s.end);
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+        <td>${s.date}</td>
+        <td>${s.start}–${s.end}</td>
+        <td><span class="pill">${s.activity}</span></td>
+        <td>${s.instructor}</td>
+        <td>${dur.toFixed(1)} שעות</td>
+      `;
+      tbodyDetails.appendChild(tr);
+    }
+    if(details.length===0){
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td colspan="5" class="muted">אין מופעים להצגה.</td>`;
+      tbodyDetails.appendChild(tr);
+    }
+  }
+
+  // ======================
+  // Wire up UI
+  // ======================
+  document.querySelectorAll("[data-range]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      currentRange = btn.getAttribute("data-range");
+      document.querySelectorAll("[data-range]").forEach(b=>b.classList.remove("primary"));
+      btn.classList.add("primary");
+      render();
+    });
+  });
+
+  document.getElementById("q").addEventListener("input", (e)=>{
+    query = e.target.value || "";
+    render();
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", ()=>{
+    query = "";
+    document.getElementById("q").value = "";
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

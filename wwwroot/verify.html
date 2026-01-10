@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PocusSchedualer | אימות קוד</title>
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+<body class="loan-login">
+
+  <div class="loan-bg"></div>
+
+  <aside class="loan-side">
+    <div class="loan-side-inner">
+      <div class="loan-side-top">
+        <div class="loan-side-brand">PocusSchedualer</div>
+        <div class="loan-side-sub">אימות קוד</div>
+        <div class="loan-side-sub2">הזן את הקוד שנשלח למייל</div>
+      </div>
+
+      <div class="loan-side-mid">
+        <div class="loan-side-lock">
+          <span class="lock-emoji">🔒</span>
+          <span>זמין לאחר התחברות</span>
+        </div>
+
+        <div class="loan-side-appname">מערכת השיבוצים – PocusSchedualer</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="loan-center">
+    <div class="loan-card">
+
+      <div class="loan-icon"><span>🔐</span></div>
+
+      <h1 class="loan-h1">אימות קוד <span class="loan-accent">OTP</span></h1>
+      <p class="loan-p" id="emailLine">נשלח קוד לכתובת:</p>
+
+      <div id="msg" class="loan-error" style="display:none"></div>
+
+      <label class="loan-label" for="code">קוד</label>
+      <input class="loan-input" id="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+             placeholder="הזן 6 ספרות" />
+
+      <button class="loan-btn" type="button" onclick="verifyOtp()">אמת והמשך</button>
+
+      <div class="loan-footnote">
+        לא קיבלת? <a href="./login.html" style="color:#0b2c66;font-weight:800">שלח שוב</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="./js/verify.js"></script>
+</body>
+</html>
