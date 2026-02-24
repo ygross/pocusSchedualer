@@ -14,8 +14,8 @@
     // baseDir כמו ב-app.js (התיקייה שבה יושב ה-HTML)
     const baseDir = window.location.pathname.replace(/\/[^\/]*$/, "");
   
-    // אצלך עובד /api/api/*
-    const API = (path) => `${baseDir}/api/api/${path}`;
+    // API base: /api/*
+    const API = (path) => `${baseDir}/api/${path}`;
   
     const COURSES_API = API("courses");
     const INSTRUCTORS_API = API("instructors");

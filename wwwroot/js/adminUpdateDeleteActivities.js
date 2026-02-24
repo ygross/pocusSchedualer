@@ -5,8 +5,8 @@
 // - Search expects nameContains (not name).  :contentReference[oaicite:2]{index=2}
 // - Hard delete should be separated from soft delete, e.g. DELETE /api/admin/activities/{id}
 
-const baseDir = "/simcenter/PocusSchedualer";
-const API_BASE = `${window.location.origin}${baseDir}/api/api`;
+const baseDir = new URL(".", window.location.href).pathname.replace(/\/$/, "");
+const API_BASE = `${window.location.origin}${baseDir}/api`;
 const ADMIN_API_BASE = `${window.location.origin}${baseDir}/api/api/admin`;
 
 const $ = (id) => document.getElementById(id);
@@ -126,8 +126,9 @@ async function loadMeAndGate() {
     $("adminLabel").textContent = isAdmin ? "Admin" : "Not Admin";
     showAdminGate(!isAdmin);
     return isAdmin;
-  } catch {
-    $("meLine").textContent = "משתמש: לא מחובר";
+  } catch(e) {
+    const errMsg = e?.message || String(e) || "שגיאה לא ידועה";
+    $("meLine").textContent = "משתמש: לא מחובר (" + errMsg + ")";
     $("roleLine").textContent = "תפקיד: -";
     setDot("sessionDot", false);
     setDot("adminDot", false);
@@ -217,7 +218,7 @@ async function doSearch() {
 
   const qs = new URLSearchParams();
   if (activityId) qs.set("activityId", String(activityId));
-  if (nameContains) qs.set("nameContains", nameContains); // ✅ correct param
+  if (nameContains) qs.set("name", nameContains);
   if (activityTypeId) qs.set("activityTypeId", String(activityTypeId));
   qs.set("take", "400");
 

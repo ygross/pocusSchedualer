@@ -92,7 +92,7 @@ async function httpJson(url, opts = {}) {
 function EP() {
   return {
     me: `${API_BASE}/me`,
-    activityTypes: `${API_BASE}/api/activity-types`,
+    activityTypes: `${API_BASE}/activity-types`,
     calendar: (fromIso, toIso, activityTypeId) => {
       const qs = new URLSearchParams();
       qs.set("from", fromIso);

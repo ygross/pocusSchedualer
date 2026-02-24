@@ -47,3 +47,11 @@ public class InstructorDto
     public string FullName { get; set; } = "";
     public string? Email { get; set; }
 }
+
+public class InstructorCreateDto
+{
+    public string FullName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Role { get; set; } = Roles.Instructor;
+    public string? Department { get; set; }
+}

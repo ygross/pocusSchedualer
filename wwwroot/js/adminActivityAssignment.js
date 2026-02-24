@@ -1,9 +1,9 @@
 ﻿// AdminAssignment.js
 // ADMIN: can assign eligible instructors even without availability.
 // Uses fairness endpoint (NEW) to sort by "least approved assignments in month" first.
-// FIX: Force API_BASE to /simcenter/PocusSchedualer/api/api (no auto-detection)
 
-const API_BASE = `${window.location.origin}/simcenter/PocusSchedualer/api/api`;
+const _APP_PATH = new URL(".", window.location.href).pathname;
+const API_BASE = `${window.location.origin}${_APP_PATH}api`;
 
 const $ = (id) => document.getElementById(id);
 

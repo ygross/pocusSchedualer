@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>עדכון פרטים אישיים – מדריך</title>
+
+    <!-- CSS כללי -->
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/instructor.css">
+    <link rel="stylesheet" href="css/instructorUpdateDetails.css">
+</head>
+<body>
+
+<!-- ייעוד הדף -->
+<div class="page-purpose">
+    ייעוד הדף: עדכון פרטים אישיים של מדריך מחובר
+</div>
+
+<header class="page-header">
+    <h1>עדכון פרטים אישיים</h1>
+    <div class="logged-user">
+        משתמש מחובר:
+        <span id="loggedFullName">—</span>
+        <span class="role">(Instructor)</span>
+    </div>
+</header>
+
+<main class="page-content">
+
+    <form id="instructorUpdateDetailsForm" class="card">
+
+        <div class="form-group">
+            <label>אימייל (לא ניתן לשינוי)</label>
+            <input type="email" id="email" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>שם מלא</label>
+            <input type="text" id="fullName" required>
+        </div>
+
+        <div class="form-group">
+            <label>טלפון</label>
+            <input type="tel" id="phone">
+        </div>
+
+        <div class="form-group">
+            <label>מחלקה</label>
+            <input type="text" id="department">
+        </div>
+
+        <div class="form-group">
+            <label>תפקיד</label>
+            <input type="text" id="role" disabled>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">
+                💾 שמור שינויים
+            </button>
+        </div>
+
+        <div id="formMessage" class="form-message"></div>
+
+    </form>
+
+</main>
+
+<script src="js/instructorUpdateDetails.js"></script>
+</body>
+</html>

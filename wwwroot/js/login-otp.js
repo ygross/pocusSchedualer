@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const API_BASE = "api/api"; // שנה אם צריך: "/simcenter/PocusSchedualer/api"
+  const API_BASE = "api";
   const LOGIN_SUCCESS_REDIRECT = "app.html";
 
   const $ = (id) => document.getElementById(id);

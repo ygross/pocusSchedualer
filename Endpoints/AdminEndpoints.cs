@@ -42,7 +42,7 @@ public static class AdminEndpoints
         // OPTIONAL: HARD DELETE Instance (Admin only)
         // DELETE /api/admin/activity-instances/{instanceId}
         // =======================
-        apiAdmin.MapDelete("/activity-instances/{instanceId:int}", (
+        apiAdmin.MapDelete("/activity-instances/{instanceId:int}", async (
             HttpContext ctx,
             int instanceId,
             Db db) =>
@@ -51,11 +51,14 @@ public static class AdminEndpoints
 
             var actorId = GetInstructorId(ctx.User);
 
-            // If you have such method in Db:
-            // var (ok, err) = await db.DeleteActivityInstanceAsync(instanceId, actorId, "HardDelete instance by Admin");
-            //
-            // If you don't have it yet, return 501 so you remember to implement it.
-            return Results.StatusCode(StatusCodes.Status501NotImplemented);
+            var (ok, err) = await db.DeleteInstanceAsync(instanceId, actorId, "HardDelete instance by Admin");
+
+            if (ok) return Results.Ok(new { ok = true, instanceId });
+
+            if (string.Equals(err, "NotFound", StringComparison.OrdinalIgnoreCase))
+                return Results.NotFound(new { ok = false, error = "NotFound", instanceId });
+
+            return Results.BadRequest(new { ok = false, error = err ?? "UnknownError", instanceId });
         })
         .WithName("Admin_HardDeleteInstance");
     }

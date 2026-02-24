@@ -1,5 +1,6 @@
-// בסיס ל-API (לפי מה שהגדרת ב-IIS)
-const API_BASE = "/simcenter/PocusSchedualer/api/api";
+// בסיס ל-API – נחשב דינמית לפי מיקום הדף
+const APP_PATH = new URL(".", window.location.href).pathname;
+const API_BASE = `${window.location.origin}${APP_PATH}api`;
 
 let occurrences = []; // מערך מופעים בזיכרון
 
@@ -81,7 +82,7 @@ async function loadActivityTypes() {
     selInstr.disabled   = true;
 
     try {
-        const resp = await fetch(`${API_BASE}/activity-types`, { cache: "no-cache" });
+        const resp = await fetch(`${API_BASE}/activity-types`, { cache: "no-cache", credentials: "include" });
         if (!resp.ok) {
             selType.innerHTML = "<option value=''>שגיאה בטעינת סוגי פעילות</option>";
             return;
@@ -128,7 +129,7 @@ async function loadCourses() {
 
     try {
         const resp = await fetch(`${API_BASE}/courses/by-type/${encodeURIComponent(typeId)}`, {
-            cache: "no-cache"
+            cache: "no-cache", credentials: "include"
         });
         if (!resp.ok) {
             selCourse.innerHTML = "<option value=''>שגיאה בטעינת קורסים</option>";
@@ -174,7 +175,7 @@ async function loadInstructors() {
 
     try {
         const resp = await fetch(`${API_BASE}/instructors/by-course/${encodeURIComponent(courseId)}`, {
-            cache: "no-cache"
+            cache: "no-cache", credentials: "include"
         });
         if (!resp.ok) {
             selInstr.innerHTML = "<option value=''>שגיאה בטעינת מדריכים</option>";
@@ -384,9 +385,10 @@ async function saveActivityAndInstances() {
     
 
     try {
-        const resp = await fetch(`${API_BASE}/activities/create`, {
+        const resp = await fetch(`${API_BASE}/activities`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
+            credentials: "include",
             body: JSON.stringify(payload)
         });
 

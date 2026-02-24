@@ -136,6 +136,36 @@ WHERE Email = @email;";
         => await GetMeByEmailAsync(email);
 
     /// <summary>
+    /// Creates a new instructor with Status='Active'.
+    /// Returns (0, "DuplicateEmail") if the email already exists.
+    /// </summary>
+    public async Task<(int InstructorId, string? Error)> CreateInstructorAsync(InstructorCreateDto dto)
+    {
+        const string sqlCheck = @"
+SELECT COUNT(1) FROM dbo.Instructors WHERE Email = @Email;";
+
+        const string sqlInsert = @"
+INSERT INTO dbo.Instructors (FullName, Email, [Role], Department, Status)
+OUTPUT INSERTED.InstructorId
+VALUES (@FullName, @Email, @Role, @Department, 'Active');";
+
+        await using var c = Open();
+
+        var exists = await c.ExecuteScalarAsync<int>(sqlCheck, new { dto.Email });
+        if (exists > 0) return (0, "DuplicateEmail");
+
+        var newId = await c.QuerySingleAsync<int>(sqlInsert, new
+        {
+            dto.FullName,
+            dto.Email,
+            dto.Role,
+            dto.Department
+        });
+
+        return (newId, null);
+    }
+
+    /// <summary>
     /// Returns all activity types.
     /// </summary>
     public async Task<IEnumerable<ActivityTypeDto>> GetActivityTypesAsync()

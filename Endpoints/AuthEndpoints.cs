@@ -26,6 +26,7 @@ public static class AuthEndpoints
                 return Results.Unauthorized();
 
             var minutes = cfg.GetValue("Otp:ExpireMinutes", 10);
+            var maxAttempts = cfg.GetValue("Otp:MaxAttempts", 6);
 
             var code = Db.GenerateOtpCode();
             var salt = Db.GenerateSalt();
@@ -36,21 +37,24 @@ public static class AuthEndpoints
             var ua = ctx.Request.Headers.UserAgent.ToString();
 
             var otpId = await db.CreateOtpAsync(
-                email, hash, salt, expiresUtc, ip, ua, maxAttempts: 6
+                email, hash, salt, expiresUtc, ip, ua, maxAttempts
             );
 
             var subject = "Pocus Scheduler - קוד התחברות (OTP)";
             var body = $@"
 <div style=""font-family:Arial;direction:rtl"">
   <h3>קוד התחברות למערכת</h3>
+  <div>שלום {me.FullName},</div>
   <div>הקוד שלך הוא:</div>
   <div style=""font-size:28px;font-weight:bold;letter-spacing:3px;margin:10px 0"">{code}</div>
   <div>תוקף הקוד: {minutes} דקות.</div>
+  <div style=""color:#9ca3af;font-size:12px;margin-top:16px"">אם לא ביקשת קוד זה, התעלם/י מהודעה זו.</div>
 </div>";
 
-            // Queue + try send now (דרך EmailService)
+            // Queue first (always succeeds if DB is up)
             var emailId = await emailSvc.QueueAsync(email, subject, body, "OtpCodes", otpId.ToString());
 
+            // Try to send now via SMTP – failure is non-fatal (email stays Queued for retry)
             var sent = await emailSvc.TrySendQueuedNowAsync(
                 ctx,
                 emailId,
@@ -63,10 +67,8 @@ public static class AuthEndpoints
                 attemptNo: 1
             );
 
-            if (!sent)
-                return Results.Problem("Failed to send OTP email");
-
-            return Results.Ok(new { ok = true, emailId });
+            // Return ok regardless of SMTP result – OTP is in DB, email is in outbox
+            return Results.Ok(new { ok = true, emailSent = sent });
         });
 
         // =======================
@@ -75,7 +77,8 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/otp/verify", async (
             HttpContext ctx,
             OtpVerifyDto dto,
-            Db db) =>
+            Db db,
+            IConfiguration cfg) =>
         {
             var email = dto.Email?.Trim().ToLowerInvariant();
             var code = dto.Code?.Trim();
@@ -83,23 +86,37 @@ public static class AuthEndpoints
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
                 return Results.BadRequest(new { ok = false, error = "Missing email/code" });
 
-            var otp = await db.GetLatestOtpAsync(email);
-            if (otp == null)
-                return Results.Unauthorized();
-
-            var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
-
-            if (used || attempts >= maxAttempts || DateTime.UtcNow > expires)
-                return Results.Unauthorized();
-
-            var calc = Db.HashOtp(code, salt);
-            if (!CryptographicOperations.FixedTimeEquals(calc, hash))
+            // ── DevBypass (development / troubleshooting) ──────────────
+            bool bypassed = false;
+            if (cfg.GetValue<bool>("Otp:DevBypassEnabled", false))
             {
-                await db.IncrementOtpAttemptsAsync(email);
-                return Results.Unauthorized();
+                var devCode   = cfg.GetValue<string>("Otp:DevBypassCode", "") ?? "";
+                var devEmails = cfg.GetSection("Otp:DevBypassEmails").Get<string[]>() ?? Array.Empty<string>();
+                if (devCode == code && devEmails.Contains(email, StringComparer.OrdinalIgnoreCase))
+                    bypassed = true;
             }
+            // ─────────────────────────────────────────────────────────────
 
-            await db.MarkOtpUsedAsync(email);
+            if (!bypassed)
+            {
+                var otp = await db.GetLatestOtpAsync(email);
+                if (otp == null)
+                    return Results.Unauthorized();
+
+                var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
+
+                if (used || attempts >= maxAttempts || DateTime.UtcNow > expires)
+                    return Results.Unauthorized();
+
+                var calc = Db.HashOtp(code, salt);
+                if (!CryptographicOperations.FixedTimeEquals(calc, hash))
+                {
+                    await db.IncrementOtpAttemptsAsync(email);
+                    return Results.Unauthorized();
+                }
+
+                await db.MarkOtpUsedAsync(email);
+            }
 
             var me = await db.GetMeByEmailAsync(email);
             if (me == null)
@@ -125,33 +142,50 @@ public static class AuthEndpoints
 
         // =======================
         // Impersonate
+        // Only the user ygross@bgu.ac.il (when already logged in) may impersonate others.
         // =======================
         app.MapPost("/api/auth/impersonate", async (
             HttpContext ctx,
             Db db,
             ImpersonateReq req) =>
         {
-            var email = (req.Email ?? "").Trim().ToLowerInvariant();
-
-            // ⚠️ זה עדיין “קשיח” כמו שהיה אצלך
-            if (email != "ygross@bgu.ac.il")
+            // 1) Guard: only the designated super-user may impersonate
+            var callerEmail = ctx.User?.FindFirst(ClaimTypes.Email)?.Value?.Trim().ToLowerInvariant();
+            if (callerEmail != "ygross@bgu.ac.il")
                 return Results.Forbid();
 
-            var me = await db.ImpersonateByEmailAsync(email);
-            if (me == null)
-                return Results.Unauthorized();
+            // 2) Target email (who to impersonate)
+            var targetEmail = (req.Email ?? "").Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(targetEmail))
+                return Results.BadRequest(new { ok = false, error = "Missing email" });
 
+            // 3) Look up target
+            var me = await db.ImpersonateByEmailAsync(targetEmail);
+            if (me == null)
+                return Results.NotFound(new { ok = false, error = "User not found" });
+
+            // 4) Sign in as target (full claims, including instructorId)
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, me.Email),
-                new Claim("fullName", me.FullName),
                 new Claim(ClaimTypes.Role, me.RoleName),
-                new Claim("department", me.Department ?? "")
+                new Claim("fullName", me.FullName),
+                new Claim("department", me.Department ?? ""),
+                new Claim("instructorId", me.InstructorId.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
+            return Results.Ok(new { ok = true, me });
+        });
+
+        // =======================
+        // Logout
+        // =======================
+        app.MapPost("/api/auth/logout", async (HttpContext ctx) =>
+        {
+            await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Results.Ok(new { ok = true });
         });
     }

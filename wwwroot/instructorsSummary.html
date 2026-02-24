@@ -1,0 +1,133 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SimPocus Scheduler | InstructorsSummary</title>
+
+  <!-- אם יש לך CSS קיים – תשאיר. אם לא, שנה לקובץ שלך -->
+  <link rel="stylesheet" href="css/instructorsSummary.css" />
+</head>
+
+<body>
+  <!-- ייעוד הדף -->
+  <div class="page-purpose">
+    ייעוד הדף: סיכום מדריך מחובר (OTP) – סטטיסטיקה, עומס, הסמכות וקורסים לפי טווח תאריכים.
+    ברירת מחדל: חודש קלנדרי נוכחי.
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="title">SimPocus Scheduler</div>
+      <div class="subtitle">InstructorsSummary · By Dates</div>
+      <div class="muted" id="apiBaseLabel"></div>
+    </div>
+
+    <div class="userline">
+      <div id="meLine" class="me">טוען משתמש…</div>
+      <div class="role">
+        תפקיד משתמש מחובר: <span id="loggedRole">טוען…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- Controls -->
+    <section class="controls card">
+      <div class="row">
+        <label class="lbl">טווח תאריכים</label>
+
+        <input id="fromDate" type="date" />
+        <span>–</span>
+        <input id="toDate" type="date" />
+
+        <button id="btnPrevMonth" type="button" class="btn">חודש קודם</button>
+        <button id="btnThisMonth" type="button" class="btn">חודש נוכחי</button>
+        <button id="btnNextMonth" type="button" class="btn">חודש הבא</button>
+
+        <button id="btnPrevQuarter" type="button" class="btn">רבעון קודם</button>
+        <button id="btnNextQuarter" type="button" class="btn">רבעון הבא</button>
+
+        <button id="btnRefresh" type="button" class="btn primary">רענן</button>
+
+        <div class="spacer"></div>
+
+        <input id="searchBox" class="search" type="search" placeholder="חיפוש פעילות בטבלה…" />
+      </div>
+
+      <div class="row" style="margin-top:10px; gap:12px;">
+        <div class="muted" id="rangeLabel">טוען טווח…</div>
+      </div>
+
+      <div id="errBox" class="err" aria-live="polite"></div>
+    </section>
+
+    <!-- Summary + Details -->
+    <section class="grid2">
+      <section class="card">
+        <h2>סיכום תקופה</h2>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="k">כמות מופעים</div>
+            <div class="v" id="totalInstances">0</div>
+          </div>
+          <div class="kpi">
+            <div class="k">סה״כ שעות</div>
+            <div class="v" id="totalHours">0.0</div>
+          </div>
+          <div class="kpi">
+            <div class="k">מספר פעילויות שונות</div>
+            <div class="v" id="distinctActivities">0</div>
+          </div>
+        </div>
+
+        <div class="loadbox">
+          <div class="loadmeta">
+            <div id="loadLabel" class="loadlabel">עומס: —</div>
+            <div id="loadInfo" class="muted">—</div>
+          </div>
+          <div class="loadbar">
+            <div id="loadBar" class="loadbar-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>פרטי מדריך</h2>
+        <div id="instructorDetails" class="muted">טוען…</div>
+
+        <h3>הסמכות</h3>
+        <div id="certifications" class="pills muted">טוען…</div>
+
+        <h3>קורסים משויכים</h3>
+        <div id="courses" class="pills muted">טוען…</div>
+      </section>
+    </section>
+
+    <!-- Table -->
+    <section class="card">
+      <h2>פירוט לפי פעילות</h2>
+
+      <div class="tablewrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>פעילות</th>
+              <th class="num">מופעים</th>
+              <th class="num">שעות</th>
+            </tr>
+          </thead>
+          <tbody id="activitiesTable">
+            <tr><td colspan="3" class="muted">טוען…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script defer src="js/instructorsSummary.js"></script>
+</body>
+</html>

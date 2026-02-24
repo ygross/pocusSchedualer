@@ -6,13 +6,13 @@
 // 4) "שבץ" -> מודל עם מדריכים שהציעו זמינות, ממוינים לפי צדק + זמינות
 // 5) אישור -> POST /api/lead/instances/{id}/approve + שליחת מייל למי ששובץ
 
-// ✅ FIX: build basePath safely (exactly ONE trailing '/')
+// build basePath safely (exactly ONE trailing '/')
 const basePath = new URL(".", window.location.href).pathname.replace(/\/+$/, "/");
 
-// ✅ FIX: candidates ordered with the working one first: .../api/api
+// candidates ordered with the correct one first: .../api
 const API_CANDIDATES = [
-  `${window.location.origin}${basePath}api/api`,
-  `${window.location.origin}${basePath}api`
+  `${window.location.origin}${basePath}api`,
+  `${window.location.origin}${basePath}api/api`
 ];
 
 let API_BASE = API_CANDIDATES[0];
@@ -73,12 +73,12 @@ function EP() {
   };
 }
 
-// ✅ FIX: probe must match EP().me => `${cand}/me` (NOT `${cand}/api/me`)
+// probe: use /me – both 200 (logged in) and 401 (not logged in) mean the endpoint exists
 async function detectApiBase() {
   for (const cand of API_CANDIDATES) {
     try {
       const res = await fetchTry(`${cand}/me`);
-      if (res.ok) {
+      if (res.ok || res.status === 401) {
         API_BASE = cand;
         $("apiBaseLabel").textContent = API_BASE;
         return;

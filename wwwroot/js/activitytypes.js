@@ -21,7 +21,7 @@ const APP_BASE = (() => {
   
   // Endpoints
   const EP = {
-    activityTypes: `${API_BASE}/api/activity-types`,
+    activityTypes: `${API_BASE}/activity-types`,
     me: `${API_BASE}/me`,
     healthDb: `${API_BASE}/health/db`
   };

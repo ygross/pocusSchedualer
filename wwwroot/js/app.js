@@ -3,10 +3,9 @@
 
   const baseDir = window.location.pathname.replace(/\/[^\/]*$/, "");
 
-  // אצלך עובד api/api
-  const API_ME     = `${baseDir}/api/api/me`;
-  const API_LOGOUT = `${baseDir}/api/api/logout`;
-  const API_DB     = `${baseDir}/api/api/health/db`;
+  const API_ME     = `${baseDir}/api/me`;
+  const API_LOGOUT = `${baseDir}/api/auth/logout`;
+  const API_DB     = `${baseDir}/api/health/db`;
   const MENU_JSON  = `${baseDir}/config/menu.json`;
 
   // storage keys

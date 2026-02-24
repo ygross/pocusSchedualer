@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.DataProtection;
 
 using PocusSchedualer.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,20 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<EmailService>();
+
+// Persist data-protection keys so auth cookies remain valid across app restarts / redeployments.
+// Keys are stored in "dp-keys" folder NEXT TO (not inside) the publish directory,
+// so they survive "dotnet publish" overwriting the api\ folder.
+{
+    var publishDir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
+    var keysPath = System.IO.Path.Combine(
+        publishDir.Parent?.FullName ?? publishDir.FullName,
+        "dp-keys");
+    System.IO.Directory.CreateDirectory(keysPath);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new System.IO.DirectoryInfo(keysPath))
+        .SetApplicationName("PocusSchedualer");
+}
 
 var app = builder.Build();
 app.UseAuthentication();
@@ -88,9 +103,10 @@ app.MapGet("/api/lead/instances/{instanceId:int}/fairness", async (
 {
     var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
     if (!isAuth) return Results.Unauthorized();
-    if (!isAdmin) return Results.Forbid();
+    if (!isAdmin && myId == null) return Results.Unauthorized();
 
-    var rows = await db.GetFairnessForInstanceAsync(instanceId);
+    // Admins see all; non-admin leads are guard-checked inside the DB method
+    var rows = await db.GetFairnessForInstanceAsync(instanceId, isAdmin ? null : myId);
     return Results.Ok(rows);
 });
 
@@ -298,6 +314,26 @@ app.MapGet("/api/me", async (HttpContext ctx, Db db) =>
     return Results.Ok(me);
 });
 
+// =======================
+// MY ASSIGNMENTS (Instructor homepage)
+// =======================
+app.MapGet("/api/assignments/my", async (
+    HttpContext ctx,
+    DateTime? from,
+    DateTime? to,
+    Db db) =>
+{
+    var (isAuth, _, myId) = AuthHelpers.GetAuthInfo(ctx);
+    if (!isAuth) return Results.Unauthorized();
+    if (myId == null) return Results.Unauthorized();
+
+    DateTime? fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value, DateTimeKind.Local).ToUniversalTime() : null;
+    DateTime? toUtc   = to.HasValue   ? DateTime.SpecifyKind(to.Value,   DateTimeKind.Local).ToUniversalTime() : null;
+
+    var rows = await db.GetMyAssignmentsAsync(myId.Value, fromUtc, toUtc);
+    return Results.Ok(rows);
+});
+
 app.MapGet("/api/activities/gantt", async (
     DateTime from,
     DateTime to,
@@ -338,6 +374,32 @@ app.MapPut("/api/activities/edit/{activityId:int}", async (int activityId, Activ
     {
         var (ok, err) = await db.UpdateActivityAsync(activityId, dto);
         return ok ? Results.NoContent() : Results.BadRequest(err);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
+});
+
+app.MapPost("/api/activities", async (
+    HttpContext ctx,
+    ActivityCreateDto dto,
+    Db db) =>
+{
+    var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+    if (!isAuth) return Results.Unauthorized();
+    if (!isAdmin || myId == null) return Results.Forbid();
+
+    if (string.IsNullOrWhiteSpace(dto.ActivityName)) return Results.BadRequest("ActivityName is required");
+    if (dto.ActivityTypeId <= 0) return Results.BadRequest("ActivityTypeId is required");
+    if (dto.CourseId <= 0) return Results.BadRequest("CourseId is required");
+    if (dto.LeadInstructorId <= 0) return Results.BadRequest("LeadInstructorId is required");
+    if (dto.Instances == null || dto.Instances.Count == 0) return Results.BadRequest("At least one instance is required");
+
+    try
+    {
+        var activityId = await db.CreateActivityAsync(dto);
+        return Results.Ok(new { ok = true, activityId });
     }
     catch (Exception ex)
     {
@@ -416,6 +478,26 @@ app.MapGet("/api/courses", async (Db db) =>
 app.MapGet("/api/instructors", async (Db db) =>
 {
     return Results.Ok(await db.GetInstructorsAsync());
+});
+
+app.MapPost("/api/instructors", async (
+    HttpContext ctx,
+    InstructorCreateDto dto,
+    Db db) =>
+{
+    var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+    if (!isAuth) return Results.Unauthorized();
+    if (!isAdmin) return Results.Forbid();
+
+    if (string.IsNullOrWhiteSpace(dto.FullName)) return Results.BadRequest("FullName is required");
+    if (string.IsNullOrWhiteSpace(dto.Email)) return Results.BadRequest("Email is required");
+    if (dto.Role != Roles.Admin && dto.Role != Roles.CourseManager && dto.Role != Roles.Instructor)
+        return Results.BadRequest($"Role must be one of: {Roles.Admin}, {Roles.CourseManager}, {Roles.Instructor}");
+
+    var (instructorId, err) = await db.CreateInstructorAsync(dto);
+    if (err == "DuplicateEmail") return Results.Conflict(new { ok = false, error = "Email already exists" });
+
+    return Results.Ok(new { ok = true, instructorId });
 });
 
 app.MapGet("/api/course-instructors/{courseId:int}", async (int courseId, Db db) =>
