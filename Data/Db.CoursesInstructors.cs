@@ -26,8 +26,9 @@ ORDER BY CourseName;";
     public async Task<List<InstructorDto>> GetInstructorsAsync()
     {
         const string sql = @"
-SELECT InstructorId, FullName, Email
+SELECT InstructorId, FullName, Email, [Status]
 FROM dbo.Instructors
+WHERE [Status] = 'Active'
 ORDER BY FullName;";
         await using var c = Open();
         return (await c.QueryAsync<InstructorDto>(sql)).AsList();
