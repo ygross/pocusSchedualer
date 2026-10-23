@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SimPocus Schedualer · adminAddActivities</title>
+  <link rel="stylesheet" href="css/adminAddActivities.css?v=full1" />
+</head>
+<body>
+  <div class="page-purpose">
+    <div class="purpose-inner">
+      <div class="purpose-text">
+        <b>ייעוד הדף:</b> יצירת פעילות חדשה + יצירת מופעים (Preview) + שמירה ל־API
+      </div>
+      <div class="purpose-role">
+        תפקיד המשתמש המחובר שביצע לוגין דרך OTP: <b id="otpRoleInline">…</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-card">
+        <div class="title">SimPocus Schedualer · adminAddActivities</div>
+        <div class="subtitle">API: <span class="mono" id="apiBase">בודק…</span></div>
+        <div class="subsubtitle">(Admin/Lead) דף מנהל הוספת פעילות + מופעים</div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-title">משתמש מחובר</div>
+        <div class="user-line">משתמש: <b id="meName">טוען…</b></div>
+        <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+
+        <div class="status-row" aria-label="status indicators">
+          <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+          <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+          <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
+        </div>
+
+        <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה" aria-label="Toggle theme">🌙</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">➕ יצירת פעילות חדשה ומופעים</div>
+        <div class="card-sub">מלא פרטי פעילות, בנה מופעים ב־Preview ואז שמור ל־API</div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="activityType">סוג פעילות (רמה):</label>
+          <select id="activityType"><option value="">טוען…</option></select>
+        </div>
+
+        <div class="field">
+          <label for="course">קורס:</label>
+          <select id="course" disabled><option value="">בחר רמה קודם…</option></select>
+        </div>
+
+        <div class="field">
+          <label for="instructor">מדריך מרכז:</label>
+          <select id="instructor" disabled><option value="">בחר קורס קודם…</option></select>
+        </div>
+      </div>
+
+      <div class="grid two-col">
+        <div class="field">
+          <label for="activityName">שם הפעילות:</label>
+          <input id="activityName" placeholder="לדוגמה: ATLS מרץ 2026" />
+        </div>
+
+        <div class="field">
+          <label for="deadline">תאריך אחרון להרשמה:</label>
+          <input id="deadline" type="datetime-local" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">מופעים של הפעילות (ActivityInstances)</div>
+        <div class="card-sub">בחר תאריך התחלה, שעות, חזרתיות והגדרות – ואז Preview</div>
+      </div>
+
+      <div class="grid three-col">
+        <div class="field">
+          <label for="startDate">תאריך התחלה:</label>
+          <input id="startDate" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="startHour">שעת התחלה:</label>
+          <select id="startHour">
+            <option value="08:00">08:00</option><option value="09:00">09:00</option><option value="10:00">10:00</option>
+            <option value="11:00">11:00</option><option value="12:00">12:00</option><option value="13:00">13:00</option>
+            <option value="14:00">14:00</option><option value="15:00">15:00</option><option value="16:00">16:00</option>
+            <option value="17:00">17:00</option><option value="18:00">18:00</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="endHour">שעת סיום:</label>
+          <select id="endHour">
+            <option value="09:00">09:00</option><option value="10:00">10:00</option><option value="11:00">11:00</option>
+            <option value="12:00">12:00</option><option value="13:00">13:00</option><option value="14:00">14:00</option>
+            <option value="15:00">15:00</option><option value="16:00">16:00</option><option value="17:00">17:00</option>
+            <option value="18:00">18:00</option><option value="19:00">19:00</option><option value="20:00">20:00</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid four-col">
+        <div class="field">
+          <label for="repeatMode">חזרתיות:</label>
+          <select id="repeatMode">
+            <option value="none">ללא</option>
+            <option value="weekly">שבועי</option>
+            <option value="monthly">חודשי</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="repeatCount">מספר חזרות:</label>
+          <input id="repeatCount" type="number" min="1" max="52" value="3" />
+        </div>
+
+        <div class="field">
+          <label for="roomsCount">מספר חדרים:</label>
+          <input id="roomsCount" type="number" min="1" max="10" value="2" />
+        </div>
+
+        <div class="field">
+          <label for="reqInstructors">מספר מדריכים נדרשים:</label>
+          <input id="reqInstructors" type="number" min="1" max="30" value="5" />
+        </div>
+      </div>
+
+      <div class="row-inline">
+        <label class="chk">
+          <input type="checkbox" id="multiPerWeek" />
+          מספר מופעים באותו שבוע
+        </label>
+
+        <div class="field multi-days-panel" id="multiDaysPanel" style="display:none;">
+          <label>ימים בשבוע:</label>
+          <div class="days-row">
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="0"> א׳</label>
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="1"> ב׳</label>
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="2"> ג׳</label>
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="3"> ד׳</label>
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="4"> ה׳</label>
+            <label><input class="multi-day" type="checkbox" name="weekDaysMulti" value="5"> ו׳</label>
+          </div>
+        </div>
+
+        <div class="grow"></div>
+
+        <div class="actions">
+          <button id="btnPreview" class="btn primary" type="button">Preview</button>
+          <button id="btnClearInstances" class="btn" type="button">נקה מופעים</button>
+          <span id="instancesCounter" class="pill">0 מופעים</span>
+        </div>
+      </div>
+
+      <div id="msgOk" class="msg ok" style="display:none;"></div>
+      <div id="msgErr" class="msg err" style="display:none;"></div>
+
+      <div class="table-wrap">
+        <table id="instancesTable">
+          <thead>
+            <tr><th>#</th><th>תאריך</th><th>יום</th><th>שעה</th><th>חדרים</th><th>מדריכים</th><th></th></tr>
+          </thead>
+          <tbody id="instancesBody">
+            <tr><td colspan="7" class="empty-cell">אין מופעים להצגה</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="save-row">
+        <button id="btnSave" class="btn success" type="button">📌 שמור פעילות + מופעים ל־API</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/adminAddActivities.js?v=full1"></script>
+</body>
+</html>

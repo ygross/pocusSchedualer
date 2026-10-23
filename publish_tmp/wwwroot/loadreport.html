@@ -1,0 +1,140 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>דוח עומסים – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <iframe src="menu.html" style="border:0;width:100%;height:100vh"></iframe>
+  </div>
+  <div class="content">
+    <div class="topbar">
+      <div>דוח עומסים</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">דוח לניהול עומסים ושעות מדריכים. מאפשר בחירת טווח זמן, מציג סיכום + פירוט מופעים, וכולל כפתור לשליחה במייל (דמו) למרכז פעילות.</p>
+      <hr>
+      <h2>דוח עומסים (דמו)</h2>
+<p class="p">דוח המציג כמה מופעים/שעות קיבל כל מדריך לפי פילטר: שבוע נוכחי / חודש נוכחי / חודש הבא / הכל. הכפתורים מפעילים פילטר אמיתי על הנתונים המוצגים, והסיכום משתנה בהתאם. מתחת לסיכום יש כפתור "שלח לאדמין" שמציג מודל מייל.</p>
+
+<div class="row">
+  <button class="btn light" onclick="setRange('week')">שבוע נוכחי</button>
+  <button class="btn light" onclick="setRange('month')">חודש נוכחי</button>
+  <button class="btn light" onclick="setRange('next')">חודש הבא</button>
+  <button class="btn light" onclick="setRange('all')">הכל</button>
+</div>
+
+<table id="tblL">
+  <thead><tr><th>מדריך</th><th>מס' מופעים</th><th>שעות</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<hr>
+
+<h2>פירוט מופעים</h2>
+<table id="tblLD">
+  <thead><tr><th>מדריך</th><th>תאריך</th><th>שעה</th><th>פעילות</th><th>שעות</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<div style="display:flex;justify-content:flex-end;margin-top:10px">
+  <button class="btn" onclick="sendMail()">שלח לאדמין</button>
+</div>
+
+<script>
+const DETAILS = [
+  {ins:"גל סער", date:"2026-01-05", time:"08:00-12:00", name:"ATLS", hours:4},
+  {ins:"גל סער", date:"2026-01-08", time:"08:00-12:00", name:"ALS", hours:4},
+  {ins:"שמעון דמתי", date:"2026-01-10", time:"12:00-16:00", name:"קורס ארצי", hours:4},
+  {ins:"עמית אשכנזי", date:"2026-02-03", time:"12:00-16:00", name:"קורס ארצי", hours:4}
+];
+
+let range="all";
+const thisMonth="2026-01";
+const nextMonth="2026-02";
+
+function inRange(x){
+  if(range==="month") return x.date.startsWith(thisMonth);
+  if(range==="next")  return x.date.startsWith(nextMonth);
+  if(range==="week")  return x.date >= "2026-01-05" && x.date <= "2026-01-11"; // דמו
+  return true;
+}
+
+function setRange(r){
+  range=r;
+  render();
+}
+
+function render(){
+  const rows = DETAILS.filter(inRange);
+
+  // summary by instructor
+  const map = {};
+  rows.forEach(x=>{
+    map[x.ins] ??= {count:0, hours:0};
+    map[x.ins].count += 1;
+    map[x.ins].hours += x.hours;
+  });
+
+  const tb = document.querySelector("#tblL tbody");
+  tb.innerHTML = Object.keys(map).length ? "" : "<tr><td colspan='3' class='hint'>אין נתונים בטווח</td></tr>";
+  Object.entries(map).forEach(([ins,v])=>{
+    tb.insertAdjacentHTML("beforeend", `<tr><td>${ins}</td><td>${v.count}</td><td>${v.hours}</td></tr>`);
+  });
+
+  const tbd = document.querySelector("#tblLD tbody");
+  tbd.innerHTML = rows.length ? "" : "<tr><td colspan='5' class='hint'>אין פירוט בטווח</td></tr>";
+  rows.forEach(x=>{
+    tbd.insertAdjacentHTML("beforeend", `<tr><td>${x.ins}</td><td>${x.date}</td><td>${x.time}</td><td>${x.name}</td><td>${x.hours}</td></tr>`);
+  });
+}
+
+function sendMail(){
+  const rows = Array.from(document.querySelectorAll("#tblL tbody tr"))
+    .filter(tr=>tr.children.length===3)
+    .map(tr=>`${tr.children[0].innerText}: ${tr.children[2].innerText} שעות (${tr.children[1].innerText} מופעים)`)
+    .join("\\n");
+
+  const mail =
+`To: simcenterbgu@gmail.com
+Subject: דוח עומסים – ${range}
+
+סיכום לפי הטווח שנבחר:
+${rows}
+
+מצורף גם פירוט מופעים בדף.
+
+PocusSchedualer`;
+
+  document.getElementById("modalMail").textContent = mail;
+  openModal("#modal1");
+}
+
+render();
+</script>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>יומן פעילויות – מדריך</title>
+  <link rel="stylesheet" href="css/InstructorActivitiesCalendar.css" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+
+<body>
+  <!-- ייעוד הדף -->
+  <div class="page-purpose">
+    <b>ייעוד הדף:</b> הצגת מופעים חודשיים למדריך המחובר (מה־Session), כולל הצעת/הסרת זמינות והדגשת מופעים ששובץ אליהם.
+  </div>
+
+  <div class="wrap">
+
+    <!-- HEADER -->
+    <div class="topbar">
+
+      <div class="right-card">
+        <div class="page-title">SimPocus Scheduler · InstructorActivitiesCalendar</div>
+        <div class="api-base">
+          API בסיסי: <span class="mono" id="apiBase">(מאתר...)</span>
+        </div>
+        <div class="page-sub">Activities · Calendar · mode=instructor</div>
+      </div>
+
+      <div class="left-card">
+        <div class="me">
+          <div class="me-label">משתמש מחובר</div>
+          <div class="me-line">שם: <b id="meName">—</b></div>
+          <div class="me-line">תפקיד: <b id="meRole">—</b></div>
+          <div class="me-line roleline">תפקיד המשתמש המחובר שביצע לוגין דרך OTP: <b id="meOtpRole">—</b></div>
+        </div>
+
+        <button id="themeToggle" class="theme-btn" title="בהיר / כהה">🌙</button>
+      </div>
+    </div>
+
+    <!-- FILTERS / CONTROLS -->
+    <div class="panel controls">
+      <div class="controls-row">
+        <div class="field">
+          <div class="label">חודש</div>
+          <input id="monthPicker" type="month" class="input" />
+        </div>
+
+        <div class="field">
+          <div class="label">סוג פעילות (אופציונלי)</div>
+          <select id="activityTypeId" class="input">
+            <option value="">הכל</option>
+          </select>
+        </div>
+
+        <div class="btns">
+          <button id="btnToday" class="btn">היום</button>
+          <button id="btnReload" class="btn primary">רענן</button>
+        </div>
+      </div>
+
+      <div id="status" class="msg"></div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="panel calendar">
+      <div class="cal-head">
+        <div class="cal-title" id="calTitle">—</div>
+        <div class="legend">
+          <span class="leg"><span class="dot assigned"></span> שובצת</span>
+          <span class="leg"><span class="dot proposed"></span> זמינות הוצעה</span>
+          <span class="leg"><span class="dot default"></span> פתוח</span>
+        </div>
+      </div>
+
+      <div class="dow">
+        <div>א׳</div><div>ב׳</div><div>ג׳</div><div>ד׳</div><div>ה׳</div><div>ו׳</div><div>ש׳</div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // THEME TOGGLE (Light / Dark)
+    const btn = document.getElementById('themeToggle');
+    const root = document.documentElement;
+
+    function setTheme(mode) {
+      root.setAttribute('data-theme', mode);
+      localStorage.setItem('theme', mode);
+      btn.textContent = mode === 'light' ? '🌞' : '🌙';
+    }
+
+    const saved = localStorage.getItem('theme') || 'dark';
+    setTheme(saved);
+
+    btn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+
+  <script src="js/InstructorActivitiesCalendar.js"></script>
+</body>
+</html>

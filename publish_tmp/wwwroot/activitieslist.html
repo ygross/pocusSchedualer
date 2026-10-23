@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>רשימת פעילויות – מדריך</title>
+  <link rel="stylesheet" href="css/activitieslist.css?v=1" />
+  <script>
+    (function(){
+      const t = localStorage.getItem('theme');
+      if (t === 'dark') document.body && document.body.classList.add('theme-dark');
+      document.addEventListener('DOMContentLoaded', function(){
+        if (t === 'dark') document.body.classList.add('theme-dark');
+      });
+      window.addEventListener('message', function(e){
+        if (e.data && e.data.type === 'theme') {
+          document.body.classList.toggle('theme-dark', e.data.value === 'dark');
+        }
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="purpose">ייעוד הדף: רשימת השיבוצים והזמינויות של המדריך לפי חודש + הצגת הסמכות והפקת קלנדר (ICS).</div>
+
+    <div class="topbar">
+      <div class="card">
+        <div class="titleRow">
+          <div class="h1">רשימת פעילויות חודשית</div>
+          <div class="sub">מדריך</div>
+        </div>
+
+        <div class="sub">משתמש מחובר: <b id="meName">טוען…</b> · תפקיד: <b id="meRole">…</b></div>
+
+        <div class="controls">
+          <div class="ctrl">
+            <label for="monthPicker">חודש</label>
+            <input id="monthPicker" type="month" />
+          </div>
+
+          <div class="ctrl">
+            <label for="activityTypeId">סוג פעילות</label>
+            <select id="activityTypeId">
+              <option value="">הכל</option>
+            </select>
+          </div>
+
+          <div class="ctrl" title="ברירת מחדל: רק זמינויות/שיבוצים שלי. סמן כדי להציג גם מופעים חדשים.">
+            <input id="chkShowAll" type="checkbox" />
+            <label for="chkShowAll">הצג גם מופעים חדשים</label>
+          </div>
+
+          <button class="btn" id="btnReload" type="button">רענן</button>
+          <button class="btn" id="btnIcs" type="button" title="מוריד קובץ ICS של השיבוצים שלך בחודש הנבחר">
+            שלח קלנדר (ICS)
+          </button>
+        </div>
+
+        <div class="metaLine">API Base: <b id="apiBase">בודק…</b></div>
+        <div id="status" class="msg">טוען…</div>
+      </div>
+
+      <div class="card">
+        <div class="titleRow">
+          <div class="h1">ההסמכות שלי</div>
+          <div class="sub">Courses / Certifications</div>
+        </div>
+        <div id="certChips" class="chips"></div>
+        <div class="metaLine">מוצג לפי: courses + course-instructors</div>
+      </div>
+    </div>
+
+    <div class="sectionTitle">
+      <div>זמינויות + שיבוצים שלי בחודש</div>
+      <div class="sub" id="countLine">—</div>
+    </div>
+
+    <div id="list" class="list"></div>
+  </div>
+
+  <script src="js/activitiesList.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+/* ============================================================
+   Role CSS: ADMIN (Layer 2/3)
+   Scoped only when: html[data-role="admin"]
+   ============================================================ */
+
+html[data-role="admin"]{
+  --bg:#0b1220;
+  --text:#e8eefc;
+  --muted:#a9b6d3;
+
+  /* Amber/Orange accent for Admin (matches screenshots) */
+  --brand:#ff8c00;
+  --brandGlow: rgba(255,140,0,.18);
+  --brand2: rgba(255,140,0,.18);
+  --brandBorder: rgba(255,140,0,.25);
+  --focus: rgba(255,140,0,.25);
+
+  --ok:#26d07c;
+  --warn:#ffcc00;
+  --bad:#ff4d4d;
+}

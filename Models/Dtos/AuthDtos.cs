@@ -16,6 +16,9 @@ public class MeDto
     public string FullName { get; set; } = "";
     public string RoleName { get; set; } = "";
     public string? Department { get; set; }
+    public string? Status { get; set; }
 }
 
 public record ImpersonateReq(string Email);
+public record SelfUpdateDto(string? FullName, string? Phone, string? Department);
+public record ImpersonateStartReq(int InstructorId);

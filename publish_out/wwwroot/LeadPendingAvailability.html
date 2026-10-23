@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>זמינות ממתינה</title>
+  <link rel="stylesheet" href="css/LeadShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">זמינות ממתינה — מופעים עתידיים שבהם מדריכים עדיין לא הגיבו לבקשת הזמינות.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">⏳ זמינות ממתינה</div>
+      <div class="subtitle">מי עוד לא ענה · שלח תזכורות</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">מחובר</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="toolbar-row">
+    <button id="refreshBtn" class="btn btn-secondary" type="button">🔄 רענן</button>
+    <span id="summaryLine" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>פעילות</th>
+          <th>תאריך מופע</th>
+          <th>נדרשים</th>
+          <th>נשלחו</th>
+          <th>עדיין ממתינים</th>
+          <th>הגיבו</th>
+          <th>דחו</th>
+          <th>פעולה</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="8" class="empty-row">טוען נתונים…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script src="js/LeadPendingAvailability.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

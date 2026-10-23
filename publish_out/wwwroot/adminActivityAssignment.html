@@ -1,0 +1,106 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>שיבוץ פעילות – אדמין</title>
+<link rel="stylesheet" href="css/adminActivityAssignment.css?v=2" />
+<script>(function(){var t=localStorage.getItem('theme');if(t!=='light')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="purpose">ייעוד הדף: ADMIN – בחירת פעילות ומופע, שיבוץ מדריכים (גם בלי זמינות) + המלצה לפי “צדק”.</div>
+    <div style="font-weight:1000;font-size:18px">simCenter Schedualer • AdminAssignment</div>
+    <div class="purpose">API בסיס: <span id="apiBaseLabel" class="mono">…</span></div>
+  </div>
+  <div style="text-align:left;font-size:12px;opacity:.95">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+  </div>
+</header>
+
+<div class="page">
+  <h1>Admin Assignment</h1>
+  <div class="sub">
+    בחר פעילות → תראה מופעים עם: נדרש / שובצו / זמינויות / חסר.  
+    “שבץ (גם בלי זמינות)” פותח מודל עם כל המדריכים הרלוונטיים לקורס, כולל המלצה לפי צדק.
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field" style="flex:2;min-width:320px">
+        <label>בחר פעילות</label>
+        <select id="activitySel"></select>
+      </div>
+      <div class="field">
+        <label>פילטר סוג פעילות</label>
+        <select id="typeSel"></select>
+      </div>
+      <div class="field">
+        <button id="btnReload" class="btn" type="button">רענן פעילויות</button>
+      </div>
+    </div>
+    <div id="activityMsg" class="msg"></div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>מופע</th><th>תאריך</th><th>שעה</th>
+          <th>נדרש</th><th>שובצו</th><th>זמינויות</th><th>חסר</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="instancesBody"></tbody>
+    </table>
+    <div id="instancesMsg" class="msg"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modalHead">
+      <div>
+        <div style="font-weight:1000" id="mTitle">שיבוץ</div>
+        <div class="muted" id="mSub">—</div>
+      </div>
+      <div class="right">
+        <button class="btn" id="btnAutoPick" type="button">בחר אוטומטי לפי צדק</button>
+        <button class="btn primary" id="btnApprove" type="button">אשר שיבוץ</button>
+        <button class="btn" id="btnClose" type="button">סגור</button>
+      </div>
+    </div>
+    <div class="modalBody">
+      <div class="row">
+        <div class="field">
+          <label>חיפוש מדריך (שם/מייל)</label>
+          <input id="mSearch" placeholder="הקלד לסינון...">
+        </div>
+        <div class="field">
+          <label>הצג רק חסרים (לפי Required)</label>
+          <select id="mLimit">
+            <option value="1">כן</option>
+            <option value="0">לא</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>הערה (DecisionNote)</label>
+          <input id="mNote" placeholder="אופציונלי">
+        </div>
+      </div>
+
+      <div class="msg" id="mMsg"></div>
+      <div id="mList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/adminActivityAssignment.js"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

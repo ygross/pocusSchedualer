@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>שיבוץ פעילות – מרכז קורס</title>
+  <link rel="stylesheet" href="css/leadassignment.css?v=2" />
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+
+<body>
+<header>
+  <div>
+    <div class="purpose">ייעוד הדף: מרכז קורס (Lead) רואה רק את הפעילויות שלו, מנהל זמינויות למופעים, משבץ מדריכים ושולח מיילים.</div>
+    <div class="title">LEAD-ASSIGNMENT</div>
+    <div class="purpose">API בסיס: <span id="apiBaseLabel" class="mono">…</span></div>
+  </div>
+  <div style="text-align:left;font-size:12px;opacity:.95">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>בחירת פעילות</h2>
+    <div class="sub">רק פעילויות שאתה מרכז (Lead). Admin רואה הכל.</div>
+
+    <div class="row" style="margin-top:10px">
+      <div class="field">
+        <label>פעילות</label>
+        <select id="activitySel"></select>
+      </div>
+
+      <div class="actions">
+        <button id="btnReload" class="btn" type="button">רענן</button>
+      </div>
+    </div>
+
+    <div id="activityMsg" class="msg"></div>
+  </section>
+
+  <section class="card">
+    <h2>מופעים לפעילות</h2>
+    <div class="sub">ליד כל מופע: נדרש / הציעו זמינות / שובצו + פעולות בקשת זמינות ושיבוץ.</div>
+
+    <div class="kpiRow" style="margin:10px 0">
+      <span id="kpiInstances" class="pill">מופעים: -</span>
+      <span id="kpiEligible" class="pill">מדריכים רלוונטיים: -</span>
+    </div>
+
+    <div class="small muted" id="instancesHint">בחר פעילות כדי לראות מופעים.</div>
+
+    <div style="overflow:auto;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>מופע</th>
+            <th>טווח</th>
+            <th>נדרש</th>
+            <th title="בקשות שנשלחו">📤 הוזמנו</th>
+            <th title="הציעו זמינות / אישרו">✅ אישרו</th>
+            <th title="דחו את הבקשה">❌ דחו</th>
+            <th title="שובצו רשמית">🏁 שובצו</th>
+            <th>פעולות</th>
+          </tr>
+        </thead>
+        <tbody id="instancesBody">
+          <tr><td colspan="8" class="muted">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="instancesMsg" class="msg"></div>
+  </section>
+
+</main>
+
+<!-- Modal -->
+<div id="backdrop" class="backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modalHead">
+      <div>
+        <div id="modalTitle" class="modalTitle">שיבוץ מדריכים</div>
+        <div id="modalSub" class="small muted">—</div>
+      </div>
+      <button id="btnClose" class="btn" type="button">סגור</button>
+    </div>
+
+    <div class="modalBody">
+      <div class="kpiRow">
+        <span id="mReq" class="pill">נדרש: -</span>
+        <span id="mAssigned" class="pill">שובצו: -</span>
+        <span id="mMissing" class="pill">חסרים: -</span>
+      </div>
+
+      <div class="small muted">
+        הרשימה כוללת רק מדריכים שהציעו זמינות למופע. הסדר: <b>צדק (פחות שיבוצים קודם)</b> → <b>זמינות</b> → שם.
+      </div>
+
+      <div class="right">
+        <button id="btnAutoPick" class="btn" type="button" disabled>בחר אוטומטי עד החסרים</button>
+      </div>
+
+      <div id="candWrap">
+        <div class="muted">טוען…</div>
+      </div>
+
+      <div id="modalMsg" class="msg"></div>
+    </div>
+
+    <div class="modalFoot">
+      <div class="small muted">בעת אישור – המדריכים שנבחרו יקבלו מייל.</div>
+      <div class="right">
+        <button id="btnApprove" class="btn primary" type="button" disabled>אשר שיבוץ + שלח מייל</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/lead-assignment.js"></script>
+</body>
+</html>

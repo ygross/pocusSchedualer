@@ -65,6 +65,26 @@ END";
     }
 
     /// <summary>
+    /// Returns the effective deadline for offering availability on an instance.
+    /// Uses ApplicationDeadlineUtc if set, otherwise StartUtc minus <paramref name="fallbackDays"/>.
+    /// Returns null if the instance does not exist.
+    /// </summary>
+    public async Task<DateTime?> GetInstanceDeadlineAsync(int instanceId, int fallbackDays)
+    {
+        const string sql = @"
+SELECT ISNULL(
+    a.ApplicationDeadlineUtc,
+    DATEADD(DAY, -@fallbackDays, inst.StartUtc)
+)
+FROM dbo.ActivityInstances inst
+JOIN dbo.Activities a ON a.ActivityId = inst.ActivityId
+WHERE inst.InstanceId = @instanceId;";
+
+        await using var c = Open();
+        return await c.ExecuteScalarAsync<DateTime?>(sql, new { instanceId, fallbackDays });
+    }
+
+    /// <summary>
     /// Cancels an instructor availability request for an instance.
     /// Implementation choice: hard delete the row (simple & consistent with your existing instance delete cascade).
     /// </summary>

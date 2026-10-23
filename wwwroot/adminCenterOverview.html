@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenterSchedualer - Center Overview</title>
+  <link rel="stylesheet" href="css/adminCenterOverview.css?v=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+<div class="wrap">
+
+  <div class="purpose">Admin - Center overview: activity types, courses, activities, hours &amp; collapsible activity tree.</div>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">Center Overview</div>
+      <div class="subtitle">simCenterSchedualer &middot; Admin</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-line"><b id="meName">...</b></div>
+        <div class="user-line" id="meRole" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+      <button id="btnRefresh" class="btn-refresh" type="button">&#128257; Refresh</button>
+      <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
+    </div>
+  </div>
+
+  <div id="errBox" class="msg-err"></div>
+
+  <!-- KPI cards -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">&#128202; Center Statistics</div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Activity Types</div>
+        <div class="kpi-val blue" id="kpiTypes">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Courses</div>
+        <div class="kpi-val green" id="kpiCourses">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Activities</div>
+        <div class="kpi-val purple" id="kpiActivities">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Instances</div>
+        <div class="kpi-val white" id="kpiInstances">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Hours</div>
+        <div class="kpi-val amber" id="kpiHours">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">&#128200; Courses &amp; Activities by Type</div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Activity Tree -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">&#127795; Activity Tree</div>
+      <div style="display:flex;gap:8px">
+        <button id="btnExpandAll"   class="btn-refresh" type="button" style="font-size:12px;padding:5px 12px">Expand All</button>
+        <button id="btnCollapseAll" class="btn-refresh" type="button" style="font-size:12px;padding:5px 12px">Collapse All</button>
+      </div>
+    </div>
+    <div id="treeContainer" class="tree">
+      <div style="color:var(--muted);padding:20px 0">Loading tree...</div>
+    </div>
+  </div>
+
+</div>
+<script src="js/adminCenterOverview.js?v=1"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

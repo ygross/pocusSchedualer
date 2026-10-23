@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenter Schedualer · דשבורד מערכת</title>
+  <link rel="stylesheet" href="css/AdminSystemDashboard.css?v=1" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> Admin – מבט כולל על מצב המערכת: בריאות, מדריכים, פעילויות ושיבוצים.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">דשבורד מערכת</div>
+      <div class="subtitle">Admin – מבט כולל</div>
+      <div class="subsubtitle">מצב בסיס נתונים, מדריכים ופעילויות</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
+        <span class="status-pill" id="dbTimePill">DB Time: <span id="dbTime">—</span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
+    </div>
+  </div>
+
+  <!-- בריאות מערכת -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🖥️ בריאות מערכת</div>
+      <button id="btnRefresh" class="btn primary" type="button">רענן</button>
+    </div>
+    <div class="grid three-col">
+      <div class="kpi-card">
+        <div class="kpi-label">סטטוס DB</div>
+        <div class="kpi-val" id="kpiDb">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">גרסת שרת</div>
+        <div class="kpi-val small" id="kpiServer">ASP.NET 8</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">זמן שרת DB</div>
+        <div class="kpi-val small" id="kpiDbTime">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- מדריכים -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">👥 מדריכים</div></div>
+    <div class="grid three-col">
+      <div class="kpi-card">
+        <div class="kpi-label">סה״כ מדריכים</div>
+        <div class="kpi-val" id="kpiTotal">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ממתינים לאישור</div>
+        <div class="kpi-val warn" id="kpiPending">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">פעילים</div>
+        <div class="kpi-val ok" id="kpiActive">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errBox" class="msg err" style="display:none"></div>
+</div>
+
+<script src="js/AdminSystemDashboard.js?v=1"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

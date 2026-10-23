@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Pending Approvals</title>
+  <link rel="stylesheet" href="css/adminPendingApprovals.css">
+</head>
+<body>
+
+<header>
+  <div class="hcol">
+    <div class="purpose">ייעוד הדף: ניהול משתמשים שממתינים לאישור/דחייה (Pending Approvals).</div>
+    <div style="font-weight:800">SimCenter • Admin • Pending Approvals</div>
+    <div class="purpose">API בסיס: <span class="mono" id="apiBaseLabel">...</span></div>
+  </div>
+
+  <div class="userbox">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+    <div id="healthLine">DB: טוען…</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- כרטיס סינון/פעולות -->
+  <section class="card">
+    <h2>
+      <span>סינון / פעולות</span>
+      <span class="badge" id="countBadge">סה״כ: 0</span>
+    </h2>
+
+    <div class="row">
+      <div class="field" style="min-width:320px;flex:2">
+        <label for="q">חיפוש</label>
+        <input id="q" type="text" placeholder="חיפוש לפי אימייל / שם / מחלקה..." />
+        <div class="msg muted">טיפ: אפשר לחפש חלקי מילים.</div>
+      </div>
+
+      <div class="actions">
+        <button class="secondary" id="btnRefresh" type="button">רענן</button>
+      </div>
+    </div>
+
+    <div class="msg muted" id="topMsg"></div>
+  </section>
+
+  <!-- כרטיס רשימה -->
+  <section class="card">
+    <h2>
+      <span>רשימת ממתינים לאישור ⏳</span>
+      <span class="badge" id="modeBadge">מצב: צפייה</span>
+    </h2>
+
+    <div style="overflow:auto;max-height:55vh;border-radius:10px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">#</th>
+            <th>אימייל</th>
+            <th>שם</th>
+            <th>טלפון</th>
+            <th>מחלקה</th>
+            <th style="width:110px">סטטוס</th>
+            <th style="width:170px">נוצר</th>
+            <th style="width:260px">פעולות</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+
+    <div class="msg muted" id="listMsg"></div>
+    <div class="msg err" id="errMsg" style="display:none"></div>
+  </section>
+
+</main>
+
+<script src="js/adminPendingApprovals.js"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

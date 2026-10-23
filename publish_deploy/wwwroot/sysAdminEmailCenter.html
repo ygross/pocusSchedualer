@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Email Center</title>
+  <link rel="stylesheet" href="css/SysAdminShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">Email Center — browse the email outbox, filter by status, resend failed messages.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">📧 Email Center</div>
+      <div class="subtitle">Outbox browser · Resend failed</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Total</div><div id="statTotal" class="stat-value blue">0</div></div>
+    <div class="stat-card"><div class="stat-label">Sent</div><div id="statSent" class="stat-value green">0</div></div>
+    <div class="stat-card"><div class="stat-label">Failed</div><div id="statFailed" class="stat-value red">0</div></div>
+    <div class="stat-card"><div class="stat-label">Queued</div><div id="statQueued" class="stat-value amber">0</div></div>
+  </div>
+
+  <div class="toolbar-row">
+    <select id="filterStatus">
+      <option value="">All statuses</option>
+      <option value="Sent">Sent</option>
+      <option value="Failed">Failed</option>
+      <option value="Queued">Queued</option>
+    </select>
+    <select id="filterDays">
+      <option value="3">Last 3 days</option>
+      <option value="7" selected>Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <button id="loadBtn" class="btn btn-primary" type="button">🔍 Load</button>
+    <button id="resendAllBtn" class="btn btn-danger" type="button">🔄 Resend All Failed</button>
+    <span id="summaryLine" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr>
+        <th>ID</th><th>To</th><th>Subject</th><th>Status</th>
+        <th>Related</th><th>Created</th><th>Sent</th><th>Fail Reason</th><th></th>
+      </tr></thead>
+      <tbody id="tableBody"><tr><td colspan="9" class="empty-row">Click Load to fetch emails</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="js/sysAdminEmailCenter.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenterSchedualer · ניצול מדריכים</title>
+  <link rel="stylesheet" href="css/AdminInstructorUtilizationReport.css?v=1" />
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> Admin – דוח ניצול מדריכים: שיבוצים, שעות והשוואה בין מדריכים.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">ניצול מדריכים</div>
+      <div class="subtitle">Admin – דוח מנהלי</div>
+      <div class="subsubtitle">שיבוצים, שעות והשוואה בין מדריכים</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">🔍 סינון</div></div>
+    <div class="grid two-col">
+      <div class="field">
+        <label>חיפוש מדריך</label>
+        <input id="searchBox" placeholder="שם מדריך…" />
+      </div>
+      <div class="field">
+        <label>טווח</label>
+        <select id="filterRange">
+          <option value="all">הכל</option>
+          <option value="month">חודש נוכחי</option>
+          <option value="week">שבוע נוכחי</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid three-col">
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ שעות</div>
+      <div class="kpi-val" id="kpiHours">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ מופעים</div>
+      <div class="kpi-val" id="kpiSessions">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">מדריכים פעילים</div>
+      <div class="kpi-val" id="kpiInstructors">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">📊 דירוג מדריכים לפי שעות</div></div>
+    <div id="errBox" class="msg err" style="display:none"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>מדריך</th><th>מחלקה</th><th>קורסים</th><th>מופעים</th><th>שעות</th><th>עומס יחסי</th></tr></thead>
+        <tbody id="tblBody"><tr><td colspan="7" class="empty-cell">טוען…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/AdminInstructorUtilizationReport.js?v=1"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

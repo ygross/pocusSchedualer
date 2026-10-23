@@ -248,4 +248,21 @@ WHERE a.ActivityId = @activityId;";
         await using var cn = Open();
         return await cn.QueryFirstOrDefaultAsync<ActivityEmailHeaderDto>(sql, new { activityId });
     }
+
+    /// <summary>
+    /// Returns true if the activity belongs to the given Lead/CourseManager (Activities.LeadInstructorId).
+    /// Used to enforce server-side authorization for Lead editing.
+    /// </summary>
+    public async Task<bool> IsActivityLedByAsync(int activityId, int instructorId)
+    {
+        const string sql = @"
+SELECT 1
+FROM dbo.Activities
+WHERE ActivityId = @activityId
+  AND LeadInstructorId = @instructorId;";
+
+        await using var c = Open();
+        var res = await c.ExecuteScalarAsync<int?>(sql, new { activityId, instructorId });
+        return res.HasValue;
+    }
 }

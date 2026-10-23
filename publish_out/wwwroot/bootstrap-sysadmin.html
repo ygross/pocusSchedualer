@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Bootstrap SysAdmin</title>
+  <style>
+    body { font-family: Arial, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#1a1a2e; color:#eee; }
+    .card { background:#16213e; border:1px solid #0f3460; border-radius:12px; padding:40px; max-width:420px; width:90%; text-align:center; }
+    h2 { margin:0 0 8px; font-size:1.4rem; }
+    .subtitle { color:#888; font-size:.9rem; margin-bottom:24px; }
+    button { background:#e94560; color:#fff; border:none; padding:12px 32px; border-radius:8px; font-size:1rem; cursor:pointer; }
+    button:hover { background:#c73652; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .status { margin-top:20px; padding:12px; border-radius:8px; font-size:.9rem; display:none; }
+    .ok { background:#1a4a2a; border:1px solid #2a8a4a; color:#4dda8e; }
+    .err { background:#4a1a1a; border:1px solid #8a2a2a; color:#ff6b6b; }
+    a.link { display:inline-block; margin-top:16px; color:#61dafb; text-decoration:none; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Bootstrap SysAdmin</h2>
+    <div class="subtitle">Updates your DB role to SystemAdmin and refreshes your session cookie.<br>You must be logged in as ygross@bgu.ac.il.</div>
+    <button id="btn" onclick="run()">Run Bootstrap</button>
+    <div class="status" id="statusBox"></div>
+  </div>
+  <script>
+    async function run() {
+      const btn = document.getElementById('btn');
+      const box = document.getElementById('statusBox');
+      btn.disabled = true;
+      box.style.display = 'none';
+      try {
+        const r = await fetch('/api/auth/bootstrap-sysadmin', { method:'POST', credentials:'include' });
+        const data = await r.json().catch(() => ({}));
+        if (r.ok && data.ok) {
+          box.className = 'status ok';
+          box.innerHTML = 'Success! Role = <b>' + (data.roleName || 'SystemAdmin') + '</b><br><a class="link" href="app.html">Go to app &rarr;</a>';
+        } else {
+          box.className = 'status err';
+          box.textContent = r.status === 401 ? 'Not authenticated — log in first via app.html / login-otp.html'
+                          : r.status === 403 ? 'Forbidden — must be ygross@bgu.ac.il'
+                          : 'Error ' + r.status + ': ' + JSON.stringify(data);
+          btn.disabled = false;
+        }
+      } catch (e) {
+        box.className = 'status err';
+        box.textContent = 'Network error: ' + e.message;
+        btn.disabled = false;
+      }
+      box.style.display = '';
+    }
+  </script>
+</body>
+</html>

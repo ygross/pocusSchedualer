@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>תזכורות — מרכז קורס</title>
+  <link rel="stylesheet" href="css/LeadShared.css" />
+  <script>(function(){var t=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',t);window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+  <style>
+    :root{--bg:#f5f7fb;--card:#ffffff;--panel:#f0f3f8;--line:#dde2ee;--line2:#c8cfe0;
+      --text:#1a1d2e;--muted:#64748b;--blue:#2563eb;--green:#16a34a;--red:#dc2626;
+      --amber:#d97706;--purple:#7c3aed;--shadow:0 2px 12px rgba(0,0,0,.08)}
+    [data-theme="dark"]{--bg:#0f1117;--card:#1a1d27;--panel:#13151e;--line:#2a2d3e;
+      --line2:#3a3d52;--text:#e2e4f0;--muted:#8b8fa8}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Segoe UI',system-ui,Arial,sans-serif;font-size:14px;
+      background:var(--bg);color:var(--text)}
+    .wrap{max-width:820px;margin:0 auto;padding:20px 16px 40px}
+
+    /* Header */
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+      background:var(--card);border:1px solid var(--line2);border-radius:14px;
+      padding:18px 22px;box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap}
+    .title-area .title{font-size:1.3rem;font-weight:700}
+    .title-area .sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .theme-btn{background:transparent;border:1px solid var(--line2);border-radius:8px;
+      padding:6px 10px;cursor:pointer;font-size:1rem;color:var(--text)}
+
+    /* Form card */
+    .form-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+      padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:18px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:13px;font-weight:600;color:var(--text)}
+    .field label .req{color:var(--red);margin-right:2px}
+    select,textarea,input[type="text"]{
+      width:100%;padding:10px 12px;border:1px solid var(--line2);border-radius:8px;
+      background:var(--panel);color:var(--text);font-size:14px;font-family:inherit}
+    select:focus,textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+    select:disabled,textarea:disabled{opacity:.5;cursor:not-allowed}
+    textarea{resize:vertical;min-height:110px;line-height:1.6}
+
+    /* Channel selector */
+    .channel-row{display:flex;gap:12px;flex-wrap:wrap}
+    .channel-opt{display:flex;align-items:center;gap:8px;padding:10px 16px;
+      border:2px solid var(--line2);border-radius:10px;cursor:pointer;
+      transition:border-color .15s,background .15s;flex:1;min-width:140px}
+    .channel-opt:has(input:checked){border-color:var(--blue);background:rgba(37,99,235,.07)}
+    .channel-opt input{accent-color:var(--blue)}
+    .channel-label{font-size:13px;font-weight:600}
+    .channel-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;
+      border-radius:9px;border:1px solid transparent;font-size:14px;
+      font-weight:600;cursor:pointer;transition:background .15s}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .btn-primary:hover:not(:disabled){background:#1d4ed8}
+
+    /* Result box */
+    .result-box{border-radius:10px;padding:14px 18px;font-size:13px;display:none;margin-top:4px}
+    .result-box.ok {background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.4);color:var(--green)}
+    .result-box.err{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.4);color:var(--red)}
+    .result-box.warn{background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.4);color:var(--amber)}
+    .result-box ul{margin:6px 0 0 0;padding-right:18px;font-size:12px}
+
+    /* Instance info badge */
+    .instance-info{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+      padding:10px 14px;font-size:12px;color:var(--muted);display:none}
+    .instance-info b{color:var(--text)}
+
+    .hint{font-size:11px;color:var(--muted);margin-top:2px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="title-area">
+      <div class="title">📨 שליחת הודעה / תזכורת</div>
+      <div class="sub">שלח הודעה לכל המדריכים המשובצים למופע — מייל או ווטסאפ</div>
+    </div>
+    <button class="theme-btn" id="themeToggle" type="button">🌙</button>
+  </div>
+
+  <div class="form-card">
+
+    <!-- Course / Activity selector -->
+    <div class="field">
+      <label for="activitySelect">קורס / פעילות <span class="req">*</span></label>
+      <select id="activitySelect" onchange="onActivityChange()">
+        <option value="">— בחר קורס —</option>
+      </select>
+    </div>
+
+    <!-- Instance selector -->
+    <div class="field">
+      <label for="instanceSelect">מופע <span class="req">*</span></label>
+      <select id="instanceSelect" disabled onchange="onInstanceChange()">
+        <option value="">— קודם בחר קורס —</option>
+      </select>
+      <div class="instance-info" id="instanceInfo"></div>
+    </div>
+
+    <!-- Subject (optional) -->
+    <div class="field">
+      <label for="msgSubject">נושא המייל (אופציונלי)</label>
+      <input id="msgSubject" type="text" placeholder="השאר ריק לנושא ברירת מחדל…" />
+      <div class="hint">ברירת מחדל: "הודעה ממרכז קורס: [שם פעילות] | [תאריך]"</div>
+    </div>
+
+    <!-- Message body -->
+    <div class="field">
+      <label for="msgBody">תוכן ההודעה <span class="req">*</span></label>
+      <textarea id="msgBody" placeholder="כתוב את ההודעה כאן…"></textarea>
+    </div>
+
+    <!-- Channel -->
+    <div class="field">
+      <label>ערוץ שליחה</label>
+      <div class="channel-row">
+        <label class="channel-opt">
+          <input type="radio" name="channel" value="email" checked />
+          <div>
+            <div class="channel-label">📧 מייל</div>
+            <div class="channel-sub">שולח מייל לכל המדריכים</div>
+          </div>
+        </label>
+        <label class="channel-opt">
+          <input type="radio" name="channel" value="whatsapp" />
+          <div>
+            <div class="channel-label">💬 ווטסאפ</div>
+            <div class="channel-sub">דורש הגדרת GreenAPI</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Send button -->
+    <div>
+      <button class="btn btn-primary" id="sendBtn" type="button" onclick="sendMessage()">
+        📤 שלח הודעה
+      </button>
+    </div>
+
+    <!-- Result -->
+    <div class="result-box" id="resultBox"></div>
+
+  </div>
+</div>
+
+<script src="js/leadReminders.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ניהול קורסים</title>
+  <link rel="stylesheet" href="./css/adminCoursesManagement.css?v=2" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+  <div class="page-purpose">
+    <div class="purpose-inner">
+      <div><b>ייעוד הדף:</b> ממשק ADMIN לניהול קורסים — הוספה, עריכה, הפעלה/השבתה ומחיקה.</div>
+      <div class="purpose-role">תפקיד המשתמש המחובר שביצע לוגין דרך OTP: <b id="otpRoleInline">…</b></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header class="topbar">
+      <div class="title-card">
+        <div class="title">simCenter Schedualer · adminCoursesManagement</div>
+        <div class="subtitle">ממשק אדמין לניהול קורסים</div>
+        <div class="subsubtitle">הטבלה מבוססת על dbo.Courses עם שיוך ל־ActivityTypes ועם בדיקת שימושים לפני מחיקה</div>
+      </div>
+
+      <div class="user-card" id="userCard">
+        <div class="user-card-header">
+          <div class="user-title">משתמש מחובר</div>
+          <button id="collapseUserCard" class="collapse-btn" type="button" title="צמצם">▲</button>
+        </div>
+        <div class="user-line">משתמש: <b id="meName">טוען…</b></div>
+        <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+        <div class="status-row">
+          <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+          <span class="status-pill">Admin <span id="dotAdmin" class="dot is-warn"></span></span>
+          <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+        </div>
+        <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">סה״כ קורסים</div>
+        <div id="statTotal" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">קורסים פעילים</div>
+        <div id="statActive" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">קורסים לא פעילים</div>
+        <div id="statInactive" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">עם פעילויות משויכות</div>
+        <div id="statWithActivities" class="stat-value">0</div>
+      </div>
+    </section>
+
+    <section class="card toolbar-card">
+      <div class="field field-wide">
+        <label for="searchInput">חיפוש</label>
+        <input id="searchInput" type="text" placeholder="חיפוש לפי שם קורס / קוד / סוג פעילות" />
+      </div>
+
+      <div class="field">
+        <label for="activityTypeFilter">סוג פעילות</label>
+        <select id="activityTypeFilter">
+          <option value="">הכל</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="statusFilter">סטטוס</label>
+        <select id="statusFilter">
+          <option value="">הכל</option>
+          <option value="active">פעיל</option>
+          <option value="inactive">לא פעיל</option>
+        </select>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="refreshBtn" class="btn btn-light" type="button">רענון</button>
+        <button id="addCourseBtn" class="btn btn-primary" type="button">+ הוסף קורס</button>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">רשימת קורסים</div>
+          <div class="card-sub">הוספה, עריכה ומחיקה מתוך ממשק אדמין אחד</div>
+        </div>
+        <div id="resultsInfo" class="table-note">0 תוצאות</div>
+      </div>
+
+      <div id="pageMsg" class="msg"></div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>שם קורס</th>
+              <th>קוד קורס</th>
+              <th>סוג פעילות</th>
+              <th>מרכז קורס (LEAD)</th>
+              <th>סטטוס</th>
+              <th>פעילויות</th>
+              <th>מדריכים</th>
+              <th>פעולות</th>
+            </tr>
+          </thead>
+          <tbody id="coursesTbody">
+            <tr><td colspan="8" class="empty-row">טוען נתונים…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div id="courseModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <div id="modalTitle" class="modal-title">הוספת קורס</div>
+          <div id="modalSubtitle" class="modal-subtitle">יצירת רשומת קורס חדשה</div>
+        </div>
+        <button id="closeModalBtn" class="icon-btn" type="button" aria-label="סגירה">✕</button>
+      </div>
+
+      <div class="modal-body form-grid">
+        <div class="field field-span-2">
+          <label for="courseNameInput">שם קורס</label>
+          <input id="courseNameInput" type="text" maxlength="200" placeholder="לדוגמה: Emergency POCUS" />
+        </div>
+
+        <div class="field">
+          <label for="courseCodeInput">קוד קורס</label>
+          <input id="courseCodeInput" type="text" maxlength="50" placeholder="לדוגמה: POCUS-ER-26" />
+        </div>
+
+        <div class="field">
+          <label for="courseTypeSelect">סוג פעילות</label>
+          <select id="courseTypeSelect">
+            <option value="">בחר סוג פעילות…</option>
+          </select>
+        </div>
+
+        <div class="field field-span-2">
+          <label for="leadSearch">מרכז קורס — LEAD <span style="color:var(--accent,#e94560)">*</span></label>
+          <input id="leadSearch" type="text" placeholder="חיפוש מדריך לפי שם או אימייל…" autocomplete="off" style="margin-bottom:4px" />
+          <select id="courseLeadSelect" size="5" style="height:auto;min-height:90px">
+            <option value="">— בחר מרכז קורס —</option>
+          </select>
+        </div>
+
+        <div class="field field-span-2">
+          <label class="switch-row">
+            <input id="courseIsActiveInput" type="checkbox" checked />
+            <span>קורס פעיל</span>
+          </label>
+        </div>
+
+        <div id="usageBox" class="usage-box hidden"></div>
+        <div id="modalMsg" class="msg"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="saveCourseBtn" class="btn btn-primary" type="button">שמירה</button>
+        <button id="deleteCourseBtn" class="btn btn-danger hidden" type="button">מחיקה</button>
+        <button id="forceDeleteCourseBtn" class="btn btn-danger hidden" type="button" title="מחיקה מוחלטת כולל כל הפעילויות, המופעים והשיבוצים">⚠ Force Delete (SysAdmin)</button>
+        <button id="cancelModalBtn" class="btn btn-light" type="button">ביטול</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/adminCoursesManagement.js?v=3"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

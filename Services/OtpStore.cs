@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Data.SqlClient;
 
@@ -42,7 +42,7 @@ WHERE Email=@Email;", c);
         var maxAttempts = 6;
         var expUtc = DateTime.UtcNow.AddMinutes(ttlMinutes);
 
-        var subject = "קוד כניסה למערכת PocusSchedualer";
+        var subject = "קוד כניסה למערכת simCenterSchedualer";
         var body =
             $"<div style='font-family:Segoe UI,Arial'>שלום {fullName},<br/>קוד הכניסה שלך: <b style='font-size:22px'>{code}</b><br/>בתוקף ל-{ttlMinutes} דקות.</div>";
 

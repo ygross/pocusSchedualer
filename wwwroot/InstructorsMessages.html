@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>הודעות מדריכים</title>
+  <link rel="stylesheet" href="css/InstructorsMessages.css?v=2" />
+  <script>(function(){var t=localStorage.getItem('theme');document.addEventListener('DOMContentLoaded',function(){if(t!=='light')document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+  <div class="page">
+    <p class="purpose">ייעוד הדף: להציג למדריך מחובר את היסטוריית המיילים שנשלחו אליו לפי חודשים אחורה, ללא מיילי OTP.</p>
+
+    <div class="bar">
+      <div>
+        <h1 class="title">📨 InstructorsMessages</h1>
+        <div id="meLine" class="sub">טוען משתמש…</div>
+      </div>
+
+      <div class="controls">
+        <button id="prevBtn" type="button">⬅ חודש קודם</button>
+
+        <select id="monthSelect"></select>
+
+        <select id="monthsBack">
+          <option value="3">3 חודשים</option>
+          <option value="6" selected>6 חודשים</option>
+          <option value="12">12 חודשים</option>
+          <option value="18">18 חודשים</option>
+          <option value="24">24 חודשים</option>
+        </select>
+
+        <input id="searchBox" type="search" placeholder="חיפוש בהודעות… (נושא/תוכן/סטטוס/תאריך)" autocomplete="off" />
+
+        <button id="refreshBtn" type="button">רענן</button>
+
+        <button id="nextBtn" type="button">חודש הבא ➡</button>
+      </div>
+    </div>
+
+    <div id="errBox" class="err"></div>
+
+    <div class="card" id="content">
+      <div class="muted">טוען…</div>
+    </div>
+  </div>
+
+  <!-- Preview Modal -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <div>
+          <h2 id="mTitle" class="modalTitle">תצוגה מקדימה</h2>
+          <div id="mMeta" class="modalMeta"></div>
+          <div class="pillRow" id="mPills"></div>
+        </div>
+        <button id="closeModalBtn" class="modalClose" type="button">✖ סגור</button>
+      </div>
+
+      <div class="modalBody">
+        <iframe id="mIframe" class="modalIframe" sandbox=""></iframe>
+        <pre id="mText"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/InstructorsMessages.js"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

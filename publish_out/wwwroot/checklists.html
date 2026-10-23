@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ניהול צ׳קליסטים</title>
+  <link rel="stylesheet" href="./css/checklists.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+
+<!-- ── Purpose banner ─────────────────────────────────────────────────── -->
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div><b>ייעוד הדף:</b> יצירת צ׳קליסטים של מטלות, שיוכן לקורסים ומעקב ביצוע.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">simCenter · ניהול צ׳קליסטים</div>
+      <div class="subtitle">יצירת רשימות מטלות, שיוך לקורסים ומעקב ביצוע</div>
+    </div>
+    <div class="user-card" id="userCard">
+      <div class="user-card-header">
+        <div class="user-title">משתמש מחובר</div>
+        <button id="collapseUserCard" class="collapse-btn" type="button">▲</button>
+      </div>
+      <div class="user-line">משתמש: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">Admin   <span id="dotAdmin"   class="dot is-warn"></span></span>
+        <span class="status-pill">API     <span id="dotApi"     class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
+    </div>
+  </header>
+
+  <!-- ── Notification ────────────────────────────────────────────────────── -->
+  <div id="pageMsg" class="msg"></div>
+
+  <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="openCreateModal()">＋ צ׳קליסט חדש</button>
+    <button class="btn btn-ghost" onclick="loadChecklists()">↻ רענן</button>
+  </div>
+
+  <!-- ── Checklist cards grid ────────────────────────────────────────────── -->
+  <div id="clGrid" class="cl-grid">
+    <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">טוען…</div></div>
+  </div>
+
+  <!-- ── Detail panel (shown below selected card) ────────────────────────── -->
+  <div id="detailPanel" class="detail-panel" style="display:none"></div>
+
+</div><!-- /wrap -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Modal: Create / Edit checklist                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="clModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="clModalTitle">צ׳קליסט חדש</div>
+      <button class="modal-close" onclick="closeClModal()">✕</button>
+    </div>
+    <div id="clModalMsg" class="msg"></div>
+
+    <div class="field">
+      <label>כותרת *</label>
+      <input id="clTitle" type="text" placeholder="לדוגמה: רשימת הכנה לפני שיעור" />
+    </div>
+    <div class="field">
+      <label>תיאור (אופציונלי)</label>
+      <textarea id="clDesc" rows="3" placeholder="תיאור הצ׳קליסט…"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeClModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="saveChecklist()">שמור</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Modal: Assign checklist to course                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal-card" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">שייך לקורס</div>
+      <button class="modal-close" onclick="closeAssignModal()">✕</button>
+    </div>
+    <div id="assignMsg" class="msg"></div>
+    <div class="field">
+      <label>בחר קורס</label>
+      <select id="assignCourseSelect"></select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeAssignModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="doAssign()">שייך</button>
+    </div>
+  </div>
+</div>
+
+<script src="./js/checklists.js?v=1"></script>
+</body>
+</html>

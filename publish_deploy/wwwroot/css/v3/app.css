@@ -1,0 +1,256 @@
+/* ============================================================
+   simCenter Schedualer - APP CSS (Base)
+   Layer 1/3: Global tokens + base + shared components
+
+   Expected HTML attributes:
+     <html data-theme="dark" data-role="lead|instructor|admin" data-page="...">
+
+   Load order:
+     1) css/v3/app.css
+     2) css/v3/<role>.css
+     3) css/pages/<page>.css   (optional)
+   ============================================================ */
+
+/* -------- Base tokens (fallback) -------- */
+:root{
+  --bg:#0b1220;
+  --text:#e8eefc;
+  --muted:#a9b6d3;
+
+  --border: rgba(255,255,255,.10);
+  --border2: rgba(255,255,255,.14);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+
+  /* Brand (fallback = Lead orange) */
+  --brand:#ff7a18;
+  --brandGlow: rgba(255,122,24,.18);
+  --brand2: rgba(255,122,24,.18);
+  --brandBorder: rgba(255,122,24,.25);
+  --focus: rgba(255,122,24,.25);
+
+  --panelA: rgba(255,255,255,.06);
+  --panelB: rgba(255,255,255,.03);
+  --panelDeep: rgba(9,14,26,.55);
+  --chip: rgba(19,36,71,.55);
+
+  --ok:#26d07c;
+  --warn:#ffcc00;
+  --bad:#ff4d4d;
+
+  --radius:16px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, var(--brandGlow), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(42,141,255,.18), transparent 55%),
+    var(--bg);
+}
+
+a{ color:inherit; text-decoration:none; }
+
+/* -------- Layout helpers -------- */
+.wrap{
+  max-width:1280px;
+  margin:18px auto 48px;
+  padding:0 14px;
+}
+
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+.row.end{ justify-content:flex-end; }
+.row.spread{ justify-content:space-between; }
+
+.field{ flex:1; min-width:220px; }
+.field.wide{ flex:2; min-width:320px; }
+
+.hidden{ display:none !important; }
+
+/* -------- Purpose line ("ייעוד הדף") -------- */
+.purpose{
+  background: linear-gradient(90deg, var(--brand2), rgba(255,255,255,.04));
+  border: 1px solid var(--brandBorder);
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #ffe9d6;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+}
+.purpose b{ color:#fff; }
+
+/* -------- Cards -------- */
+.card{
+  background: linear-gradient(180deg, var(--panelA), var(--panelB));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card.pad{ padding:14px; }
+
+.tophead{
+  margin-top:14px;
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+  flex-wrap:wrap;
+}
+
+.headerCard{
+  flex: 1 1 640px;
+  padding:14px;
+  min-width:320px;
+}
+
+.userCard{
+  flex: 0 1 340px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-width:260px;
+}
+
+.hTitle{
+  font-weight:1000;
+  font-size:18px;
+  margin:0;
+}
+
+.hSub{
+  margin-top:6px;
+  font-size:12px;
+  color:rgba(255,255,255,.75);
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+hr.sep{
+  border:none;
+  border-top:1px solid rgba(255,255,255,.08);
+  margin:12px 0;
+}
+
+h2{ margin:0 0 10px 0; font-size:16px; font-weight:1000; }
+h3{ margin:0; font-size:14px; font-weight:1000; color:rgba(255,255,255,.92); }
+
+label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
+
+/* -------- Inputs -------- */
+input, select, textarea{
+  width:100%;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: var(--panelDeep);
+  color: var(--text);
+  outline:none;
+}
+
+input::placeholder, textarea::placeholder{ color:#8fa1c7; }
+
+select:focus, input:focus, textarea:focus{
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 4px var(--focus);
+}
+
+select option{ background:#0f1b31; color:#e8eefc; }
+
+/* -------- Buttons -------- */
+.actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+
+.btn{
+  border:1px solid var(--brandBorder);
+  background: linear-gradient(180deg, var(--brand2), rgba(255,255,255,.04));
+  color:#fff;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:900;
+  transition: transform .05s ease, filter .15s ease;
+  user-select:none;
+}
+
+.btn:hover{ filter: brightness(1.05); }
+.btn:active{ transform: translateY(1px); }
+.btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+.btn.secondary{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  font-weight:800;
+}
+
+.btn.danger{
+  border-color: rgba(255,77,77,.35);
+  background: linear-gradient(180deg, rgba(255,77,77,.22), rgba(255,77,77,.10));
+}
+
+/* -------- Pills / chips -------- */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  background: var(--chip);
+  border:1px solid rgba(255,255,255,.10);
+  font-size:12px;
+  color: var(--muted);
+  white-space:nowrap;
+}
+
+.pill.ok{ border-color: rgba(38,208,124,.35); color:#dff8ec; }
+.pill.warn{ border-color: rgba(255,204,0,.35); color:#fff3bf; }
+.pill.bad{ border-color: rgba(255,77,77,.35); color:#ffe0e0; }
+
+/* -------- Tables -------- */
+.tableWrap{
+  width:100%;
+  overflow:auto;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  background: rgba(9,14,26,.35);
+}
+
+table.tbl{
+  width:100%;
+  border-collapse: collapse;
+}
+
+.tbl thead th{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(9,14,26,.65);
+  backdrop-filter: blur(8px);
+  text-align:right;
+  font-weight:1000;
+  font-size:13px;
+  color:rgba(255,255,255,.92);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding:10px 12px;
+}
+
+.tbl tbody td{
+  padding:10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  font-size:14px;
+  color:rgba(255,255,255,.90);
+}
+
+.tbl tbody tr:hover{ background: rgba(255,255,255,.03); }
+
+/* -------- Small responsiveness -------- */
+@media (max-width: 980px){
+  .wrap{ margin:14px auto 36px; }
+  .headerCard{ min-width: 100%; }
+  .userCard{ min-width: 100%; }
+}

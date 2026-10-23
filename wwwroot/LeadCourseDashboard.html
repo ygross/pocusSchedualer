@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenterSchedualer · דשבורד קורס</title>
+  <link rel="stylesheet" href="css/LeadCourseDashboard.css?v=1" />
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> CourseManager – דשבורד סטטוס קורס: מופעים, שיבוצים, הודעות ופירוט לפי חודש.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">דשבורד קורס</div>
+      <div class="subtitle">CourseManager / Admin</div>
+      <div class="subsubtitle">סטטוס מופעים, שיבוצים ופירוט חודשי</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
+    </div>
+  </div>
+
+  <!-- בחירת קורס וחודש -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">🔍 סינון</div></div>
+    <div class="grid two-col">
+      <div class="field">
+        <label>קורס</label>
+        <select id="selCourse"><option value="">טוען קורסים…</option></select>
+      </div>
+      <div class="field">
+        <label>חודש</label>
+        <input id="selMonth" type="month" />
+      </div>
+    </div>
+    <div id="msgErr" class="msg err" style="display:none"></div>
+  </div>
+
+  <!-- KPI -->
+  <div class="grid four-col">
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ מופעים</div>
+      <div class="kpi-val" id="kpiTotal">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">מאוישים מלא</div>
+      <div class="kpi-val ok" id="kpiFull">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">חלקי</div>
+      <div class="kpi-val warn" id="kpiPartial">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ללא מדריך</div>
+      <div class="kpi-val err" id="kpiNone">—</div>
+    </div>
+  </div>
+
+  <!-- טבלת מופעים -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">📋 פירוט מופעים</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>נדרש</th><th>שובצו</th><th>חסר</th><th>סטטוס</th></tr></thead>
+        <tbody id="tblInstances"><tr><td colspan="6" class="empty-cell">בחר קורס וחודש</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/LeadCourseDashboard.js?v=1"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

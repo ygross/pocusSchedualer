@@ -1,0 +1,166 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>הגש זמינות – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+
+  <div class="content">
+    <div class="topbar">
+      <div>הגש זמינות</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">דף זה מאפשר למדריך להגיש זמינות למופעים שבהם חסר מדריכים. ההגשה אינה שיבוץ אוטומטי: מרכז הפעילות יבחר מבין המגישים לפי טבלת צדק.</p>
+      <hr>
+      <h2>הגש זמינות לפעילויות</h2>
+<p class="p">הטבלה מציגה רק פעילויות עתידיות שבהן עדיין חסר מדריכים. ניתן לסנן לפי כל טקסט, ולהוסיף מופעים ל"סל זמינות". בסוף מגישים זמינות לאישור מרכז פעילות.</p>
+
+<div class="row">
+  <div class="field">
+    <label>פילטר חופשי</label>
+    <input id="q" placeholder="חפש לפי פעילות/תאריך/שעה..." oninput="filterTable('tblA','#q')">
+  </div>
+  <div class="field" style="max-width:220px">
+    <label>&nbsp;</label>
+    <button class="btn light" onclick="clearCart()">נקה סל</button>
+  </div>
+</div>
+
+<table id="tblA">
+  <thead>
+    <tr>
+      <th>תאריך</th><th>שעה</th><th>פעילות</th><th>נדרש</th><th>זמינות הוגשה</th><th>חסר</th><th>פעולה</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<hr>
+
+<h2>סל זמינות</h2>
+<table id="tblCart">
+  <thead><tr><th>תאריך</th><th>שעה</th><th>פעילות</th><th>הסר</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+  <button class="btn" onclick="submitAvailability()">הגש זמינות לאישור מרכז פעילות</button>
+</div>
+
+<script>
+const DATA = [
+  {date:"2026-01-05", time:"08:00-12:00", name:"ATLS", required:5, availability:8, missing:3},
+  {date:"2026-01-10", time:"12:00-16:00", name:"קורס ארצי", required:6, availability:3, missing:5},
+  {date:"2026-01-13", time:"08:00-12:00", name:"ראש צוואר", required:3, availability:1, missing:3}
+];
+
+const CART_KEY = "PS_AVAIL_CART";
+
+function load(){
+  const tb = document.querySelector("#tblA tbody");
+  tb.innerHTML = "";
+  DATA.forEach((x,i)=>{
+    tb.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${x.date}</td>
+        <td>${x.time}</td>
+        <td>${x.name}</td>
+        <td><span class="badge">${x.required}</span></td>
+        <td><span class="badge">${x.availability}</span></td>
+        <td><span class="badge red">${x.missing}</span></td>
+        <td><button class="btn" onclick="addToCart(${i})">הוסף לסל</button></td>
+      </tr>
+    `);
+  });
+  renderCart();
+}
+
+function getCart(){
+  const raw = localStorage.getItem(CART_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function setCart(v){ localStorage.setItem(CART_KEY, JSON.stringify(v)); }
+
+function addToCart(i){
+  const cart = getCart();
+  const item = DATA[i];
+  const key = item.date+"|"+item.time+"|"+item.name;
+  if(cart.some(c=>c.key===key)) return;
+  cart.push({ key, ...item });
+  setCart(cart);
+  renderCart();
+}
+
+function removeFromCart(key){
+  const cart = getCart().filter(x=>x.key!==key);
+  setCart(cart);
+  renderCart();
+}
+
+function clearCart(){ setCart([]); renderCart(); }
+
+function renderCart(){
+  const tb = document.querySelector("#tblCart tbody");
+  const cart = getCart();
+  tb.innerHTML = cart.length ? "" : "<tr><td colspan='4' class='hint'>הסל ריק</td></tr>";
+  cart.forEach(c=>{
+    tb.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${c.date}</td><td>${c.time}</td><td>${c.name}</td>
+        <td><button class="btn light" onclick="removeFromCart('${c.key}')">הסר</button></td>
+      </tr>
+    `);
+  });
+}
+
+function submitAvailability(){
+  const u = getUser();
+  const cart = getCart();
+  if(!cart.length){ alert("הסל ריק"); return; }
+
+  const lines = cart.map(c=>`- ${c.date} ${c.time} | ${c.name}`).join("\\n");
+
+  const mail =
+`To: simcenterbgu@gmail.com
+Subject: הגשת זמינות לשיבוץ (לאישור)
+
+שלום,
+${u.fullName} (${u.email}) מגיש/ה זמינות למופעים הבאים:
+
+${lines}
+
+נא לבחור משובצים לפי טבלת צדק.
+תודה,
+PocusSchedualer`;
+
+  document.getElementById("modalMail").textContent = mail;
+  openModal("#modal1");
+}
+load();
+</script>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

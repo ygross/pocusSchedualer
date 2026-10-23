@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -11,7 +11,10 @@
       display: flex; align-items: center; justify-content: center; }
     .card { background: #fff; width: 380px; padding: 30px; border-radius: 16px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; }
-    h1 { margin: 0 0 8px; font-size: 22px; color: #0b2c5f; }
+    .brand { font-size: 28px; font-weight: 800; color: #0b2c5f;
+      letter-spacing: -0.5px; margin-bottom: 4px; }
+    .brand span { color: #0f5fb4; }
+    h1 { margin: 0 0 8px; font-size: 18px; color: #334155; font-weight: 600; }
     .subtitle { font-size: 14px; color: #64748b; margin-bottom: 22px; }
     label { display:block; text-align:right; font-size:13px; margin-bottom:6px; color:#334155; }
     input { width:100%; padding:11px; font-size:15px; margin-bottom:16px; border-radius:8px;
@@ -25,10 +28,12 @@
 
   <!-- JS חיצוני בלבד -->
   <script src="js/login-otp.js" defer></script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
 </head>
 
 <body>
   <div class="card">
+    <div class="brand">sim<span>Schedualer</span></div>
     <h1>התחברות למערכת</h1>
     <div class="subtitle">הזדהות באמצעות קוד חד־פעמי (OTP)</div>
 

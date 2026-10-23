@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ניהול הסמכות לפי קורס</title>
+  <link rel="stylesheet" href="./css/adminInstructorCourse.css" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+<div class="wrap">
+
+  <div class="purpose">ייעוד הדף: בחר קורס ונהל אילו מדריכים מוסמכים לו – הוסף או הסר הסמכה בקלות.</div>
+
+  <h1>ניהול הסמכות לפי קורס</h1>
+  <div class="subtitle">simCenterSchedualer · בחר קורס, סמן / בטל סימון מדריכים, ושמור</div>
+
+  <!-- Course selector -->
+  <div class="card">
+    <div class="course-row">
+      <label for="courseSelect">קורס:</label>
+      <select id="courseSelect" class="course-select">
+        <option value="">— בחר קורס —</option>
+      </select>
+      <span id="courseInfo" style="font-size:13px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div id="msgBox" class="msg"></div>
+
+  <!-- Instructor list (hidden until course selected) -->
+  <div id="listCard" class="card" style="display:none">
+    <div class="toolbar">
+      <input id="searchBox" type="text" placeholder="חיפוש לפי שם / אימייל / מחלקה…" />
+      <button id="btnSelectAll" class="btn btn-light" type="button">בחר הכל</button>
+      <button id="btnClearAll"  class="btn btn-light" type="button">נקה הכל</button>
+      <span id="counter" class="counter">0 מדריכים מסומנים</span>
+      <button id="btnSave" class="btn btn-primary" type="button">💾 שמור שינויים</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input id="chkAll" type="checkbox" title="בחר/בטל הכל" /></th>
+            <th>שם מדריך</th>
+            <th>אימייל</th>
+            <th>מחלקה</th>
+            <th>תפקיד</th>
+            <th>סטטוס</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" class="empty-row">בחר קורס להצגת מדריכים</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<script src="./js/adminInstructorCourse.js?v=1"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

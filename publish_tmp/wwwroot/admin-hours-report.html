@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SimPocus Schedualer · דוח שעות מנהלה</title>
+  <link rel="stylesheet" href="css/admin-hours-report.css?v=2" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> Admin בלבד – דוח שעות הדרכה לכלל המדריכים לפי מופעים מאושרים.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">דוח שעות מנהלה</div>
+      <div class="subtitle">API: <span class="mono" id="apiBase">בודק…</span></div>
+      <div class="subsubtitle">Admin – שעות הדרכה לפי מדריכים ומופעים מאושרים</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+        <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
+    </div>
+  </div>
+
+  <!-- פילטרים -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🔍 סינון</div>
+    </div>
+    <div class="grid two-col">
+      <div class="field">
+        <label>חיפוש חופשי (מדריך / פעילות)</label>
+        <input id="searchBox" placeholder="הקלד לחיפוש…" />
+      </div>
+      <div class="field">
+        <label>טווח זמן</label>
+        <select id="filterRange">
+          <option value="all">הכל</option>
+          <option value="week">שבוע נוכחי</option>
+          <option value="month">חודש נוכחי</option>
+          <option value="nextMonth">חודש הבא</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="grid three-col">
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ שעות</div>
+      <div class="kpi-val" id="totalHours">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ מופעים</div>
+      <div class="kpi-val" id="totalSessions">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">סה״כ מדריכים</div>
+      <div class="kpi-val" id="totalInstructors">0</div>
+    </div>
+  </div>
+
+  <!-- סיכום לפי מדריך -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">👤 סיכום לפי מדריך</div>
+    </div>
+    <div id="errBox" class="msg err" style="display:none"></div>
+    <div class="table-wrap">
+      <table id="summaryTable">
+        <thead>
+          <tr><th>מדריך</th><th>מחלקה</th><th>מופעים</th><th>שעות</th></tr>
+        </thead>
+        <tbody id="summaryBody">
+          <tr><td colspan="4" class="empty-cell">טוען…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- פירוט מופעים -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 פירוט מופעים</div>
+    </div>
+    <div class="table-wrap">
+      <table id="detailsTable">
+        <thead>
+          <tr><th>תאריך</th><th>קורס</th><th>פעילות</th><th>מדריך</th><th>שעות</th><th>סטטוס</th></tr>
+        </thead>
+        <tbody id="detailsBody">
+          <tr><td colspan="6" class="empty-cell">טוען…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/admin-hours-report.js?v=2"></script>
+</body>
+</html>

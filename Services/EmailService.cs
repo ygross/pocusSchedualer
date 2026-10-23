@@ -97,7 +97,47 @@ public sealed class EmailService
         }
     }
 
-    private async Task SendSmtpAsync(string toEmail, string subject, string bodyHtml)
+    /// <summary>
+    /// Sends an email from a background service (no HttpContext required).
+    /// Enqueues → sends SMTP → marks Outbox → writes EmailSendLog.
+    /// </summary>
+    public async Task<bool> SendBackgroundAsync(
+        string toEmail, string subject, string bodyHtml,
+        string? relatedEntity = null, string? relatedId = null)
+    {
+        long emailId = 0;
+        try
+        {
+            emailId = await QueueAsync(toEmail, subject, bodyHtml, relatedEntity, relatedId);
+            await SendSmtpAsync(toEmail, subject, bodyHtml);
+            await _db.MarkEmailOutboxSentAsync(emailId);
+            await _db.InsertEmailSendLogAsync(
+                emailId: emailId, toEmail: toEmail, subject: subject,
+                relatedEntity: relatedEntity, relatedId: relatedId,
+                attemptNo: 1, provider: "SMTP", status: "Sent", failReason: null,
+                actorInstructorId: null, correlationId: null,
+                ip: "background", userAgent: "ReminderBackgroundService");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.Message.Length > 380 ? ex.Message[..380] : ex.Message;
+            if (emailId > 0)
+            {
+                await _db.MarkEmailOutboxFailedAsync(emailId, msg);
+                await _db.InsertEmailSendLogAsync(
+                    emailId: emailId, toEmail: toEmail, subject: subject,
+                    relatedEntity: relatedEntity, relatedId: relatedId,
+                    attemptNo: 1, provider: "SMTP", status: "Failed", failReason: msg,
+                    actorInstructorId: null, correlationId: null,
+                    ip: "background", userAgent: "ReminderBackgroundService");
+            }
+            _logger.LogError(ex, "Background SMTP failed. To={ToEmail}", toEmail);
+            return false;
+        }
+    }
+
+    internal async Task SendSmtpAsync(string toEmail, string subject, string bodyHtml)
     {
         var host = _cfg["Smtp:Host"];
         var user = _cfg["Smtp:User"];

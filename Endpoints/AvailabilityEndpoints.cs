@@ -1,57 +1,57 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using PocusSchedualer.Services;
 
+namespace PocusSchedualer.Endpoints;
+
 /// <summary>
-/// Availability endpoints for instructors:
-/// - Offer availability for an instance
-/// - Cancel availability for an instance
-/// Hard-locked if instructor is assigned to the instance.
+/// Availability endpoints for instructors (offer/cancel availability for ME).
+/// Includes deadline enforcement when Availability.EnforceDeadline = true.
+/// Routes are relative to /api.
 /// </summary>
 public static class AvailabilityEndpoints
 {
-    /// <summary>
-    /// Maps availability endpoints under /api/api.
-    /// Authorization:
-    /// - Requires authenticated user with one of: Instructor, CourseManager, Admin.
-    /// - Requires instructorId claim (MyInstructorId) to operate "as me".
-    /// </summary>
-    public static void MapAvailabilityEndpoints(this WebApplication app)
+    public static void MapAvailabilityEndpoints(this IEndpointRouteBuilder api)
     {
         // POST: offer availability (for ME)
-        app.MapPost("/api/api/activity-instances/{instanceId:int}/availability", async (
+        api.MapPost("/activity-instances/{instanceId:int}/availability", async (
             HttpContext ctx,
             int instanceId,
-            Db db) =>
+            Db db,
+            SettingsService settings) =>
         {
-            var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+            var (isAuth, _, myId) = AuthHelpers.GetAuthInfo(ctx);
             if (!isAuth) return Results.Unauthorized();
             if (myId == null) return Results.Unauthorized();
 
-            // role check (multi-role) - strict as requested
-            // NOTE: we allow Admin / CourseManager / Instructor to submit availability.
-            // If you want ONLY Instructor, remove CourseManager/Admin here.
             if (!ctx.User.IsInRole(Roles.Instructor) &&
                 !ctx.User.IsInRole(Roles.CourseManager) &&
                 !ctx.User.IsInRole(Roles.Admin))
                 return Results.Forbid();
 
-            // hard lock if assigned
             if (await db.IsInstructorAssignedToInstanceAsync(instanceId, myId.Value))
                 return Results.Conflict(new { ok = false, error = "Assigned instance is locked." });
 
+            // Deadline check
+            if (await settings.GetBoolAsync("Availability.EnforceDeadline", false))
+            {
+                var deadlineDays = await settings.GetIntAsync("Availability.DefaultDeadlineDays", 3);
+                var deadline = await db.GetInstanceDeadlineAsync(instanceId, deadlineDays);
+                if (deadline.HasValue && DateTime.UtcNow > deadline.Value)
+                    return Results.Conflict(new { ok = false, error = $"הדדליין לשליחת זמינות עבר ({deadline.Value:dd/MM/yyyy HH:mm} UTC)." });
+            }
+
             await db.UpsertInstructorAvailabilityAsync(instanceId, myId.Value);
             return Results.Ok(new { ok = true });
-        })
-        .RequireAuthorization(p => p.RequireRole(Roles.Instructor, Roles.CourseManager, Roles.Admin));
+        });
 
         // DELETE: cancel availability (for ME)
-        app.MapDelete("/api/api/activity-instances/{instanceId:int}/availability", async (
+        api.MapDelete("/activity-instances/{instanceId:int}/availability", async (
             HttpContext ctx,
             int instanceId,
-            Db db) =>
+            Db db,
+            SettingsService settings) =>
         {
-            var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
+            var (isAuth, _, myId) = AuthHelpers.GetAuthInfo(ctx);
             if (!isAuth) return Results.Unauthorized();
             if (myId == null) return Results.Unauthorized();
 
@@ -60,13 +60,11 @@ public static class AvailabilityEndpoints
                 !ctx.User.IsInRole(Roles.Admin))
                 return Results.Forbid();
 
-            // hard lock if assigned
             if (await db.IsInstructorAssignedToInstanceAsync(instanceId, myId.Value))
                 return Results.Conflict(new { ok = false, error = "Assigned instance is locked." });
 
             await db.DeleteInstructorAvailabilityAsync(instanceId, myId.Value);
             return Results.Ok(new { ok = true });
-        })
-        .RequireAuthorization(p => p.RequireRole(Roles.Instructor, Roles.CourseManager, Roles.Admin));
+        });
     }
 }

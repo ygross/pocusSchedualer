@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SimPocus Schedualer · עומס מדריכים</title>
+  <link rel="stylesheet" href="css/LeadInstructorLoad.css?v=1" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> CourseManager – טבלת עומס וצדק לפי מדריך: שיבוצים, שעות ודירוג צדק.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">עומס מדריכים</div>
+      <div class="subtitle">CourseManager / Admin</div>
+      <div class="subsubtitle">שיבוצים, שעות ודירוג צדק לפי מדריך</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">🔍 סינון</div></div>
+    <div class="grid two-col">
+      <div class="field">
+        <label>קורס</label>
+        <select id="selCourse"><option value="">טוען…</option></select>
+      </div>
+      <div class="field">
+        <label>חודש</label>
+        <input id="selMonth" type="month" />
+      </div>
+    </div>
+    <div id="msgErr" class="msg err" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">⚖️ עומס וצדק לפי מדריך</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>מדריך</th><th>שיבוצים (חודש)</th><th>שיבוצים (כולל)</th><th>שעות</th><th>ציון צדק</th></tr></thead>
+        <tbody id="tblBody"><tr><td colspan="5" class="empty-cell">בחר קורס וחודש</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/LeadInstructorLoad.js?v=1"></script>
+</body>
+</html>

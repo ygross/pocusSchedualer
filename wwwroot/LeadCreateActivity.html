@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>פתיחת פעילות חדשה</title>
+  <link rel="stylesheet" href="css/LeadCreateActivity.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+<div class="wrap">
+
+  <div class="purpose">פתיחת פעילות חדשה — מרכז הקורס יוצר פעילות + מופעים. ה-Lead שלך מוגדר אוטומטית.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">📋 פתיחת פעילות חדשה</div>
+      <div class="subtitle">מרכז קורס · יצירת פעילות + מופעים</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">מחובר</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <section class="card">
+    <div class="card-title">פרטי הפעילות</div>
+
+    <div class="form-grid">
+      <div class="field field-wide">
+        <label for="fName">שם הפעילות *</label>
+        <input id="fName" type="text" maxlength="200" placeholder="לדוגמה: Emergency POCUS Day 1" />
+      </div>
+
+      <div class="field">
+        <label for="fType">סוג פעילות *</label>
+        <select id="fType"><option value="">בחר…</option></select>
+      </div>
+
+      <div class="field">
+        <label for="fCourse">קורס *</label>
+        <select id="fCourse" disabled><option value="">בחר סוג פעילות קודם</option></select>
+      </div>
+
+      <div class="field">
+        <label for="fDeadline">תאריך אחרון להגשת זמינות</label>
+        <input id="fDeadline" type="datetime-local" />
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-title">מופעים (Instances) *</div>
+      <button id="addInstanceBtn" class="btn btn-secondary" type="button">+ הוסף מופע</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="inst-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>תאריך התחלה</th>
+            <th>תאריך סיום</th>
+            <th>מדריכים נדרשים</th>
+            <th>חדרים</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="instancesBody"></tbody>
+      </table>
+    </div>
+    <div id="instMsg" class="msg" style="display:none"></div>
+  </section>
+
+  <div class="submit-row">
+    <button id="submitBtn" class="btn btn-primary" type="button">שמור פעילות</button>
+    <span id="submitStatus" class="submit-status"></span>
+  </div>
+
+</div>
+<script src="js/LeadCreateActivity.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Maintenance</title>
+  <link rel="stylesheet" href="css/SysAdminshared.css?v=4" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+  <style>
+    .action-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .action-body{flex:1}
+    .action-title{font-weight:600;margin-bottom:4px}
+    .action-desc{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .action-result{font-size:12px;font-family:Consolas,monospace;margin-top:8px;padding:6px 10px;background:var(--panel);border-radius:6px;display:none}
+    .action-result.ok{color:var(--green);display:block}
+    .action-result.err{color:var(--red);display:block}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">Maintenance — system info, one-click admin actions, OTP cleanup, seed reset.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">🔧 Maintenance</div>
+      <div class="subtitle">System info · Admin actions</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="section-title">System Info</div>
+  <div class="info-card">
+    <div class="info-grid" id="sysInfoGrid">
+      <div class="info-key">Loading…</div><div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Maintenance Actions</div>
+
+  <div class="action-card">
+    <div class="action-body">
+      <div class="action-title">🔑 Ensure SysAdmin Seed</div>
+      <div class="action-desc">Re-applies ygross@bgu.ac.il → Role=SystemAdmin, Status=active. Safe to run multiple times.</div>
+      <button class="btn btn-primary btn-sm" type="button" onclick="doAction('ensure-seed', this)">Run</button>
+      <div class="action-result" id="res-ensure-seed"></div>
+    </div>
+  </div>
+
+  <div class="action-card">
+    <div class="action-body">
+      <div class="action-title">🗑 Clear Old OTP Codes</div>
+      <div class="action-desc">Deletes expired or used OTP codes older than the specified number of days.</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <label style="font-size:12px;color:var(--muted)">Older than</label>
+        <input id="otpDays" type="number" value="7" min="1" max="365" style="width:70px" />
+        <label style="font-size:12px;color:var(--muted)">days</label>
+        <button class="btn btn-sm" type="button" onclick="doClearOtps()">Run</button>
+      </div>
+      <div class="action-result" id="res-clear-otps"></div>
+    </div>
+  </div>
+
+  <div class="action-card" style="border-color:#c0392b22">
+    <div class="action-body">
+      <div class="action-title" style="color:var(--red,#e74c3c)">🔥 Purge Logs</div>
+      <div class="action-desc">Deletes old records from EmailSendLog, EmailOutbox (Sent/Failed/Cancelled) and AuditLog older than the specified number of days. <b>Irreversible.</b></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <label style="font-size:12px;color:var(--muted)">Older than</label>
+        <input id="purgeDays" type="number" value="90" min="1" max="3650" style="width:80px" />
+        <label style="font-size:12px;color:var(--muted)">days</label>
+        <button class="btn btn-sm" style="background:var(--red,#e74c3c);color:#fff" type="button" onclick="doPurgeLogs()">Purge</button>
+      </div>
+      <div class="action-result" id="res-purge-logs"></div>
+    </div>
+  </div>
+</div>
+<script src="js/sysAdminMaintenance.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

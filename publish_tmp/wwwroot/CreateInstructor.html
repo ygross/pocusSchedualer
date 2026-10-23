@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>יצירת מדריך חדש</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ✅ התאמה לשם קובץ אמיתי שקיים ב-ZIP -->
+  <link rel="stylesheet" href="css/CreateInstructor.css" />
+</head>
+
+<body>
+  <!-- ייעוד הדף -->
+  <div class="page-purpose">ייעוד הדף: יצירת מדריך חדש למערכת</div>
+
+  <div class="wrap">
+    <h1>יצירת מדריך חדש</h1>
+
+    <p class="desc">
+      האימייל לא נמצא במערכת. מלא את הפרטים כדי ליצור מדריך,
+      ולאחר אישור מנהל תוכל להתחבר למערכת.
+    </p>
+
+    <label for="email">אימייל</label>
+    <input id="email" type="email" autocomplete="email" />
+
+    <div class="row">
+      <div>
+        <label for="firstName">שם פרטי</label>
+        <input id="firstName" autocomplete="given-name" />
+      </div>
+      <div>
+        <label for="lastName">שם משפחה</label>
+        <input id="lastName" autocomplete="family-name" />
+      </div>
+    </div>
+
+    <button class="btn" id="btnCreate">צור מדריך</button>
+
+    <div id="msg" class="msg" style="display:none"></div>
+  </div>
+
+  <!-- ✅ התאמה לשם קובץ אמיתי שקיים ב-ZIP -->
+  <script src="js/CreateInstructor.js"></script>
+</body>
+</html>

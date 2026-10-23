@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>פעילויות – PocusSchedualer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <iframe src="menu.html" style="border:0;width:100%;height:100vh"></iframe>
+  </div>
+  <div class="content">
+    <div class="topbar">
+      <div>פעילויות</div>
+      <div id="topUser"></div>
+    </div>
+
+    <div class="card">
+      <h1>מה הדף עושה</h1>
+      <p class="p">קלנדר מרכזי לכל הפעילויות במערכת. המדריך רואה את כלל הפעילויות ויכול להגיש זמינות למופעים שבהם חסר מדריכים. מרכז פעילות רואה את אותו קלנדר ובקרוב יוכל לשלוח תזכורות/לסגור חלון זמינות.</p>
+      <hr>
+      <h2>קלנדר פעילויות (דמו)</h2>
+<p class="p">מציג את כלל הפעילויות לפי חודש. בתוך כל פעילות מוצגים: שעות, נדרש, שובצו, זמינות, וחסר. לחיצה על "חסר" פותחת מודל להגשת זמינות.</p>
+
+<div class="row">
+  <button class="btn light" onclick="alert('דמו: חודש קודם')">חודש קודם</button>
+  <button class="btn light" onclick="alert('דמו: חודש הבא')">חודש הבא</button>
+</div>
+
+<table id="tblCal">
+  <thead>
+    <tr>
+      <th>תאריך</th><th>שעה</th><th>שם פעילות</th><th>נדרש</th><th>שובצו</th><th>זמינות</th><th>חסר</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2026-01-05</td><td>08:00-12:00</td><td>ATLS</td>
+      <td><span class="badge">5</span></td>
+      <td><span class="badge green">2</span></td>
+      <td><span class="badge">8</span></td>
+      <td><button class="btn danger" onclick="showAvail('ATLS','2026-01-05','08:00-12:00',3)">חסר 3</button></td>
+    </tr>
+    <tr>
+      <td>2026-01-08</td><td>08:00-12:00</td><td>ALS</td>
+      <td><span class="badge">4</span></td>
+      <td><span class="badge green">4</span></td>
+      <td><span class="badge">2</span></td>
+      <td><span class="badge green">מלא</span></td>
+    </tr>
+    <tr>
+      <td>2026-01-10</td><td>12:00-16:00</td><td>קורס ארצי</td>
+      <td><span class="badge">6</span></td>
+      <td><span class="badge green">1</span></td>
+      <td><span class="badge">3</span></td>
+      <td><button class="btn danger" onclick="showAvail('קורס ארצי','2026-01-10','12:00-16:00',5)">חסר 5</button></td>
+    </tr>
+    <tr>
+      <td>2026-01-13</td><td>08:00-12:00</td><td>ראש צוואר</td>
+      <td><span class="badge">3</span></td>
+      <td><span class="badge green">0</span></td>
+      <td><span class="badge">1</span></td>
+      <td><button class="btn danger" onclick="showAvail('ראש צוואר','2026-01-13','08:00-12:00',3)">חסר 3</button></td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+function showAvail(name,date,time,missing){
+  // דוגמת מודל "הגש זמינות"
+  const u = getUser();
+  const mail =
+`To: מרכז פעילות <simcenterbgu@gmail.com>
+Subject: זמינות לפעילות – ${name}
+
+שלום,
+${u.fullName} (${u.email}) מגיש/ה זמינות לפעילות:
+
+פעילות: ${name}
+תאריך: ${date}
+שעות: ${time}
+נדרש/חסר כרגע: ${missing}
+
+תודה,
+PocusSchedualer`;
+  document.getElementById("modalMail").textContent = mail;
+  openModal("#modal1");
+}
+</script>
+    </div>
+  </div>
+</div>
+
+<div class="modalBack" id="modal1" onclick="closeModal('#modal1')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>דוגמת מייל</h3>
+    <pre id="modalMail">...</pre>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="closeModal('#modal1')">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/demo-auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>requireUser();</script>
+</body>
+</html>

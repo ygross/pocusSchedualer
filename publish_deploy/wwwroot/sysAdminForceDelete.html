@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Force Delete Course</title>
+  <link rel="stylesheet" href="css/SysAdminShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+  <style>
+    .search-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+    .search-bar input{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--input,var(--panel));color:var(--text);font-size:14px}
+    .courses-table{width:100%;border-collapse:collapse;font-size:13px}
+    .courses-table th{background:var(--panel);padding:8px 12px;text-align:left;font-weight:600;border-bottom:2px solid var(--line);white-space:nowrap}
+    .courses-table td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .courses-table tr:hover td{background:var(--row-hover,rgba(255,255,255,.04))}
+    .badge-active{color:var(--green);font-weight:600}
+    .badge-inactive{color:var(--muted);font-weight:600}
+    .warn-box{background:#c0392b18;border:1px solid #c0392b55;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--red,#e74c3c)}
+    .warn-box b{display:block;margin-bottom:4px;font-size:14px}
+    .table-wrap{overflow-x:auto}
+    .empty-row td{text-align:center;color:var(--muted);padding:24px}
+    .count-badge{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:2px 8px;font-size:11px;color:var(--muted)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">Force Delete Course — permanently removes a course and ALL related data (activities, instances, assignments, availability requests, instructor links). SysAdmin only.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">⚠ Force Delete Course</div>
+      <div class="subtitle">מחיקה מוחלטת של קורס כולל כל הנתונים הקשורים אליו</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="warn-box">
+    <b>⚠ פעולה בלתי הפיכה</b>
+    מחיקה מוחלטת תמחק את הקורס וכל הנתונים הקשורים אליו: פעילויות, מופעים, שיבוצים, בקשות זמינות ושיוכי מדריכים. לא ניתן לשחזר.
+  </div>
+
+  <div class="section-title">בחר קורס למחיקה</div>
+
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="חיפוש לפי שם קורס או קוד…" oninput="filterCourses()" />
+    <button class="btn btn-secondary btn-sm" onclick="loadCourses()">רענון</button>
+    <span id="countLabel" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="courses-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>שם קורס</th>
+          <th>קוד</th>
+          <th>סוג פעילות</th>
+          <th>סטטוס</th>
+          <th>פעילויות</th>
+          <th>מדריכים</th>
+          <th>פעולה</th>
+        </tr>
+      </thead>
+      <tbody id="coursesTbody">
+        <tr class="empty-row"><td colspan="8">טוען…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="js/sysAdminForceDelete.js?v=4"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SimPocus Schedualer · השיבוצים שלי</title>
+<link rel="stylesheet" href="css/my-assignments.css?v=1" />
+</head>
+<body>
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> דף אישי למדריך – כל המופעים אליהם שובץ, פילטרים וסיכום שעות.</div>
+    <div class="purpose-role">תפקיד המשתמש: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">השיבוצים שלי</div>
+      <div class="subtitle">API: <span class="mono" id="apiBase">בודק…</span></div>
+      <div class="subsubtitle">פירוט מופעים + סיכום שעות</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">משתמש: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+        <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 השיבוצים שלי</div>
+      <div class="card-sub">כל המופעים אליהם שובצת</div>
+    </div>
+
+    <div class="grid two-col">
+      <div class="field">
+        <label>חיפוש חופשי</label>
+        <input id="qSearch" placeholder="שם פעילות, תאריך..." />
+      </div>
+      <div class="field">
+        <label>פילטר חודשים</label>
+        <div class="btn-group">
+          <button class="btn" id="btnAll" type="button">הכל</button>
+          <button class="btn" id="btnThis" type="button">חודש נוכחי</button>
+          <button class="btn" id="btnNext" type="button">חודש הבא</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="msgErr" class="msg err" style="display:none"></div>
+    <div id="msgOk" class="msg ok" style="display:none"></div>
+
+    <div class="table-wrap">
+      <table id="tblAssignments">
+        <thead>
+          <tr>
+            <th>תאריך</th>
+            <th>שעה</th>
+            <th>פעילות</th>
+            <th>מופע</th>
+            <th>שעות</th>
+            <th>סטטוס</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody">
+          <tr><td colspan="6" class="empty-cell">טוען…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="save-row">
+      <span class="pill" id="hoursSummary">סה״כ: 0 שעות</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/my-assignments.js?v=1"></script>
+</body>
+</html>

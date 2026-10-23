@@ -1,74 +1,24 @@
-﻿<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <title>SimPocus Scheduler</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link rel="stylesheet" href="css/app.css?v=3" />
-  <script src="js/app.js?v=3" defer></script>
-</head>
-
-<body>
-  <div class="purpose">
-    ייעוד הדף: APP מרכזי שמנהל Header+Menu ותוכן מרכזי ב-iframe לפי הרשאות (role) שמגיעות מ-/api/me.
-  </div>
-
-  <div class="app">
-    <!-- HEADER -->
-    <header class="header">
-      <div class="headerLeft">
-        <div class="brand">SimPocus Scheduler</div>
-        <div class="pageLine">דף פעיל: <span id="pageText">help.html</span></div>
-
-        <div id="authBanner" class="authBanner">
-          <span id="authMsg"></span>
-          <button id="goLoginBtn" class="btn light" type="button">מעבר להתחברות</button>
-        </div>
-      </div>
-
-      <div class="headerCenter">
-        <div class="statusBlock">
-          <span class="statusLabel">Session</span>
-          <span id="sessionDot" class="dot"></span>
-          <span id="sessionText" class="statusText">בודק…</span>
-        </div>
-
-        <div class="statusBlock">
-          <span class="statusLabel">DB</span>
-          <span id="dbDot" class="dot"></span>
-          <span id="dbText" class="statusText">לא נבדק</span>
-        </div>
-      </div>
-
-      <div class="headerRight">
-        <div class="userName" id="userName">—</div>
-        <div class="userRole" id="userRole">—</div>
-
-        <div class="headerBtns">
-          <button id="themeToggle" class="btn light" type="button" title="מצב כהה / בהיר">🌙</button>
-          <button id="logoutBtn" class="btn danger" type="button">התנתקות</button>
-        </div>
-      </div>
-    </header>
-
-    <!-- MAIN -->
-    <div class="main">
-      <!-- CONTENT -->
-      <main class="content">
-        <iframe id="contentFrame" title="Content"></iframe>
-      </main>
-
-      <!-- MENU (ימין) -->
-      <aside class="menu">
-        <div class="menuTop">
-          <div class="menuTitle">תפריט</div>
-          <div id="menuRoleLine" class="menuSub">תפקיד: —</div>
-        </div>
-
-        <div id="menuContainer" class="menuContainer"></div>
-      </aside>
-    </div>
-  </div>
-</body>
-</html>
+<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8" /><title>simCenterSchedualer</title><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="css/app.css?v=51" /><script src="js/app.js?v=51" defer></script>
+<script>
+// Help button — opens guide.html at the tab matching the user's role
+document.getElementById('helpBtn').addEventListener('click', function(){
+  var role = (document.getElementById('userRole') || {}).textContent || '';
+  var hash = 'intro';
+  if      (role.includes('SystemAdmin'))   hash = 'sysadmin';
+  else if (role.includes('Admin'))         hash = 'admin';
+  else if (role.includes('CourseManager')) hash = 'lead';
+  else if (role.includes('Instructor'))    hash = 'instructor';
+  var frame = document.getElementById('contentFrame');
+  if (frame) frame.src = 'guide.html#' + hash;
+});
+</script>
+<script>
+(function(){
+  var d = new Date(document.lastModified);
+  if(isNaN(d.getTime())) return;
+  var pad = function(n){return n<10?'0'+n:n;};
+  var heb = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  var str = pad(d.getDate())+' '+heb[d.getMonth()]+' '+d.getFullYear()+' | '+pad(d.getHours())+':'+pad(d.getMinutes());
+  document.getElementById('vDate').textContent = str;
+})();
+</script></head><body><div class="purpose">ייעוד הדף: APP מרכזי שמנהל Header+Menu ותוכן מרכזי ב-iframe לפי הרשאות (role / roles) שמגיעות מ-/api/me.</div><div class="app"><header class="header"><div class="headerLeft"><button id="burgerBtn" class="burgerBtn" type="button" aria-label="תפריט">☰</button><div class="brand">simCenterSchedualer</div><div class="versionLine"><span class="vBadge">v3.2</span><span class="vDate" id="vDate"></span></div><div class="pageLine">דף פעיל: <span id="pageText">help.html</span></div><div id="authBanner" class="authBanner"><span id="authMsg"></span><button id="goLoginBtn" class="btn light" type="button">מעבר להתחברות</button></div><div id="impersonateBanner" class="impersonateBanner" style="display:none">מתחזה בתור: <b id="impersonateName"></b><button id="stopImpersonateBtn" class="btn light" type="button">↩ חזור לAdmin</button></div></div><div class="headerCenter"><div class="statusBlock"><span class="statusLabel">Session</span><span id="sessionDot" class="dot"></span><span id="sessionText" class="statusText">בודק…</span></div><div class="statusBlock"><span class="statusLabel">DB</span><span id="dbDot" class="dot"></span><span id="dbText" class="statusText">לא נבדק</span></div></div><div class="headerRight"><div class="userName" id="userName">—</div><div class="userRole" id="userRole">—</div><div class="headerBtns"><button id="helpBtn" class="btn light" type="button" title="מדריך למשתמש" style="font-size:15px;font-weight:700;padding:4px 11px;">?</button><button id="themeToggle" class="btn light" type="button" title="מצב כהה / בהיר">🌙</button><button id="logoutBtn" class="btn danger" type="button">התנתקות</button></div></div></header><div class="main"><main class="content"><iframe id="contentFrame" title="Content"></iframe></main><div id="menuOverlay" class="menuOverlay"></div><aside class="menu"><div class="menuTop"><div class="menuTitle">תפריט</div><div id="menuRoleLine" class="menuSub">תפקידים: —</div></div><div id="impersonatePanel" class="impersonatePanel" style="display:none"><div class="impersonatePanelTitle">👁 התחזה למשתמש</div><select id="impersonateSelect"></select><button id="startImpersonateBtn" class="btn light" type="button">התחזה</button></div><div id="menuContainer" class="menuContainer"></div></aside></div></div></body></html>

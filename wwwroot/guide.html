@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מדריך למשתמש – simCenterSchedualer</title>
+<link rel="stylesheet" href="css/app.css?v=50">
+<link rel="stylesheet" href="css/shared.css?v=4">
+<style>
+:root{
+  --acc:#0b2c5f;--acc2:#1d4ed8;--tab-h:44px;
+  --bg:   var(--c-bg);
+  --text: var(--c-text);
+  --card: var(--c-surface);
+  --line: var(--c-border);
+  --muted:var(--c-muted);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;overflow-y:auto;}
+body{background:var(--c-bg,#f4f6f8);color:var(--c-text,#1a202c);font-family:"Segoe UI",Arial,sans-serif;margin:0;padding:0;}
+
+/* ── tabs bar ── */
+.tab-bar{display:flex;gap:6px;padding:8px 16px 0;background:#132d4e;border-bottom:2px solid rgba(255,255,255,.12);flex-wrap:wrap;position:sticky;top:0;z-index:10;}
+.tab-btn{border:0;background:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:700;color:#8fafd6;border-radius:6px 6px 0 0;border-bottom:3px solid transparent;transition:all .15s;}
+.tab-btn:hover{color:#e8f0fb;background:rgba(45,127,249,.12);}
+.tab-btn.active{color:#3d8bff;border-bottom-color:#3d8bff;background:rgba(45,127,249,.15);}
+.tab-btn .badge{display:inline-block;background:rgba(45,127,249,.18);color:#7ab8ff;border-radius:999px;font-size:10px;padding:1px 6px;margin-right:4px;}
+
+/* ── page wrapper ── */
+.guide-page{display:none;padding:14px 16px 30px;}
+
+/* ══════════════════════════════
+   FLOWCHART
+══════════════════════════════ */
+.flow-wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 16px 16px;margin-bottom:20px;}
+.flow-title{font-size:13px;font-weight:800;color:var(--acc);margin-bottom:16px;text-align:center;letter-spacing:.2px;}
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;}
+.flow-row{display:flex;align-items:flex-start;justify-content:center;gap:0;width:100%;}
+
+/* node */
+.fn{
+  background:var(--card);
+  border:2px solid var(--acc2);
+  border-radius:10px;
+  padding:8px 14px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--acc2);
+  text-align:center;
+  min-width:140px;
+  max-width:180px;
+  line-height:1.4;
+  position:relative;
+}
+.fn.start{background:var(--acc2);color:#fff;border-color:var(--acc2);}
+.fn.end  {background:#dcfce7;border-color:#16a34a;color:#14532d;}
+.fn.side {background:#fef9c3;border-color:#d97706;color:#92400e;min-width:110px;font-size:11px;}
+.fn.act  {background:#eff6ff;border-color:var(--acc2);color:var(--acc2);}
+.fn.sys  {background:#f3e8ff;border-color:#7c3aed;color:#5b21b6;}
+
+/* arrows */
+.fa{display:flex;flex-direction:column;align-items:center;color:var(--acc2);font-size:11px;font-weight:700;gap:0;line-height:1;}
+.fa::before{content:'';width:2px;height:18px;background:var(--acc2);display:block;}
+.fa::after {content:'▼';font-size:10px;margin-top:-2px;}
+.fa.right::before{width:30px;height:2px;}
+.fa.right::after{content:'▶';margin-top:-8px;margin-right:-2px;}
+
+/* branch row */
+.branch{display:flex;align-items:flex-start;gap:20px;justify-content:center;}
+.branch-col{display:flex;flex-direction:column;align-items:center;gap:0;}
+.branch-label{font-size:10px;font-weight:700;color:var(--muted);margin:2px 0 4px;text-align:center;}
+
+/* horizontal line for branch */
+.branch-line{display:flex;align-items:center;justify-content:center;gap:0;width:100%;}
+.branch-line::before,.branch-line::after{content:'';flex:1;height:2px;background:var(--acc2);}
+.branch-dot{width:8px;height:8px;border-radius:50%;background:var(--acc2);flex:0 0 8px;}
+.guide-page.active{display:block;}
+
+/* ── role header ── */
+.role-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding:18px 20px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(135deg,var(--card),var(--bg));}
+.role-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 52px;}
+.role-icon.inst{background:linear-gradient(135deg,#dbeafe,#eff6ff);}
+.role-icon.lead{background:linear-gradient(135deg,#dcfce7,#f0fdf4);}
+.role-icon.admin{background:linear-gradient(135deg,#fef9c3,#fefce8);}
+.role-icon.sys{background:linear-gradient(135deg,#fce7f3,#fdf4ff);}
+.role-title{font-size:22px;font-weight:900;color:var(--acc);}
+.role-sub{font-size:13px;color:var(--muted);margin-top:4px;}
+
+/* ── section ── */
+.section{margin-bottom:10px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;user-select:none;transition:background .12s;}
+.section-head:hover{background:rgba(29,78,216,.04);}
+.section-head .sh-left{display:flex;align-items:center;gap:10px;}
+.section-emoji{font-size:18px;width:30px;text-align:center;}
+.section-title{font-size:15px;font-weight:900;}
+.section-badge{font-size:11px;padding:2px 9px;border-radius:999px;font-weight:700;}
+.badge-page{background:#dbeafe;color:#1e40af;}
+.badge-action{background:#dcfce7;color:#166534;}
+.badge-report{background:#fef9c3;color:#713f12;}
+.badge-admin{background:#fce7f3;color:#9d174d;}
+.chev{font-size:14px;transition:transform .2s;color:var(--muted);}
+.section-head.open .chev{transform:rotate(90deg);}
+.section-body{display:none;padding:0 16px 16px;border-top:1px solid var(--line);}
+.section-body.open{display:block;}
+
+/* ── content inside sections ── */
+.step-list{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;}
+.step-item{display:flex;gap:10px;align-items:flex-start;}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--acc2);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:0 0 24px;margin-top:1px;}
+.step-text{font-size:13px;line-height:1.55;}
+
+.info-box{background:rgba(29,78,216,.06);border:1px solid rgba(29,78,216,.18);border-radius:10px;padding:10px 14px;margin-top:12px;font-size:13px;line-height:1.5;}
+.info-box.warn{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3);}
+.info-box.ok{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.25);}
+.info-box strong{color:var(--acc2);}
+.info-box.warn strong{color:#92400e;}
+.info-box.ok strong{color:#14532d;}
+
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
+.feature-card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.feature-card .fc-title{font-size:13px;font-weight:900;margin-bottom:4px;}
+.feature-card .fc-desc{font-size:12px;color:var(--muted);line-height:1.45;}
+
+.guide-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+.guide-table th{background:var(--bg);padding:8px 10px;font-weight:900;border:1px solid var(--line);text-align:right;}
+.guide-table td{padding:8px 10px;border:1px solid var(--line);vertical-align:top;line-height:1.5;}
+.guide-table tr:hover td{background:rgba(29,78,216,.03);}
+
+p.desc{font-size:13px;color:var(--muted);line-height:1.6;margin:10px 0 0;}
+
+/* ── dark mode ── */
+:root[data-theme="dark"] .tab-btn.active{background:rgba(59,130,246,.12);}
+:root[data-theme="dark"] .role-header{background:linear-gradient(135deg,var(--card),#0a0f1e);}
+:root[data-theme="dark"] .role-icon.inst{background:linear-gradient(135deg,#1e3a5f,#172f4d);}
+:root[data-theme="dark"] .role-icon.lead{background:linear-gradient(135deg,#14532d,#052e16);}
+:root[data-theme="dark"] .role-icon.admin{background:linear-gradient(135deg,#431407,#1c1008);}
+:root[data-theme="dark"] .role-icon.sys{background:linear-gradient(135deg,#581c87,#1e0533);}
+:root[data-theme="dark"] .info-box{background:rgba(59,130,246,.09);}
+:root[data-theme="dark"] .feature-card{background:#0a0f1e;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ TAB BAR ════════════════ -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="intro">🏠 סקירה כללית</button>
+  <button class="tab-btn" data-tab="instructor"><span class="badge">מדריך</span>Instructor</button>
+  <button class="tab-btn" data-tab="lead"><span class="badge">מרכז קורס</span>CourseManager</button>
+  <button class="tab-btn" data-tab="admin"><span class="badge">מנהל</span>Admin</button>
+  <button class="tab-btn" data-tab="sysadmin"><span class="badge">אדמין</span>SystemAdmin</button>
+  <button class="tab-btn" data-tab="principles">⚖️ עקרונות</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: INTRO
+════════════════════════════════════════ -->
+<div class="guide-page active" id="tab-intro">
+
+  <div class="role-header" style="margin-top:8px;">
+    <div class="role-icon inst" style="font-size:30px;">🏥</div>
+    <div>
+      <div class="role-title">simCenterSchedualer — מדריך למשתמש</div>
+      <div class="role-sub">מערכת לניהול פעילויות סימולציה והגשת זמינות מדריכים | v3.2 ספטמבר 2026</div>
+    </div>
+  </div>
+
+  <!-- כניסה -->
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left">
+        <span class="section-emoji">🔑</span>
+        <span class="section-title">כניסה למערכת</span>
+        <span class="section-badge badge-action">OTP</span>
+      </div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <ol class="step-list">
+        <li class="step-item"><span class="step-num">1</span><span class="step-text">פתח את הדפדפן ועבור לכתובת המערכת.</span></li>
+        <li class="step-item"><span class="step-num">2</span><span class="step-text">הזן כתובת מייל ארגונית (<code>@bgu.ac.il</code>) ולחץ <b>שלח קוד</b>.</span></li>
+        <li class="step-item"><span class="step-num">3</span><span class="step-text">קבל קוד OTP במייל — תקף <b>10 דקות</b>, עד <b>6 ניסיונות</b>.</span></li>
+        <li class="step-item"><span class="step-num">4</span><span class="step-text">הזן את הקוד ולחץ <b>אישור</b>.</span></li>
+        <li class="step-item"><span class="step-num">5</span><span class="step-text">המערכת מפנה אוטומטית לדף הברירת מחדל לפי תפקידך.</span></li>
+      </ol>
+      <div class="info-box warn">
+        <strong>⚠️ סיום שימוש:</strong> לחץ <b>התנתק</b> מהתפריט — סגירת הדפדפן בלבד אינה מנתקת את הסשן.
+      </div>
+    </div>
+  </div>
+
+  <!-- סקירת תפקידים -->
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left">
+        <span class="section-emoji">👥</span>
+        <span class="section-title">סקירת תפקידים</span>
+      </div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <table class="guide-table">
+        <thead>
+          <tr><th>תפקיד</th><th>תיאור</th><th>דף ברירת מחדל</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Instructor</b> — מדריך</td><td>מגיש זמינות, רואה שיבוצים אישיים</td><td>המשימות שלי</td></tr>
+          <tr><td><b>CourseManager</b> — מרכז קורס</td><td>מנהל פעילויות, משבץ מדריכים בקורסים שלו</td><td>עריכת פעילות</td></tr>
+          <tr><td><b>Admin</b> — מנהל</td><td>גישה מלאה לכל הפעילויות וכל הקורסים</td><td>עדכון / מחיקה פעילויות</td></tr>
+          <tr><td><b>SystemAdmin</b> — אדמין מערכת</td><td>ניהול משתמשים, הגדרות, ניטור מערכת</td><td>System Dashboard</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box">
+        <strong>💡 זרימת עבודה כללית:</strong><br>
+        פתיחת פעילות (מרכז קורס/מנהל) ← הגשת זמינות (מדריך) ← שיבוץ לפי טבלת צדק (מרכז קורס) ← שליחת הודעות אוטומטית
+      </div>
+    </div>
+  </div>
+
+  <!-- פתרון בעיות -->
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left">
+        <span class="section-emoji">🛠️</span>
+        <span class="section-title">פתרון בעיות נפוצות</span>
+      </div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <table class="guide-table">
+        <thead><tr><th>בעיה</th><th>פתרון</th></tr></thead>
+        <tbody>
+          <tr><td>לא קיבלתי קוד OTP</td><td>בדוק Spam/Junk. המתן 2 דקות ונסה שוב.</td></tr>
+          <tr><td>הקוד לא מתקבל</td><td>הקוד תקף 10 דקות ו-6 ניסיונות. אחרי כן — בקש קוד חדש.</td></tr>
+          <tr><td>אינני רואה פעילות מסוימת</td><td>ייתכן שאין לך הסמכה לקורס. פנה לאדמין.</td></tr>
+          <tr><td>שגיאה בשמירה (500)</td><td>פנה ל-IT עם צילום מסך של הודעת השגיאה.</td></tr>
+          <tr><td>הפעילות שובצה אבל לא קיבלתי מייל</td><td>בדוק Spam. ודא שכתובת המייל שלך נכונה בפרטים האישיים.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: INSTRUCTOR
+════════════════════════════════════════ -->
+<div class="guide-page" id="tab-instructor">
+
+  <div class="role-header">
+    <div class="role-icon inst">👨‍🏫</div>
+    <div>
+      <div class="role-title">מדריך (Instructor)</div>
+      <div class="role-sub">מגיש זמינות לפעילויות — אינו משבץ את עצמו. השיבוץ הסופי על ידי מרכז הקורס.</div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART -->
+  <div class="flow-wrap">
+    <div class="flow-title">🔄 זרימת עבודה — מדריך</div>
+    <div class="flow">
+      <div class="fn start">כניסה + קוד OTP</div>
+      <div class="fa"></div>
+      <div class="fn act">יומן פעילויות<br><small>זיהוי מופעים "חסר"</small></div>
+      <div class="fa"></div>
+      <div class="fn act">הגשת זמינות<br><small>הוסף לסל ← שלח</small></div>
+      <div class="fa"></div>
+      <div class="fn">המתנה לאישור מרכז קורס</div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">✅ אושרת</div>
+          <div class="fn end">מייל אישור שיבוץ</div>
+          <div class="fa"></div>
+          <div class="fn end">המשימות שלי</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">❌ לא נבחרת</div>
+          <div class="fn side">ניסיון<br>בסבב הבא</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📋</span><span class="section-title">המשימות שלי</span><span class="section-badge badge-page">my-assignments.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <p class="desc">רשימת כל הפעילויות שאושרו לשיבוץ שלך, עם סיכום שעות חודשי.</p>
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">🔍 סינון</div><div class="fc-desc">לפי חודש ושם פעילות</div></div>
+        <div class="feature-card"><div class="fc-title">📊 סיכום שעות</div><div class="fc-desc">מחושב אוטומטית לפי חודש</div></div>
+        <div class="feature-card"><div class="fc-title">📧 שלח במייל</div><div class="fc-desc">שלח סיכום שיבוצים לתיבתך</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📅</span><span class="section-title">הגשת זמינות</span><span class="section-badge badge-action">assign-activities.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">הגשת זמינות לפעילויות שחסרות מדריכים.</p>
+      <ol class="step-list">
+        <li class="step-item"><span class="step-num">1</span><span class="step-text">בחר פעילות מהרשימה (מוצגות רק פעילויות שחסרות מדריכים).</span></li>
+        <li class="step-item"><span class="step-num">2</span><span class="step-text">לחץ <b>"הוסף לסל"</b> — הפעילות נוספת לסל הזמינות.</span></li>
+        <li class="step-item"><span class="step-num">3</span><span class="step-text">חזור על הפעולה לפעילויות נוספות שרלוונטיות אליך.</span></li>
+        <li class="step-item"><span class="step-num">4</span><span class="step-text">לחץ <b>"הגש זמינות"</b> — הבקשה נשלחת למרכז הקורס לאישור.</span></li>
+      </ol>
+      <div class="info-box warn"><strong>⚠️ חשוב:</strong> הגשת זמינות ≠ שיבוץ. השיבוץ הסופי נעשה על ידי מרכז הקורס בהתאם לטבלת הצדק.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🗓️</span><span class="section-title">יומן פעילויות</span><span class="section-badge badge-page">InstructorActivitiesCalendar.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">תצוגת לוח שנה של כל הפעילויות הפתוחות במרכז.</p>
+      <table class="guide-table">
+        <thead><tr><th>צבע</th><th>סטטוס</th><th>פעולה אפשרית</th></tr></thead>
+        <tbody>
+          <tr><td>🟢 ירוק</td><td>מלא — כל המדריכים שובצו</td><td>צפייה בלבד</td></tr>
+          <tr><td>🟡 צהוב</td><td>חסר — יש צורך במדריכים</td><td>לחץ ← הגש זמינות</td></tr>
+          <tr><td>🔴 אדום</td><td>מבוטל</td><td>צפייה בלבד</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📝</span><span class="section-title">עדכון פרטים אישיים</span><span class="section-badge badge-page">instructorUpdateDetails.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">👤 פרטים</div><div class="fc-desc">שם מלא, טלפון</div></div>
+        <div class="feature-card"><div class="fc-title">🏅 הסמכות</div><div class="fc-desc">תחומי הסמכה (Competencies)</div></div>
+        <div class="feature-card"><div class="fc-title">🔔 הודעות</div><div class="fc-desc">העדפות קבלת עדכונים</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📊</span><span class="section-title">דוח מסכם</span><span class="section-badge badge-report">instructorsSummary.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">סיכום שעות ופעילויות שלך לפי תקופה: שובצת, נדרשת, ביצעת בפועל.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">💬</span><span class="section-title">הודעות</span><span class="section-badge badge-page">InstructorsMessages.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">הודעות מהמערכת: אישורי שיבוץ, ביטולי פעילות, שינויי שעה/מיקום.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: COURSE MANAGER
+════════════════════════════════════════ -->
+<div class="guide-page" id="tab-lead">
+
+  <div class="role-header">
+    <div class="role-icon lead">🎯</div>
+    <div>
+      <div class="role-title">מרכז קורס (CourseManager)</div>
+      <div class="role-sub">אחראי על קורס מסוים — מנהל פעילויות, בוחר מדריכים ומאשר שיבוצים.</div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART -->
+  <div class="flow-wrap">
+    <div class="flow-title">🔄 זרימת עבודה — מרכז קורס</div>
+    <div class="flow">
+      <div class="fn start">פתיחת פעילות חדשה</div>
+      <div class="fa"></div>
+      <div class="fn act">הגדרת מופעים<br><small>יחיד / חוזר / שבועי</small></div>
+      <div class="fa"></div>
+      <div class="fn sys">פעילות פעילה בלוח השנה</div>
+      <div class="fa"></div>
+      <div class="fn act">מדריכים מגישים זמינות</div>
+      <div class="fa"></div>
+      <div class="fn act">בדיקת "זמינות ממתינה"</div>
+      <div class="fa"></div>
+      <div class="fn act">שיבוץ לפי טבלת צדק</div>
+      <div class="fa"></div>
+      <div class="fn sys">מייל אישור אוטומטי למדריך</div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">📊 מעקב</div>
+          <div class="fn end">דשבורד קורס</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">🔁 שינוי</div>
+          <div class="fn side">עריכה /<br>ביטול מופע</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">🔄 החלפה</div>
+          <div class="fn side">ניהול<br>החלפות</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">➕</span><span class="section-title">פתיחת פעילות חדשה</span><span class="section-badge badge-action">LeadCreateActivity.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <ol class="step-list">
+        <li class="step-item"><span class="step-num">1</span><span class="step-text">מלא שם פעילות, קורס, תאריך ושעה, מיקום, מספר מדריכים נדרש.</span></li>
+        <li class="step-item"><span class="step-num">2</span><span class="step-text"><b>פעילות חוזרת:</b> סמן "חוזרת" ← הגדר כמות מופעים ותדירות (לדוגמה: כל שבועיים × 5).</span></li>
+        <li class="step-item"><span class="step-num">3</span><span class="step-text">בדוק את רשימת המופעים שנוצרה לפני שמירה.</span></li>
+        <li class="step-item"><span class="step-num">4</span><span class="step-text">לחץ <b>שמור</b> — הפעילות פעילה ומופיעה בלוח השנה.</span></li>
+      </ol>
+      <div class="info-box"><strong>💡 טיפ:</strong> ניתן ליצור עד 2 מופעים שונים בשבוע אחד עם תאריכים שונים.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">✏️</span><span class="section-title">עריכת פעילות</span><span class="section-badge badge-action">LeadUpdateActivities.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">🔄 Reschedule</div><div class="fc-desc">שינוי תאריך/שעה</div></div>
+        <div class="feature-card"><div class="fc-title">📍 מיקום</div><div class="fc-desc">שינוי חדר/מיקום</div></div>
+        <div class="feature-card"><div class="fc-title">👥 כמות</div><div class="fc-desc">שינוי מספר מדריכים נדרש</div></div>
+        <div class="feature-card"><div class="fc-title">🚫 ביטול</div><div class="fc-desc">Soft Delete — ניתן לשחזר</div></div>
+      </div>
+      <div class="info-box ok"><strong>📧 הודעה אוטומטית:</strong> בעת שינוי/ביטול המערכת מציגה תצוגה מקדימה של מייל למדריכים המשובצים. לחץ <b>אשר ושלח</b> להמשך.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">✅</span><span class="section-title">שיבוץ פעילות</span><span class="section-badge badge-action">leadassignment.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <ol class="step-list">
+        <li class="step-item"><span class="step-num">1</span><span class="step-text">בחר פעילות/מופע מהרשימה.</span></li>
+        <li class="step-item"><span class="step-num">2</span><span class="step-text">המערכת מציגה את כל מגישי הזמינות עם <b>ניקוד צדק</b> לכל אחד.</span></li>
+        <li class="step-item"><span class="step-num">3</span><span class="step-text">סמן את המדריכים שתרצה לשבץ (מי שובץ פחות — ניקוד גבוה יותר = קדימות).</span></li>
+        <li class="step-item"><span class="step-num">4</span><span class="step-text">לחץ <b>"אשר שיבוץ"</b> — הודעות יוצאות אוטומטית.</span></li>
+      </ol>
+      <div class="info-box warn"><strong>⚖️ טבלת הצדק:</strong> ניתן לעקוף ולבחור ידנית, אך מומלץ לכבד את הניקוד לשמירה על שוויון.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">⏳</span><span class="section-title">זמינות ממתינה</span><span class="section-badge badge-action">LeadPendingAvailability.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">כל הגשות הזמינות שעוד לא אושרו ושיובצו. ניתן לאשר/לדחות ידנית ולסנן לפי פעילות, תאריך, מדריך.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🔁</span><span class="section-title">ניהול החלפות</span><span class="section-badge badge-action">LeadReplacementManagement.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">מדריך שובץ ואינו יכול להגיע — מציאת מחליף.</p>
+      <ol class="step-list">
+        <li class="step-item"><span class="step-num">1</span><span class="step-text">בחר את המדריך שפרש.</span></li>
+        <li class="step-item"><span class="step-num">2</span><span class="step-text">המערכת מציגה מדריכים זמינים לאותו מועד.</span></li>
+        <li class="step-item"><span class="step-num">3</span><span class="step-text">בחר מחליף ← אשר ← הודעות יוצאות לשני הצדדים.</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">⚡</span><span class="section-title">דוח התנגשויות</span><span class="section-badge badge-report">LeadConflictReport.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">מדריכים שמשובצים לשתי פעילויות חופפות זמן. ניתן לפתור ידנית או לסמן "ידוע".</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📆</span><span class="section-title">קלנדר למרכז</span><span class="section-badge badge-page">leadCalendar.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">תצוגה שבועית/חודשית/שנתית של כל הפעילויות בקורסים שבאחריותך — כולל מספר משובצים, שעות וסטטוס.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📊</span><span class="section-title">דשבורד קורס + עומסים</span><span class="section-badge badge-report">דוחות</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">📊 דשבורד קורס</div><div class="fc-desc">מספר פעילויות, אחוז מילוי, ממוצע שעות, מדריכים פעילים</div></div>
+        <div class="feature-card"><div class="fc-title">⚖️ עומס מדריכים</div><div class="fc-desc">שובץ/זמין לפי מדריך — מי עמוס, מי פנוי</div></div>
+        <div class="feature-card"><div class="fc-title">📋 דוחות מרכז קורס</div><div class="fc-desc">סיכום שעות ופעילויות לתקופה</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: ADMIN
+════════════════════════════════════════ -->
+<div class="guide-page" id="tab-admin">
+
+  <div class="role-header">
+    <div class="role-icon admin">🛡️</div>
+    <div>
+      <div class="role-title">מנהל (Admin)</div>
+      <div class="role-sub">גישה מלאה לכל הפעילויות וכל הקורסים — לא רק לאלו שבאחריות ישירה. כולל את כל יכולות מרכז הקורס.</div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART -->
+  <div class="flow-wrap">
+    <div class="flow-title">🔄 זרימת עבודה — מנהל</div>
+    <div class="flow">
+      <div class="fn start">מבט מרכז<br><small>כל הפעילויות בזמן אמת</small></div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">🏫 הקמה</div>
+          <div class="fn act">ניהול קורסים<br>+ הסמכות</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">📝 תפעול</div>
+          <div class="fn act">הוספה / עדכון<br>/ ביטול פעילות</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">✅ שיבוץ</div>
+          <div class="fn act">שיבוץ ידני<br>כל קורס</div>
+        </div>
+      </div>
+      <div class="fa"></div>
+      <div class="fn sys">מייל אוטומטי למדריכים</div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">📊 דוחות</div>
+          <div class="fn end">שעות / ניצול<br>/ גאנט</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">🔍 בקרה</div>
+          <div class="fn end">דשבורד<br>מרכז</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-bottom:16px;">
+    <strong>ℹ️</strong> כל הדפים של <b>מרכז הקורס</b> פתוחים גם למנהל. הדפים הבאים הם <b>ייחודיים לתפקיד Admin</b>:
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📝</span><span class="section-title">עדכון / מחיקה פעילויות</span><span class="section-badge badge-admin">adminUpdateDeleteActivities.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <p class="desc">חיפוש מהיר לפי שם, קורס, תאריך — עדכון או מחיקה (Soft Delete) של <b>כל</b> פעילות במרכז ללא תלות בקורס.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">➕</span><span class="section-title">הוספת פעילות</span><span class="section-badge badge-admin">adminAddActivities.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">פתיחת פעילות חדשה לכל קורס — ניתן לבחור כל קורס ולהגדיר כל מרכז קורס.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📊</span><span class="section-title">גאנט פעילויות</span><span class="section-badge badge-report">gantt.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">תצוגה גרפית של כל הפעילויות על ציר זמן (Gantt). ניתן לסנן לפי קורס, חודש, סטטוס. שימושי לתכנון רבעוני/שנתי.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">💰</span><span class="section-title">דוח שעות מנהלה</span><span class="section-badge badge-report">admin-hours-report.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">סיכום שעות לכל מדריך לתקופה נבחרת — לצרכי שכר, תקצוב, שיפוי. ניתן לייצא לאקסל/PDF.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📈</span><span class="section-title">ניצול מדריכים</span><span class="section-badge badge-report">AdminInstructorUtilizationReport.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">אחוז ניצול כל מדריך (שובץ מתוך זמין), מגמות לאורך זמן. שימושי לזיהוי מדריכים מנוצלים חסר/יתר.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🏫</span><span class="section-title">ניהול קורסים</span><span class="section-badge badge-admin">adminCoursesManagement.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">➕ הוספה</div><div class="fc-desc">שם, קוד, מרכז ברירת מחדל</div></div>
+        <div class="feature-card"><div class="fc-title">✏️ עריכה</div><div class="fc-desc">עדכון פרטי קורס קיים</div></div>
+        <div class="feature-card"><div class="fc-title">🚫 ביטול</div><div class="fc-desc">הסתרת קורס לא פעיל</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🏅</span><span class="section-title">ניהול הסמכות מדריכים</span><span class="section-badge badge-admin">admincourseInstructors.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">הגדרת אילו מדריכים מורשים ללמד בכל קורס. מדריך ללא הסמכה לא יופיע ברשימת הזמינות לאותו קורס.</p>
+      <div class="info-box"><strong>💡 הסמכות לפי קורס (adminInstructorCourse.html):</strong> תצוגה הפוכה — בחר קורס וראה/עדכן את כל המדריכים המורשים לו. נוח לסמסטר חדש.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🗂️</span><span class="section-title">סוגי פעילויות</span><span class="section-badge badge-admin">activityTypes.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">הגדרת סוגי פעילויות (OSCE, POCUS, סדנה, הדרכה...) שמופיעים בטופס פתיחת פעילות. ניתן להוסיף/לערוך/להסתיר.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🏠</span><span class="section-title">מבט מרכז</span><span class="section-badge badge-report">adminCenterOverview.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">לוח בקרה מרכזי: מספר פעילויות, מופעים, שיבוצים, זמינויות פתוחות — בזמן אמת.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: SYSTEM ADMIN
+════════════════════════════════════════ -->
+<div class="guide-page" id="tab-sysadmin">
+
+  <div class="role-header">
+    <div class="role-icon sys">⚙️</div>
+    <div>
+      <div class="role-title">אדמין מערכת (SystemAdmin)</div>
+      <div class="role-sub">תפקיד טכני — IT / מפתח המערכת. ניהול משתמשים, ניטור, הגדרות מערכת.</div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART -->
+  <div class="flow-wrap">
+    <div class="flow-title">🔄 זרימת עבודה — אדמין מערכת</div>
+    <div class="flow">
+      <div class="fn start">System Dashboard<br><small>מצב שרת + פעילות</small></div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">👤 משתמשים</div>
+          <div class="fn act">ניהול משתמשים<br>+ ייבוא מקובץ</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">⚙️ הגדרות</div>
+          <div class="fn act">הגדרות מערכת<br>+ Email From</div>
+        </div>
+      </div>
+      <div class="fa"></div>
+      <div class="fn sys">ניטור שוטף</div>
+      <div class="fa"></div>
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label">🚨 שגיאות</div>
+          <div class="fn side">Errors Log<br>+ טיפול</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">📜 ביקורת</div>
+          <div class="fn side">Audit Log<br>מי עשה מה</div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label">📧 מיילים</div>
+          <div class="fn side">Email Center<br>לוג שליחות</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">👤</span><span class="section-title">ניהול משתמשים</span><span class="section-badge badge-admin">sysAdminUsers.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">➕ הוספה</div><div class="fc-desc">יצירת חשבון משתמש חדש</div></div>
+        <div class="feature-card"><div class="fc-title">🚫 נטרול</div><div class="fc-desc">השבתת חשבון ללא מחיקה</div></div>
+        <div class="feature-card"><div class="fc-title">🔄 תפקיד</div><div class="fc-desc">Instructor / CourseManager / Admin / SystemAdmin</div></div>
+        <div class="feature-card"><div class="fc-title">🔓 איפוס</div><div class="fc-desc">איפוס נעילה אחרי כשלוני כניסה</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📥</span><span class="section-title">ייבוא מדריכים מקובץ</span><span class="section-badge badge-action">adminBulkImport.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">העלאת קובץ Excel/CSV עם רשימת מדריכים — ייבוא מרוכז בלחיצה אחת.</p>
+      <table class="guide-table" style="margin-top:12px;">
+        <thead><tr><th>עמודה</th><th>שדה</th><th>חובה?</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>Email</td><td>✅</td></tr>
+          <tr><td>B</td><td>FirstName</td><td>✅</td></tr>
+          <tr><td>C</td><td>LastName</td><td>✅</td></tr>
+          <tr><td>D</td><td>Phone</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📧</span><span class="section-title">Email Center</span><span class="section-badge badge-page">sysAdminEmailCenter.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">צפייה בכל המיילים שנשלחו (לוג שליחה), ניסוח ושליחת מייל ידני. שימושי לבדיקות ולפתרון תקלות.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📜</span><span class="section-title">Audit Log</span><span class="section-badge badge-report">sysAdminAuditLog.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">רישום מלא של כל הפעולות החשובות: מי עשה מה ומתי — שיבוצים, מחיקות, שינויי הגדרות. חובה לבדיקה אחרי תקריות.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🚨</span><span class="section-title">Errors</span><span class="section-badge badge-report">sysAdminErrors.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">יומן שגיאות שרת — קוד שגיאה, Stack Trace, זמן. ניתן לסמן שגיאות כ"טופלה".</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">⚙️</span><span class="section-title">הגדרות מערכת</span><span class="section-badge badge-admin">adminSettings.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">⚖️ שעות מינימום</div><div class="fc-desc">סף זכאות בטבלת הצדק</div></div>
+        <div class="feature-card"><div class="fc-title">📅 חלון זמן</div><div class="fc-desc">כמה שבועות קדימה מוצגות פעילויות</div></div>
+        <div class="feature-card"><div class="fc-title">🏥 שם מרכז</div><div class="fc-desc">מוצג בכותרות המערכת</div></div>
+        <div class="feature-card"><div class="fc-title">📮 מייל שליחה</div><div class="fc-desc">כתובת From Address</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📋</span><span class="section-title">עדכוני גרסאות</span><span class="section-badge badge-page">changelog.html</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">היסטוריית גרסאות המערכת — כל שינוי, תיקון ושיפור לפי תאריך.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: PRINCIPLES
+════════════════════════════════════════ -->
+<div class="guide-page" id="tab-principles">
+
+  <div class="role-header">
+    <div class="role-icon inst">⚖️</div>
+    <div>
+      <div class="role-title">עקרונות כלליים</div>
+      <div class="role-sub">מנגנונים ומושגי יסוד שחשוב להכיר בכל תפקיד</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">⚖️</span><span class="section-title">טבלת הצדק (Fairness Score)</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <p class="desc">המנגנון המרכזי בשיבוצים — מבטיח שהעומס מתחלק בצורה שוויונית.</p>
+      <div class="feature-grid">
+        <div class="feature-card"><div class="fc-title">📊 חישוב</div><div class="fc-desc">יחס שובץ / זמינות לכל מדריך לאורך זמן</div></div>
+        <div class="feature-card"><div class="fc-title">🔝 קדימות</div><div class="fc-desc">הגיש הרבה ושובץ מעט = ניקוד גבוה</div></div>
+        <div class="feature-card"><div class="fc-title">✋ עקיפה</div><div class="fc-desc">ניתן לבחור ידנית עם הסבר</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🗑️</span><span class="section-title">Soft Delete — מחיקה הפיכה</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <p class="desc">מחיקה של פעילות/מופע לעולם אינה מוחקת את הרשומה מהמסד — הסטטוס משתנה ל"מבוטל".</p>
+      <div class="info-box ok"><strong>✅ ניתן לשחזר.</strong> ההיסטוריה שמורה ומופיעה בדוחות עם סטטוס "מבוטל".</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">📧</span><span class="section-title">הודעות אוטומטיות</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body open">
+      <table class="guide-table">
+        <thead><tr><th>ארוע</th><th>נשלח ל...</th></tr></thead>
+        <tbody>
+          <tr><td>אישור שיבוץ</td><td>המדריך המשובץ</td></tr>
+          <tr><td>ביטול מופע</td><td>כל המדריכים המשובצים לאותו מופע</td></tr>
+          <tr><td>שינוי שעה / מיקום</td><td>כל המדריכים המשובצים</td></tr>
+          <tr><td>קוד OTP לכניסה</td><td>המשתמש שמבקש להתחבר</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head" onclick="toggleSection(this)">
+      <div class="sh-left"><span class="section-emoji">🏅</span><span class="section-title">הסמכות (Competencies)</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="section-body">
+      <p class="desc">כל קורס מוגדר עם רשימת מדריכים מורשים. מדריך ללא הסמכה לקורס מסוים לא יופיע ברשימת הזמינות לאותו קורס. ניתן לעדכן בדפי ניהול הסמכות (Admin בלבד).</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════ -->
+<script>
+function switchTab(id, fromClick){
+  document.querySelectorAll('.guide-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const page = document.getElementById('tab-'+id);
+  if(!page) return;
+  page.classList.add('active');
+  document.querySelector('.tab-btn[data-tab="'+id+'"]')?.classList.add('active');
+  if(fromClick) history.replaceState(null,'','#'+id);
+}
+
+function toggleSection(head){
+  const body = head.nextElementSibling;
+  const isOpen = head.classList.contains('open');
+  head.classList.toggle('open',!isOpen);
+  body.classList.toggle('open',!isOpen);
+}
+
+// wire tab buttons
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab, true));
+});
+
+// open default sections
+document.querySelectorAll('.section-head.open').forEach(h=>{
+  h.nextElementSibling.classList.add('open');
+});
+
+// activate tab from URL hash
+const tabMap = {instructor:'instructor', lead:'lead', admin:'admin', sysadmin:'sysadmin', principles:'principles'};
+const hash = location.hash.replace('#','').toLowerCase();
+switchTab(tabMap[hash] || 'intro');
+</script>
+
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenterSchedualer · סיכום מדריך</title>
+  <link rel="stylesheet" href="css/instructorsSummary.css?v=2" />
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body class="theme-dark">
+
+<div class="page-purpose">
+  <div class="purpose-inner">
+    <div class="purpose-text"><b>ייעוד הדף:</b> סיכום פעילות המדריך – שעות, מופעים, הסמכות וקורסים לפי טווח תאריכים.</div>
+    <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">סיכום מדריך</div>
+      <div class="subtitle">simCenterSchedualer</div>
+      <div class="subsubtitle">דוח אישי – שעות, מופעים, הסמכות</div>
+    </div>
+    <div class="user-card">
+      <div class="user-title">משתמש מחובר</div>
+      <div class="user-line">שם: <b id="meName">טוען…</b></div>
+      <div class="user-line">תפקיד: <b id="meRole">…</b></div>
+      <div class="status-row">
+        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
+        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
+    </div>
+  </div>
+
+  <!-- טווח תאריכים – שורה מלאה -->
+  <div class="date-row">
+    <span class="date-label">📅 טווח תאריכים</span>
+    <label class="date-field-label">מתאריך</label>
+    <input id="fromDate" type="date" class="date-input" />
+    <label class="date-field-label">עד תאריך</label>
+    <input id="toDate" type="date" class="date-input" />
+    <button id="btnRefresh" class="btn primary" type="button">רענן נתונים</button>
+  </div>
+
+  <!-- קוביה אחת: KPIs + הסמכות + קורסים -->
+  <div class="card summary-box">
+    <div class="kpi-row">
+      <div class="kpi-item">
+        <div class="kpi-label">מספר מופעים</div>
+        <div class="kpi-val" id="totalInstances">0</div>
+      </div>
+      <div class="kpi-sep"></div>
+      <div class="kpi-item">
+        <div class="kpi-label">שעות הדרכה</div>
+        <div class="kpi-val" id="totalHours">0</div>
+      </div>
+      <div class="kpi-sep"></div>
+      <div class="kpi-item">
+        <div class="kpi-label">סוגי פעילויות</div>
+        <div class="kpi-val" id="distinctActivities">0</div>
+      </div>
+    </div>
+    <hr class="summary-divider" />
+    <div class="cert-courses-row">
+      <div class="cert-col" style="flex:1">
+        <div class="sub-title">🏅 הסמכות</div>
+        <div id="certifications" class="pills">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- טבלת פירוט -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 פירוט פעילויות</div>
+    </div>
+    <div class="field" style="margin-bottom:16px">
+      <input id="searchBox" placeholder="חיפוש פעילות…" />
+    </div>
+    <div id="errBox" class="msg err" style="display:none"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>פעילות</th><th>תאריך ושעה</th><th>שעות</th></tr>
+        </thead>
+        <tbody id="tblBody">
+          <tr><td colspan="3" class="empty-cell">טוען…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/instructorsSummary.js?v=5"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

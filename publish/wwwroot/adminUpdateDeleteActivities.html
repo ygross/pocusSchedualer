@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>עדכון ומחיקת פעילויות – אדמין</title>
+  <link rel="stylesheet" href="css/adminUpdateDeleteActivities.css?v=2" />
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div>
+      <div class="purpose">ייעוד הדף: ADMIN בלבד – חיפוש פעילות, עדכון פרטי פעילות, הוספה/מחיקה/עדכון מופעים, ומחיקה מלאה (Hard Delete) של פעילות כולל מופעים לאחר אישור “DELETE &lt;id&gt;”.</div>
+      <div class="title">SimPocus • Admin Update/Delete Activities</div>
+      <div class="subRow">
+        <span class="pill"><span class="dot ok" id="sessionDot"></span><span>Session</span></span>
+        <span class="pill"><span class="dot err" id="adminDot"></span><span id="adminLabel">בודק הרשאות…</span></span>
+        <span class="pill mono">API: <span id="apiBaseLabel">...</span></span>
+      </div>
+    </div>
+
+    <div style="text-align:left;min-width:240px">
+      <div id="meLine" class="purpose">משתמש: טוען…</div>
+      <div id="roleLine" class="purpose">תפקיד: טוען…</div>
+      <div class="subRow" style="justify-content:flex-start">
+        <button id="btnLogoutHint" class="ghost" type="button" title="אם אתה לא רואה נתונים – נסה להתחבר מחדש">בדיקת התחברות</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>חיפוש פעילות</h2>
+
+    <div class="row">
+      <div class="field">
+        <label>ActivityId</label>
+        <input id="sActivityId" type="number" min="1" placeholder="למשל 22" />
+      </div>
+
+      <div class="field wide">
+        <label>שם פעילות (מכיל)</label>
+        <input id="sName" type="text" placeholder="למשל OSCE / POCUS / סדנה..." />
+      </div>
+
+      <div class="field">
+        <label>סוג פעילות</label>
+        <select id="sType"></select>
+      </div>
+
+      <div class="actions">
+        <button id="btnSearch" class="primary" type="button">חפש</button>
+        <button id="btnClearSearch" class="secondary" type="button">נקה</button>
+      </div>
+    </div>
+
+    <div id="searchMsg" class="msg"></div>
+
+    <div class="tableWrap" style="margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px">ID</th>
+            <th>שם פעילות</th>
+            <th style="width:160px">סוג</th>
+            <th style="width:220px">קורס</th>
+            <th style="width:220px">מדריך מרכז</th>
+            <th style="width:170px">מופע קרוב</th>
+            <th style="width:120px">פעולה</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr><td colspan="7" class="tiny">בצע חיפוש…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="editCard" style="display:none">
+    <div class="row" style="align-items:center">
+      <div style="flex:1">
+        <h2 style="margin:0">
+          עריכת פעילות
+          <span id="selectedPill" class="pill2">-</span>
+        </h2>
+        <div class="tiny" style="margin-top:6px">
+          מחיקת מופע מהטבלה מסירה אותו מהרשימה. המחיקה/עדכון בשרת מתבצעים בפועל רק אחרי “שמור שינויים”.
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnReload" class="secondary" type="button">טען מחדש</button>
+        <button id="btnSave" class="primary" type="button">שמור שינויים</button>
+      </div>
+    </div>
+
+    <div id="editMsg" class="msg"></div>
+
+    <div class="split" style="margin-top:10px">
+
+      <div class="panel">
+        <h3>פרטי פעילות</h3>
+
+        <div class="row">
+          <div class="field wide">
+            <label>שם פעילות</label>
+            <input id="eName" type="text" />
+          </div>
+          <div class="field">
+            <label>סוג פעילות</label>
+            <select id="eType"></select>
+          </div>
+          <div class="field">
+            <label>קורס</label>
+            <select id="eCourse"></select>
+          </div>
+          <div class="field">
+            <label>מדריך מרכז</label>
+            <select id="eLead"></select>
+          </div>
+          <div class="field">
+            <label>דדליין להגשה (אופציונלי)</label>
+            <input id="eDeadline" type="datetime-local" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="actions" style="width:100%">
+            <button id="btnAddInst" class="secondary" type="button">+ הוסף מופע</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top:14px">מופעים</h3>
+        <div class="tiny" style="margin-top:-6px">
+          זמנים מוצגים ונערכים <b>בלוקאלי</b>, ונשלחים לשרת כ־UTC.
+        </div>
+
+        <div class="tableWrap small" style="margin-top:10px">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px">#</th>
+                <th style="width:240px">Start (Local)</th>
+                <th style="width:240px">End (Local)</th>
+                <th style="width:120px">Rooms</th>
+                <th style="width:160px">Required</th>
+                <th style="width:180px">InstanceId</th>
+                <th style="width:140px">פעולות</th>
+              </tr>
+            </thead>
+            <tbody id="instBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel dangerZone">
+        <h3 class="dangerTitle">מחיקה מלאה (Hard Delete)</h3>
+        <div class="tiny">
+          מוחק פיזית מה־DB: פעילות + כל המופעים + נתונים תלויים (אם השרת תומך).  
+          כדי למחוק, הקלד בדיוק: <span class="mono"><b>DELETE &lt;ActivityId&gt;</b></span> (לדוגמה: <span class="mono">DELETE 22</span>)
+        </div>
+
+        <div class="confirmRow" style="margin-top:12px">
+          <div class="field" style="flex:1;min-width:220px">
+            <label>אישור מחיקה</label>
+            <input id="deleteConfirm" placeholder="DELETE 22" class="mono" />
+          </div>
+        </div>
+
+        <div class="checkLine">
+          <input id="deleteAck" type="checkbox" />
+          <label for="deleteAck" style="margin:0;font-weight:800">אני מבין/ה שזה מוחק פעילות ומופעים לצמיתות</label>
+        </div>
+
+        <div class="actions" style="margin-top:12px;justify-content:flex-start">
+          <button id="btnDeleteActivity" class="danger" type="button">מחק פעילות מה־DB</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<div class="gate" id="adminGate">
+  <div class="box">
+    <h2>גישה מוגבלת</h2>
+    <p>
+      הדף הזה מיועד ל־<b>Admin</b> בלבד.  
+      נראה שאתה לא מחובר/ת כאדמין או שאין הרשאות מתאימות.
+    </p>
+    <div class="tiny" style="margin-top:10px">
+      פתרון מהיר: התחבר מחדש דרך מערכת ה־OTP ואז חזור לדף.
+    </div>
+  </div>
+</div>
+
+<script src="js/adminUpdateDeleteActivities.js"></script>
+</body>
+</html>

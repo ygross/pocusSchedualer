@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Audit Log</title>
+  <link rel="stylesheet" href="css/SysAdminShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">Audit Log — full history of all system actions. Filter by entity, action type, actor, or date range.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">📋 Audit Log</div>
+      <div class="subtitle">Full action history · Filterable</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="toolbar-row">
+    <input id="filterEntity" type="text" placeholder="Entity (Activity, Assignment…)" style="width:180px" />
+    <input id="filterAction" type="text" placeholder="Action (Create, Update…)" style="width:160px" />
+    <input id="filterActor"  type="number" placeholder="Actor ID" style="width:100px" />
+    <select id="filterDays">
+      <option value="1">Last 24h</option>
+      <option value="7" selected>Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <button id="loadBtn" class="btn btn-primary" type="button">🔍 Load</button>
+    <span id="summaryLine" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr>
+        <th>Log ID</th><th>Actor</th><th>Action</th><th>Entity</th>
+        <th>Entity ID</th><th>IP</th><th>Details</th><th>Time (UTC)</th>
+      </tr></thead>
+      <tbody id="tableBody"><tr><td colspan="8" class="empty-row">Click Load to fetch audit log</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="js/sysAdminAuditLog.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

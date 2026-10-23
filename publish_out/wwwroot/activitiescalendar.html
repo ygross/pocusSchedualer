@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simCenter Schedualer · UpdateActivities</title>
+
+  <link rel="stylesheet" href="activitiesCalendar.css" />
+</head>
+
+<body>
+  <!-- ייעוד הדף -->
+  <div class="page-purpose">
+    <b>ייעוד הדף:</b> הצגת כל הפעילויות + חיפוש לפי קוד/שם + בחירה + עדכון מלא כולל מופעים.
+  </div>
+
+  <div class="wrap">
+
+    <!-- HEADER -->
+    <div class="topbar">
+
+      <!-- קוביית שם הדף (ימין) -->
+      <div class="right-card">
+        <div class="page-title">simCenter Schedualer · UpdateActivities</div>
+        <div class="api-base">
+          API בסיסי:
+          <span class="mono">
+            https://localrecord.med.ad.bgu.ac.il/simcenter/PocusSchedualer/api/api
+          </span>
+        </div>
+        <div class="page-sub">Activities (Admin/Lead) · Instances</div>
+      </div>
+
+      <!-- קוביית משתמש (שמאל) -->
+      <div class="left-card">
+        <div class="me">
+          <div class="me-label">משתמש מחובר</div>
+          <div class="me-line">שם: <b id="meName">יוסי גרוס</b></div>
+          <div class="me-line">תפקיד: <b id="meRole">Admin</b></div>
+        </div>
+
+        <!-- כפתור בהיר/כהה -->
+        <button id="themeToggle" class="theme-btn" title="בהיר / כהה">
+          🌙
+        </button>
+      </div>
+
+    </div>
+
+    <!-- כאן ממשיך הקלנדר שלך -->
+    <div style="margin-top:40px; text-align:center; color:var(--muted)">
+      ← כאן ממשיך הקלנדר (JS לא שונה)
+    </div>
+
+  </div>
+
+  <script>
+    // THEME TOGGLE (Light / Dark)
+    const btn = document.getElementById('themeToggle');
+    const root = document.documentElement;
+
+    function setTheme(mode) {
+      root.setAttribute('data-theme', mode);
+      localStorage.setItem('theme', mode);
+      btn.textContent = mode === 'light' ? '🌞' : '🌙';
+    }
+
+    const saved = localStorage.getItem('theme') || 'dark';
+    setTheme(saved);
+
+    btn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

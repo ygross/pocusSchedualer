@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ייבוא מדריכים מקובץ</title>
+  <link rel="stylesheet" href="./css/adminCoursesManagement.css?v=2" />
+  <style>
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      margin-bottom: 18px;
+    }
+    .upload-zone.drag-over { border-color: var(--accent); background: var(--row-hover); }
+    .upload-zone input[type=file] { display:none; }
+    .upload-zone .upload-icon { font-size: 2.4rem; margin-bottom: 8px; }
+    .upload-zone .upload-label { font-size: 1rem; color: var(--text-secondary); }
+    .upload-zone .file-name { margin-top: 8px; font-weight: 600; color: var(--accent); }
+
+    .template-bar { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
+
+    .preview-section { margin-bottom: 20px; }
+    .preview-table-wrap { overflow-x: auto; max-height: 260px; }
+
+    .result-summary { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+    .stat-pill { padding: 6px 18px; border-radius: 20px; font-size: .9rem; font-weight: 600; }
+    .pill-imported { background: #1a7a4a22; color: #1a7a4a; border:1px solid #1a7a4a55; }
+    .pill-duplicate { background: #b8860033; color: #b07000; border:1px solid #b8860055; }
+    .pill-error { background: #c0392b22; color: #c0392b; border:1px solid #c0392b55; }
+    .pill-total { background: var(--row-hover); color: var(--text-main); border:1px solid var(--border); }
+    [data-theme="dark"] .pill-imported { color: #4dda8e; }
+    [data-theme="dark"] .pill-duplicate { color: #f5c842; }
+    [data-theme="dark"] .pill-error { color: #ff6b6b; }
+
+    .status-badge {
+      display:inline-block; padding: 2px 10px; border-radius:10px;
+      font-size:.78rem; font-weight:600;
+    }
+    .badge-imported { background:#1a7a4a22; color:#1a7a4a; }
+    .badge-duplicate { background:#b8860022; color:#b07000; }
+    .badge-error { background:#c0392b22; color:#c0392b; }
+    [data-theme="dark"] .badge-imported { color:#4dda8e; }
+    [data-theme="dark"] .badge-duplicate { color:#f5c842; }
+    [data-theme="dark"] .badge-error { color:#ff6b6b; }
+
+    .action-row { display:flex; gap:10px; align-items:center; margin-bottom:20px; }
+    .hint { font-size:.82rem; color:var(--text-secondary); margin-top:4px; }
+    .section-title { font-size:1rem; font-weight:700; margin:18px 0 10px; color:var(--text-main); }
+  </style>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+  <div class="page-purpose">
+    <div class="purpose-inner">
+      <div><b>ייעוד הדף:</b> ייבוא מדריכים מקובץ CSV — הכנסת מספר מדריכים בבת אחת.</div>
+      <div class="purpose-role">תפקיד: <b id="otpRoleInline">…</b></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header class="topbar">
+      <div class="title-card">
+        <div class="title">simCenterSchedualer · ייבוא מדריכים מקובץ</div>
+        <div class="subtitle">העלאת קובץ CSV לייבוא מרובה של מדריכים</div>
+      </div>
+      <div class="user-card" id="userCard">
+        <div class="user-card-header">
+          <div class="user-title">משתמש מחובר</div>
+          <button id="collapseUserCard" class="collapse-btn" type="button" title="צמצם">▲</button>
+        </div>
+        <div id="userCardBody" class="user-card-body">
+          <div class="user-field"><span class="user-label">שם:</span><span id="userFullName">…</span></div>
+          <div class="user-field"><span class="user-label">אימייל:</span><span id="userEmail">…</span></div>
+          <div class="user-field"><span class="user-label">תפקיד:</span><span id="userRole">…</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- Template download -->
+      <div class="template-bar">
+        <button class="btn btn-secondary" onclick="downloadTemplate()">הורד תבנית CSV</button>
+        <span class="hint">הורד תבנית ריקה עם כותרות נכונות, מלא אותה וייבא</span>
+      </div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".csv,text/csv" />
+        <div class="upload-icon">📂</div>
+        <div class="upload-label">גרור קובץ CSV לכאן, או לחץ לבחירה</div>
+        <div class="file-name" id="selectedFileName"></div>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-section" id="previewSection" style="display:none">
+        <div class="section-title">תצוגה מקדימה (<span id="previewCount">0</span> שורות)</div>
+        <div class="preview-table-wrap">
+          <table class="data-table" id="previewTable">
+            <thead id="previewHead"></thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+        <div class="hint" id="previewHint"></div>
+      </div>
+
+      <!-- Import action -->
+      <div class="action-row" id="importBar" style="display:none">
+        <button class="btn btn-primary" id="importBtn" onclick="runImport()">ייבא מדריכים</button>
+        <button class="btn btn-secondary" onclick="resetAll()">נקה / בחר קובץ אחר</button>
+        <span id="importSpinner" style="display:none">⏳ מייבא…</span>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsSection" style="display:none">
+        <div class="section-title">תוצאות ייבוא</div>
+        <div class="result-summary" id="resultSummary"></div>
+        <div class="preview-table-wrap">
+          <table class="data-table" id="resultsTable">
+            <thead>
+              <tr>
+                <th>שורה</th><th>אימייל</th><th>שם מלא</th><th>תפקיד</th><th>סטטוס</th><th>הערה</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ── inline check: no parent app.js here
+    (function() {
+      const cc = document.getElementById('collapseUserCard');
+      const body = document.getElementById('userCardBody');
+      if (cc && body) {
+        cc.addEventListener('click', function() {
+          const collapsed = body.style.display === 'none';
+          body.style.display = collapsed ? '' : 'none';
+          cc.textContent = collapsed ? '▲' : '▼';
+        });
+      }
+    })();
+  </script>
+  <script src="./js/adminBulkImport.js?v=2"></script>
+</body>
+</html>

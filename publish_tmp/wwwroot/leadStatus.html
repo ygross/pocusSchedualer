@@ -1,0 +1,296 @@
+<!-- File: LeadsStatus.html -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LeadsStatus | רכז/ת קורס</title>
+
+  <!-- חשוב: נתיב יחסי -->
+  <link rel="stylesheet" href="css/leadStatus.css?v=7" />
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- חובה אצלך: ייעוד הדף למעלה -->
+    <div class="purpose">
+      <b>ייעוד הדף:</b>
+      LeadsStatus מרכז לרכז/ת הקורס תמונת מצב על מצב השיבוצים למופעים, סטטוס ריכוז, הודעות שנשלחו, טבלת צדק לפי מדריכים מוסמכים, והתראות/המלצות פעולה.
+      <span class="tag">Live API</span>
+      <span class="tag" id="envTag">—</span>
+      <span class="tag ghost" id="lastRefreshTag">עדכון אחרון: —</span>
+    </div>
+
+    <!-- Appbar / Hero -->
+    <div class="appbar">
+      <div class="appbarLeft">
+        <div class="pageTitle">
+          <div class="pageName">LeadsStatus</div>
+          <div class="pageSub">Dashboard לרכז/ת קורס • ניהול שיבוצים, צדק והודעות</div>
+        </div>
+      </div>
+
+      <div class="appbarRight">
+        <div class="userChip" title="משתמש מחובר (OTP)">
+          <div class="tiny muted">משתמש מחובר</div>
+          <div class="chipLine">
+            <b id="userName">—</b>
+            <span class="dotSep">•</span>
+            <span id="userRole" class="muted">—</span>
+          </div>
+        </div>
+
+        <button class="iconBtn" id="btnTheme" type="button" title="מצב כהה/בהיר">
+          <span class="icon">🌓</span>
+          <span class="txt">Theme</span>
+        </button>
+
+        <button class="iconBtn primary" id="btnRefreshTop" type="button" title="רענן נתונים">
+          <span class="icon">⟳</span>
+          <span class="txt">רענן</span>
+          <span class="spinner" id="spinTop"></span>
+        </button>
+      </div>
+
+      <div class="heroGlow" aria-hidden="true"></div>
+    </div>
+
+    <header>
+      <div class="card filters">
+        <div>
+          <label for="courseSel">קורס</label>
+          <select id="courseSel"></select>
+        </div>
+
+        <div>
+          <label for="monthSel">חודש</label>
+          <input id="monthSel" type="month" />
+        </div>
+
+        <div>
+          <label for="searchTxt">חיפוש</label>
+          <input id="searchTxt" type="text" placeholder="חפש פעילות / תאריך / בעיה..." />
+        </div>
+
+        <label class="toggle" title="הצג רק מופעים פתוחים / בעייתיים">
+          <input id="onlyOpenChk" type="checkbox" />
+          <span>רק מופעים פתוחים (לא מלא/לא בוטל)</span>
+        </label>
+
+        <label class="toggle" title="הצג רק מופעים עם בעיה">
+          <input id="onlyIssuesChk" type="checkbox" />
+          <span>רק מופעים עם בעיה</span>
+        </label>
+
+        <div class="row end">
+          <button class="btn secondary" id="btnPrev" type="button">חודש קודם</button>
+          <button class="btn secondary" id="btnNext" type="button">חודש הבא</button>
+          <button class="btn" id="btnRefresh" type="button">
+            רענן
+            <span class="spinner" id="spin"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card userbox">
+        <div>
+          <div class="muted tiny">סטטוס דשבורד</div>
+          <div class="pillRow">
+            <span class="pill" id="pillCourseCount">—</span>
+            <span class="pill" id="pillMonthRange">—</span>
+            <span class="pill live" id="pillLive">
+              <span class="blink"></span> LIVE
+            </span>
+          </div>
+          <div class="muted tiny mt8" id="kpiSubtitle">—</div>
+        </div>
+
+        <div class="row end mt12">
+          <button class="btn secondary" id="btnExport" type="button" title="בהמשך: יצוא PDF/CSV">ייצוא</button>
+          <button class="btn secondary" id="btnEmail" type="button" title="בהמשך: שליחת דוח במייל">שלח דוח</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI -->
+    <div class="card mt12">
+      <div class="title">
+        <h2>סיכום התקופה</h2>
+        <div class="muted tiny">כיסוי, מלאות ובעיות — מבוסס מופעים לחודש</div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi" data-kpi="total">
+          <div class="dot"></div>
+          <div class="lbl">מספר מופעים</div>
+          <div class="val" id="kpiTotal">0</div>
+          <div class="hint">סה״כ מופעים בחודש</div>
+          <canvas class="spark" id="spTotal" width="180" height="40" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="kpi" data-kpi="full">
+          <div class="dot green"></div>
+          <div class="lbl">מלאים</div>
+          <div class="val" id="kpiFull">0</div>
+          <div class="hint">מופעים מאוישים מלא</div>
+          <canvas class="spark" id="spFull" width="180" height="40" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="kpi" data-kpi="partial">
+          <div class="dot yellow"></div>
+          <div class="lbl">חלקיים</div>
+          <div class="val" id="kpiPartial">0</div>
+          <div class="hint">חסר מדריך(ים)</div>
+          <canvas class="spark" id="spPartial" width="180" height="40" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="kpi" data-kpi="none">
+          <div class="dot blue"></div>
+          <div class="lbl">ללא שיבוץ</div>
+          <div class="val" id="kpiNone">0</div>
+          <div class="hint">מופעים ללא מדריך</div>
+          <canvas class="spark" id="spNone" width="180" height="40" aria-hidden="true"></canvas>
+        </div>
+      </div>
+
+      <div class="progressWrap">
+        <div class="row spread">
+          <span class="muted tiny">כיסוי קורס</span>
+          <span class="muted tiny" id="progressText">0%</span>
+        </div>
+        <div class="bar"><div id="progressBar"></div></div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid mt12">
+      <div class="card">
+        <div class="title">
+          <h2>סטטוס שיבוצים לפי מופעים</h2>
+          <div class="muted tiny">כולל ביטולים • פס צבע מציין מצב</div>
+        </div>
+
+        <div class="sectionBody scroll520">
+          <table>
+            <thead>
+              <tr>
+                <th class="w120">תאריך</th>
+                <th>פעילות</th>
+                <th class="w90">נדרש</th>
+                <th class="w90">שובץ</th>
+                <th class="w150">סטטוס</th>
+                <th>הערה</th>
+                <th class="w220">פעולות</th>
+              </tr>
+            </thead>
+            <tbody id="instancesTbody"></tbody>
+          </table>
+
+          <div class="emptyState" id="instancesEmpty" style="display:none;">
+            <div class="emptyIcon">📭</div>
+            <div class="emptyTxt">
+              <b>אין תוצאות להצגה</b>
+              <div class="muted">נסה להחליף חודש / קורס / חיפוש</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card">
+          <div class="title">
+            <h2>הודעות שנשלחו</h2>
+            <div class="muted tiny">Audit trail (ללא OTP)</div>
+          </div>
+
+          <div class="sectionBody scroll260">
+            <table>
+              <thead>
+                <tr>
+                  <th class="w120">יום</th>
+                  <th>נושא</th>
+                  <th class="w110">סטטוס</th>
+                  <th class="w90">נמענים</th>
+                  <th class="w90">צפייה</th>
+                </tr>
+              </thead>
+              <tbody id="messagesTbody"></tbody>
+            </table>
+
+            <div class="emptyState" id="messagesEmpty" style="display:none;">
+              <div class="emptyIcon">✉️</div>
+              <div class="emptyTxt">
+                <b>אין הודעות בתקופה</b>
+                <div class="muted">או שאין נתונים עבור הקורס/חודש</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="title">
+            <h2>התראות והמלצות</h2>
+            <div class="muted tiny">AI-style insights</div>
+          </div>
+          <div class="sectionBody">
+            <div class="insights" id="insightsBox"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt12">
+      <div class="title">
+        <h2>טבלת צדק (מדריכים מוסמכים לקורס)</h2>
+        <div class="muted tiny">שיבוצים/פניות/אי-תגובה</div>
+      </div>
+      <div class="sectionBody scroll380">
+        <table>
+          <thead>
+            <tr>
+              <th>מדריך</th>
+              <th class="w120">שובץ (מאושר)</th>
+              <th class="w140">הגיש זמינות</th>
+              <th class="w140">פניות במייל</th>
+              <th class="w150">אי-תגובה (הערכה)</th>
+              <th class="w140">סטטוס</th>
+            </tr>
+          </thead>
+          <tbody id="fairnessTbody"></tbody>
+        </table>
+
+        <div class="emptyState" id="fairnessEmpty" style="display:none;">
+          <div class="emptyIcon">🧑‍🏫</div>
+          <div class="emptyTxt">
+            <b>אין מדריכים מוסמכים להצגה</b>
+            <div class="muted">או שעדיין לא נטענו נתונים</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      LeadsStatus • API: <span class="muted" id="apiPathTxt">—</span>
+      <span class="sep">|</span>
+      <span class="muted">Theme:</span> <span class="muted" id="themeTxt">—</span>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalHeader">
+        <h3 id="modalTitle">—</h3>
+        <button class="close" id="modalClose" type="button">סגור</button>
+      </div>
+      <div class="modalBody">
+        <div class="muted tiny mb8" id="modalMeta">—</div>
+        <pre id="modalBody">—</pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/leadStatus.js?v=7"></script>
+</body>
+</html>

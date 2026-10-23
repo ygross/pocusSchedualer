@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>קלנדר מרכז קורס</title>
+  <script src="js/session.js"></script>
+  <link rel="stylesheet" href="css/leadCalendar.css?v=2"/>
+  <script>(function(){var t=localStorage.getItem('theme');document.addEventListener('DOMContentLoaded',function(){if(t!=='light')document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+<body>
+
+<div class="page-purpose">
+  ייעוד הדף: לוח שנה חודשי למרכז קורס – הצגת כל מופעי הפעילויות בצבעים לפי פעילות, כולל שליחת תזכורת.
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="title">LeadCalendar</div>
+    <div class="sub">SimPocus Scheduler</div>
+  </div>
+  <div class="me">
+    <div id="meName">טוען משתמש…</div>
+    <div class="role">תפקיד משתמש מחובר: <span id="meRole">—</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="toolbar card">
+    <button id="btnPrev" class="btn">◀ חודש קודם</button>
+    <div id="monthTitle" class="monthTitle">—</div>
+    <button id="btnNext" class="btn">חודש הבא ▶</button>
+
+    <div class="spacer"></div>
+
+    <label>
+      חיפוש:
+      <input id="searchBox" type="search" placeholder="שם פעילות"/>
+    </label>
+
+    <button id="btnRefresh" class="btnGhost">רענן</button>
+  </section>
+
+  <section class="legend card">
+    <div class="legendTitle">מקרא פעילויות</div>
+    <div id="legendItems">—</div>
+  </section>
+
+  <section class="calendar card">
+    <div class="dow">
+      <div>א׳</div><div>ב׳</div><div>ג׳</div><div>ד׳</div><div>ה׳</div><div>ו׳</div><div>ש׳</div>
+    </div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+</main>
+
+<script src="js/leadCalendar.js"></script>
+</body>
+</html>

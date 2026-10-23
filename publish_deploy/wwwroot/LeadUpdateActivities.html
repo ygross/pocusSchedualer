@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>עריכת פעילות – מרכז קורס</title>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/lead.css">
+  <script>(function(){var t=localStorage.getItem('theme');document.addEventListener('DOMContentLoaded',function(){if(t!=='light')document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+
+<body class="app-page">
+  <!-- ✅ לפי ההנחיה שלך: ייעוד הדף למעלה -->
+  <div class="page-purpose">
+    ייעוד הדף: רכז קורס (Lead/CourseManager) מציג ומעדכן רק פעילויות שהוא מרכז, כולל מופעים. תצוגה בהתאם לנושא כהה/בהיר.
+  </div>
+
+  <div class="page-title-row">
+    <div class="page-title">LeadUpdateActivities</div>
+
+    <div class="page-actions">
+      <!-- ✅ שמירת הטוגל כהה/בהיר כמו בשאר הדפים -->
+      <button id="themeToggle" type="button" class="btn btn-secondary">
+        כהה/בהיר
+      </button>
+    </div>
+
+    <div class="page-user">
+      <div class="muted">משתמש מחובר:</div>
+      <div id="meLabel" class="strong">טוען…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">חיפוש / הצגת פעילויות</div>
+
+    <div class="grid grid-4">
+      <div class="form-group">
+        <label>קוד פעילות (ActivityId)</label>
+        <input id="sActivityId" class="input" type="number" min="1" placeholder="למשל 123">
+      </div>
+
+      <div class="form-group">
+        <label>שם פעילות (מכיל)</label>
+        <input id="sName" class="input" type="text" placeholder="OSCE / אולטרסאונד / סדנה...">
+      </div>
+
+      <div class="form-group">
+        <label>סוג פעילות</label>
+        <select id="sType" class="input"></select>
+      </div>
+
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <div class="btn-row">
+          <button id="btnSearch" class="btn btn-primary" type="button">חפש</button>
+          <button id="btnShowMine" class="btn btn-secondary" type="button">הצג את הפעילויות שלי</button>
+          <button id="btnClearSearch" class="btn btn-ghost" type="button">נקה</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="searchMsg" class="msg"></div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:90px">קוד</th>
+            <th>שם פעילות</th>
+            <th style="width:170px">סוג</th>
+            <th style="width:240px">קורס</th>
+            <th style="width:190px">מופע קרוב</th>
+            <th style="width:120px">פעולה</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      עריכת פעילות
+      <span id="selectedPill" class="pill">לא נבחרה</span>
+    </div>
+
+    <div class="grid grid-5">
+      <div class="form-group grid-span-2">
+        <label>שם פעילות</label>
+        <input id="eName" class="input" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>סוג פעילות</label>
+        <select id="eType" class="input"></select>
+      </div>
+
+      <div class="form-group">
+        <label>קורס</label>
+        <select id="eCourse" class="input"></select>
+      </div>
+
+      <div class="form-group">
+        <label>מדריך מוביל</label>
+        <select id="eLead" class="input"></select>
+        <div id="leadHint" class="hint"></div>
+      </div>
+
+      <div class="form-group">
+        <label>דדליין להגשה (אופציונלי)</label>
+        <input id="eDeadline" class="input" type="datetime-local">
+      </div>
+    </div>
+
+    <div class="btn-row right">
+      <button id="btnAddInst" class="btn btn-secondary" type="button">+ הוסף מופע</button>
+      <button id="btnSave" class="btn btn-primary" type="button">שמור עדכון</button>
+    </div>
+
+    <div class="section-title">מופעים</div>
+    <div id="instWrap"></div>
+
+    <div id="editMsg" class="msg"></div>
+  </div>
+
+  <!-- ✅ חשוב: תטען את הקובץ הזה (בשם שלו), לא UpdateActivities.js אחר -->
+  <script src="js/LeadUpdateActivities.js"></script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

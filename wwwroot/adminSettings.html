@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>System Settings - simCenterSchedualer</title>
+  <link rel="stylesheet" href="css/adminSettings.css?v=3" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+<div class="wrap">
+
+  <div class="purpose">System Settings — Admin only. Changes take effect immediately after saving.</div>
+
+  <div class="topbar">
+    <div class="title-card">
+      <div class="title">&#9881;&#65039; System Settings</div>
+      <div class="subtitle">simCenterSchedualer &middot; Admin</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-line"><b id="meName">...</b></div>
+        <div class="user-line" id="meRole" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
+    </div>
+  </div>
+
+  <div id="msgBox" class="msg"></div>
+
+  <div id="catsGrid" class="cats-grid">
+    <div class="loading">&#9696; Loading settings...</div>
+  </div>
+
+</div>
+<script src="js/adminSettings.js?v=3"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

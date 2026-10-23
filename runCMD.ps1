@@ -1,298 +1,270 @@
 ﻿Import-Module WebAdministration
 
-# ============================
+# =====================================================
 # CONFIG
-# ============================
+# =====================================================
+
 $AppPoolName = "PocusSchedualer"
+
+# Backend
 $PublishPath = "E:\inetpub\wwwroot\simcenter\PocusSchedualer\api"
 $RepoPath    = "E:\dev\simPocusSchedualerBackend\PocusSchedualer"
 
-# Frontend paths
+# Frontend
 $DevWwwrootPath  = Join-Path $RepoPath "wwwroot"
 $IisFrontendPath = "E:\inetpub\wwwroot\simcenter\PocusSchedualer"
 
-# Which asset folders to sync (if exist)
-$FrontendFolders = @("css","js","images","img","fonts")
+# Frontend folders to deploy
+$FrontendFolders = @("css","js","config","img")
 
-# ============================
+# =====================================================
 # HELPERS
-# ============================
+# =====================================================
 
 function Ensure-GitAvailable {
-    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-        Write-Host "❌ Git not found in PATH" -ForegroundColor Red
-        return $false
-    }
-    return $true
+    return [bool](Get-Command git -ErrorAction SilentlyContinue)
 }
 
 function Invoke-Git {
-    param(
-        [Parameter(Mandatory=$true)][string[]]$Args,
-        [switch]$ThrowOnError = $true
-    )
-
-    $out = & git @Args 2>&1
-    $code = $LASTEXITCODE
-
-    if ($out) { $out | ForEach-Object { Write-Host $_ } }
-
-    if ($ThrowOnError -and $code -ne 0) {
-        throw "git $($Args -join ' ') failed (exit code $code)."
+    param([string[]]$Args)
+    & git @Args
+    if ($LASTEXITCODE -ne 0) {
+        throw "Git command failed: git $($Args -join ' ')"
     }
-
-    return @{ ExitCode = $code; Output = $out }
 }
 
-function Get-CurrentGitBranch {
-    $r = Invoke-Git -Args @("branch","--show-current") -ThrowOnError:$false
-    $b = ($r.Output | Out-String).Trim()
-    if ([string]::IsNullOrWhiteSpace($b)) { return $null }
-    return $b
-}
+# -----------------------------------------------------
+# SAFE APPPOOL STOP (NO ERROR IF ALREADY DOWN)
+# -----------------------------------------------------
 
-function Git-PushSmart {
-    Write-Host "🚀 git push" -ForegroundColor Green
-    $r = Invoke-Git -Args @("push") -ThrowOnError:$false
-    if ($r.ExitCode -eq 0) {
-        Write-Host "✅ Git push completed" -ForegroundColor Green
-        return
+function Stop-AppPoolSafe {
+    param([Parameter(Mandatory=$true)][string]$Name)
+
+    try {
+        $state = (Get-WebAppPoolState -Name $Name -ErrorAction Stop).Value
+        if ($state -eq "Stopped") {
+            Write-Host "ℹ️ POOL ALREADY DOWN: $Name" -ForegroundColor DarkYellow
+            return
+        }
+
+        Stop-WebAppPool -Name $Name -ErrorAction Stop
+        Write-Host "🛑 POOL STOPPED: $Name" -ForegroundColor Yellow
     }
-
-    $branch = Get-CurrentGitBranch
-    if (-not $branch) { throw "Cannot detect current branch." }
-
-    Write-Host "⚠️ Push failed. Trying: git push -u origin $branch" -ForegroundColor Yellow
-    Invoke-Git -Args @("push","-u","origin",$branch) -ThrowOnError
-    Write-Host "✅ Git push completed (upstream set)" -ForegroundColor Green
+    catch {
+        Write-Host "ℹ️ POOL ALREADY DOWN: $Name" -ForegroundColor DarkYellow
+    }
 }
 
-function Copy-MirrorFolder {
+# =====================================================
+# ROBOCOPY – COPY ONLY CHANGED FILES + SHOW WHAT COPIED
+# =====================================================
+
+function Copy-ChangedFilesOnly {
     param(
         [Parameter(Mandatory=$true)][string]$Source,
         [Parameter(Mandatory=$true)][string]$Destination
     )
 
-    if (-not (Test-Path $Source)) { return $false }
+    if (-not (Test-Path $Source)) {
+        Write-Host "ℹ️ Source missing: $Source" -ForegroundColor DarkYellow
+        return
+    }
 
     if (-not (Test-Path $Destination)) {
         New-Item -ItemType Directory -Path $Destination | Out-Null
     }
 
-    # /MIR mirrors folder (adds + deletes) within that folder
-    # Robocopy codes < 8 are success-ish
+    $log = Join-Path $env:TEMP ("robocopy_" + [guid]::NewGuid() + ".log")
+
     $args = @(
-        "`"$Source`"",
-        "`"$Destination`"",
-        "/MIR",
+        $Source,
+        $Destination,
+        "*.*",
+        "/E",
+        "/XO",
         "/FFT",
         "/R:1",
         "/W:1",
         "/NP",
-        "/NFL",
-        "/NDL"
+        "/NDL",
+        "/NJH",
+        "/NJS",
+        "/LOG:$log"
     )
 
-    Start-Process -FilePath "robocopy.exe" -ArgumentList $args -Wait -NoNewWindow | Out-Null
-    if ($LASTEXITCODE -ge 8) {
-        throw "Robocopy failed (exit code $LASTEXITCODE) for: $Source -> $Destination"
+    & robocopy @args | Out-Null
+    $rc = $LASTEXITCODE
+
+    if ($rc -ge 8) {
+        Write-Host "❌ Robocopy failed (exit code $rc)" -ForegroundColor Red
+        if (Test-Path $log) {
+            Get-Content $log | Select-Object -Last 80
+        }
+        throw "Robocopy failed"
     }
-    return $true
+
+    $lines = @()
+    if (Test-Path $log) { $lines = Get-Content $log }
+
+    $copiedLines = $lines | Where-Object {
+        $_ -match '^\s*(New File|Newer|Changed)\s+'
+    }
+
+    if (-not $copiedLines) {
+        Write-Host "ℹ️ No files copied (up-to-date)" -ForegroundColor DarkYellow
+    }
+    else {
+        Write-Host "📄 Files copied:" -ForegroundColor Cyan
+        foreach ($line in $copiedLines) {
+            $file = ($line -split "\s{2,}")[-1]
+            Write-Host "➕ $file" -ForegroundColor Green
+        }
+    }
+
+    Remove-Item $log -Force -ErrorAction SilentlyContinue
 }
 
-# ============================
-# FLOWS
-# ============================
+# =====================================================
+# GIT SUB MENU
+# =====================================================
 
-function Git-PushFlow {
+function Show-GitSubMenu {
 
-    if (-not (Ensure-GitAvailable)) { Pause; return }
-    if (-not (Test-Path $RepoPath)) {
-        Write-Host "❌ Repo path not found: $RepoPath" -ForegroundColor Red
-        Pause; return
+    if (-not (Ensure-GitAvailable)) {
+        Write-Host "❌ Git not found" -ForegroundColor Red
+        Pause
+        return
     }
 
     Push-Location $RepoPath
     try {
-        if (-not (Test-Path ".git")) {
-            Write-Host "❌ This folder is not a Git repository (.git missing)" -ForegroundColor Red
-            Pause; return
+        while ($true) {
+            Clear-Host
+            Write-Host "==================================" -ForegroundColor DarkCyan
+            Write-Host " Git Sub Menu " -ForegroundColor White
+            Write-Host "==================================" -ForegroundColor DarkCyan
+            Write-Host ""
+            Write-Host "1  - Status"
+            Write-Host "2  - Diff"
+            Write-Host "3  - Diff (staged)"
+            Write-Host "4  - Add ALL"
+            Write-Host "5  - Add modified/deleted"
+            Write-Host "6  - Add interactive"
+            Write-Host "7  - Commit"
+            Write-Host "8  - Amend commit"
+            Write-Host "9  - Push"
+            Write-Host "10 - Pull --rebase"
+            Write-Host "11 - Undo last commit"
+            Write-Host "12 - Clean untracked (preview)"
+            Write-Host "13 - Clean untracked (DELETE)"
+            Write-Host "0  - Back"
+            Write-Host ""
+
+            switch (Read-Host "Choose option") {
+                "1"  { git status -sb; Pause }
+                "2"  { git diff; Pause }
+                "3"  { git diff --staged; Pause }
+                "4"  { Invoke-Git @("add","-A"); Pause }
+                "5"  { Invoke-Git @("add","-u"); Pause }
+                "6"  { git add -p; Pause }
+                "7"  {
+                    $msg = Read-Host "Commit message"
+                    if ($msg) { Invoke-Git @("commit","-m",$msg) }
+                    Pause
+                }
+                "8"  { git commit --amend; Pause }
+                "9"  { Invoke-Git @("push"); Pause }
+                "10" { Invoke-Git @("pull","--rebase"); Pause }
+                "11" {
+                    if ((Read-Host "Undo last commit? (y/n)") -match 'y') {
+                        git reset --soft HEAD~1
+                    }
+                    Pause
+                }
+                "12" { git clean -fd -n; Pause }
+                "13" {
+                    if ((Read-Host "DELETE all untracked files? (y/n)") -match 'y') {
+                        git clean -fd
+                    }
+                    Pause
+                }
+                "0"  { return }
+            }
         }
-
-        Write-Host ""
-        Write-Host "📁 Repo: $RepoPath" -ForegroundColor Cyan
-        Write-Host ""
-
-        Invoke-Git -Args @("status") -ThrowOnError:$false | Out-Null
-
-        $changes = & git status --porcelain
-        if (-not $changes) {
-            Write-Host "ℹ️ No changes to commit." -ForegroundColor DarkYellow
-            $push = Read-Host "Push anyway? (y/n)"
-            if ($push -match '^(y|yes)$') { Git-PushSmart }
-            Pause
-            return
-        }
-
-        $msg = Read-Host "Commit message"
-        if ([string]::IsNullOrWhiteSpace($msg)) {
-            $msg = "Auto deploy $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
-        }
-
-        Write-Host "➕ git add -A" -ForegroundColor Yellow
-        Invoke-Git -Args @("add","-A") | Out-Null
-
-        Write-Host "📝 git commit" -ForegroundColor Yellow
-        $commitRes = Invoke-Git -Args @("commit","-m",$msg) -ThrowOnError:$false
-        if ($commitRes.ExitCode -ne 0) {
-            Write-Host "❌ Commit failed (see output above)" -ForegroundColor Red
-            Pause
-            return
-        }
-
-        Git-PushSmart
-        Pause
-    }
-    catch {
-        Write-Host ""
-        Write-Host "❌ ERROR: $($_.Exception.Message)" -ForegroundColor Red
-        Pause
     }
     finally {
         Pop-Location
     }
 }
 
-function Deploy-FrontendFromDevToIis {
+# =====================================================
+# DEPLOY FRONTEND  (NO Y/N)
+# =====================================================
 
-    if (-not (Test-Path $DevWwwrootPath)) {
-        Write-Host "❌ DEV wwwroot not found: $DevWwwrootPath" -ForegroundColor Red
-        Pause
-        return
-    }
-    if (-not (Test-Path $IisFrontendPath)) {
-        Write-Host "❌ IIS Frontend path not found: $IisFrontendPath" -ForegroundColor Red
-        Pause
-        return
-    }
+function Deploy-Frontend {
 
-    Write-Host ""
+    Clear-Host
     Write-Host "==============================================" -ForegroundColor DarkCyan
-    Write-Host " Deploy Frontend: DEV wwwroot -> IIS Frontend " -ForegroundColor White
+    Write-Host " Frontend Deploy (DEV → IIS) " -ForegroundColor White
     Write-Host "==============================================" -ForegroundColor DarkCyan
-    Write-Host "DEV: $DevWwwrootPath" -ForegroundColor Cyan
-    Write-Host "IIS: $IisFrontendPath" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "NOTE: This updates HTML/JS/CSS and does NOT touch 'api\'." -ForegroundColor DarkYellow
-    Write-Host ""
 
-    $confirm = Read-Host "Continue deploy frontend? (y/n)"
-    if ($confirm -notmatch '^(y|yes)$') {
-        Write-Host "Skipped." -ForegroundColor DarkYellow
-        Pause
-        return
-    }
-
-    # 1) Sync asset folders
     foreach ($f in $FrontendFolders) {
+        Write-Host ""
+        Write-Host "---- Sync folder: $f ----" -ForegroundColor DarkCyan
         $src = Join-Path $DevWwwrootPath $f
         $dst = Join-Path $IisFrontendPath $f
-
-        if (Test-Path $src) {
-            Write-Host "📁 Sync folder: $f" -ForegroundColor Yellow
-            Copy-MirrorFolder -Source $src -Destination $dst | Out-Null
-            Write-Host "✅ Done: $f" -ForegroundColor Green
-        }
+        Copy-ChangedFilesOnly -Source $src -Destination $dst
     }
 
-    # 2) Copy root HTML files
-    Write-Host "📄 Copy root *.html" -ForegroundColor Yellow
-    Get-ChildItem -Path $DevWwwrootPath -Filter "*.html" -File -ErrorAction SilentlyContinue |
-        ForEach-Object {
-            Copy-Item $_.FullName (Join-Path $IisFrontendPath $_.Name) -Force
-        }
+    Write-Host ""
+    Write-Host "---- Sync root HTML files ----" -ForegroundColor DarkCyan
 
-    # 3) Optional: copy root favicon/manifest/etc (common static files)
-    $rootExtras = @("favicon.ico","site.webmanifest","manifest.json","robots.txt")
-    foreach ($x in $rootExtras) {
-        $srcX = Join-Path $DevWwwrootPath $x
-        if (Test-Path $srcX) {
-            Copy-Item $srcX (Join-Path $IisFrontendPath $x) -Force
+    Get-ChildItem $DevWwwrootPath -Filter "*.html" -File | ForEach-Object {
+        $dst = Join-Path $IisFrontendPath $_.Name
+        if (-not (Test-Path $dst) -or $_.LastWriteTimeUtc -gt (Get-Item $dst).LastWriteTimeUtc) {
+            Copy-Item $_.FullName $dst -Force
+            Write-Host "➕ $($_.Name)" -ForegroundColor Green
         }
     }
 
     Write-Host ""
-    Write-Host "✅ Frontend deployed to IIS." -ForegroundColor Green
+    Write-Host "✅ Frontend deployment completed" -ForegroundColor Green
     Pause
 }
 
-# ============================
-# MENU LOOP
-# ============================
+# =====================================================
+# MAIN MENU
+# =====================================================
 
 while ($true) {
 
     Clear-Host
     Write-Host "==================================" -ForegroundColor DarkCyan
-    Write-Host "  PocusSchedualer Deployment Tool  " -ForegroundColor White
+    Write-Host " PocusSchedualer Deployment Tool " -ForegroundColor White
     Write-Host "==================================" -ForegroundColor DarkCyan
     Write-Host ""
-    Write-Host "1 - Stop AppPool + Publish"
+    Write-Host "1 - Stop AppPool + Publish (.NET)"
     Write-Host "2 - Start AppPool"
     Write-Host "3 - Stop AppPool only"
-    Write-Host "4 - Git: Add + Commit + Push"
-    Write-Host "5 - Deploy Frontend (DEV wwwroot -> IIS HTML)"
-    Write-Host "6 - Exit"
+    Write-Host "4 - Git Commit + Push"
+    Write-Host "5 - Deploy Frontend"
+    Write-Host "6 - Git Menu"
+    Write-Host "7 - Exit"
     Write-Host ""
 
-    $choice = Read-Host "Choose option"
-
-    switch ($choice) {
+    switch (Read-Host "Choose option") {
 
         "1" {
-            Write-Host ""
-            Write-Host "⛔ Stopping Application Pool..." -ForegroundColor Yellow
-            Stop-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 3
-
-            Write-Host "📦 Publishing (.NET)..." -ForegroundColor Cyan
+            Stop-AppPoolSafe -Name $AppPoolName
             dotnet publish -c Release -o $PublishPath
-
-            Write-Host ""
-            Write-Host "✅ Publish completed. AppPool remains STOPPED." -ForegroundColor DarkYellow
             Pause
         }
 
-        "2" {
-            Write-Host ""
-            Write-Host "▶️ Starting Application Pool..." -ForegroundColor Green
-            Start-WebAppPool -Name $AppPoolName
-            Pause
-        }
-
-        "3" {
-            Write-Host ""
-            Write-Host "⛔ Stopping Application Pool only..." -ForegroundColor Yellow
-            Stop-WebAppPool -Name $AppPoolName
-            Pause
-        }
-
-        "4" {
-            Git-PushFlow
-        }
-
-        "5" {
-            Deploy-FrontendFromDevToIis
-        }
-
-        "6" {
-            Write-Host "👋 Exiting..." -ForegroundColor Gray
-            break
-        }
-
-        default {
-            Write-Host "❌ Invalid option" -ForegroundColor Red
-            Start-Sleep -Seconds 2
-        }
+        "2" { Start-WebAppPool -Name $AppPoolName; Pause }
+        "3" { Stop-AppPoolSafe -Name $AppPoolName; Pause }
+        "4" { Git-PushFlow }
+        "5" { Deploy-Frontend }
+        "6" { Show-GitSubMenu }
+        "7" { break }
     }
 }

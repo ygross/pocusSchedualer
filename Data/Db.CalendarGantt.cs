@@ -79,7 +79,9 @@ ORDER BY inst.StartUtc;";
         DateTime fromUtc,
         DateTime toUtc,
         int? activityTypeId,
-        int? myInstructorId)
+        int myInstructorId,
+        int? scopeInstructorId,
+        int? leadInstructorId)
     {
         const string sql = @"
 SELECT
@@ -96,6 +98,7 @@ SELECT
     inst.EndUtc,
     ISNULL(inst.RoomsCount, 0) AS RoomsCount,
     ISNULL(inst.RequiredInstructors, 0) AS RequiredInstructors,
+
     (
         SELECT COUNT(1)
         FROM dbo.Assignments ax
@@ -104,13 +107,25 @@ SELECT
           AND (ax.CancelledAtUtc IS NULL)
     ) AS AssignedInstructors,
 
-    CASE WHEN @myInstructorId IS NOT NULL AND EXISTS (
+    (SELECT TOP 1 ass.AssignmentId FROM dbo.Assignments ass
+     WHERE ass.InstanceId   = inst.InstanceId
+       AND ass.InstructorId = @myInstructorId
+       AND ass.Status       = 'Approved'
+       AND ass.CancelledAtUtc IS NULL) AS MyAssignmentId,
+
+    (SELECT TOP 1 ar.AvailabilityId FROM dbo.AvailabilityRequests ar
+     WHERE ar.InstanceId = inst.InstanceId AND ar.InstructorId = @myInstructorId) AS AvailabilityId,
+
+    (SELECT TOP 1 ar.Status FROM dbo.AvailabilityRequests ar
+     WHERE ar.InstanceId = inst.InstanceId AND ar.InstructorId = @myInstructorId) AS AvailabilityStatus,
+
+    CASE WHEN EXISTS (
         SELECT 1 FROM dbo.AvailabilityRequests ar
         WHERE ar.InstanceId = inst.InstanceId
           AND ar.InstructorId = @myInstructorId
     ) THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS HasAvailability,
 
-    CASE WHEN @myInstructorId IS NOT NULL AND EXISTS (
+    CASE WHEN EXISTS (
         SELECT 1 FROM dbo.Assignments am
         WHERE am.InstanceId = inst.InstanceId
           AND am.InstructorId = @myInstructorId
@@ -127,16 +142,21 @@ WHERE inst.StartUtc >= @fromUtc
   AND inst.StartUtc <  @toUtc
   AND (@activityTypeId IS NULL OR a.ActivityTypeId = @activityTypeId)
 
-  -- ✅ Certification filter (your requirement):
-  -- If myInstructorId is provided => show only activities whose CourseId is mapped to the instructor in InstructorCourses.
+  -- ✅ INSTRUCTOR menu scope (certification):
   AND (
-        @myInstructorId IS NULL
+        @scopeInstructorId IS NULL
         OR EXISTS (
             SELECT 1
             FROM dbo.InstructorCourses ic
             WHERE ic.CourseId = a.CourseId
-              AND ic.InstructorId = @myInstructorId
+              AND ic.InstructorId = @scopeInstructorId
         )
+      )
+
+  -- ✅ LEAD menu scope:
+  AND (
+        @leadInstructorId IS NULL
+        OR a.LeadInstructorId = @leadInstructorId
       )
 
 ORDER BY inst.StartUtc;";
@@ -147,7 +167,10 @@ ORDER BY inst.StartUtc;";
             fromUtc,
             toUtc,
             activityTypeId,
-            myInstructorId
+            myInstructorId,
+            scopeInstructorId,
+            leadInstructorId
         });
     }
+
 }

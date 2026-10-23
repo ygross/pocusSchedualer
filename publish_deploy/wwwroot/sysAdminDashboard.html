@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Dashboard</title>
+  <link rel="stylesheet" href="css/SysAdminShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">SysAdmin Dashboard — live system health, today's activity stats, infrastructure info.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">🖥 SysAdmin Dashboard</div>
+      <div class="subtitle">System health · Real-time stats</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Active Instructors</div><div id="statInstructors" class="stat-value blue">—</div></div>
+    <div class="stat-card"><div class="stat-label">Emails Sent Today</div><div id="statEmailsSent" class="stat-value green">—</div></div>
+    <div class="stat-card"><div class="stat-label">Emails Failed Today</div><div id="statEmailsFailed" class="stat-value red">—</div></div>
+    <div class="stat-card"><div class="stat-label">Audit Actions Today</div><div id="statAudit" class="stat-value amber">—</div></div>
+    <div class="stat-card"><div class="stat-label">Uptime (min)</div><div id="statUptime" class="stat-value purple">—</div></div>
+  </div>
+
+  <div class="toolbar-row">
+    <button id="refreshBtn" class="btn" type="button">🔄 Refresh</button>
+    <span id="lastRefresh" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap">
+    <div class="info-card" id="appCard">
+      <h3>Application</h3>
+      <div class="info-grid" id="appGrid"><div class="info-key">Loading…</div><div></div></div>
+    </div>
+    <div class="info-card" id="dbCard">
+      <h3>Database</h3>
+      <div class="info-grid" id="dbGrid"><div class="info-key">Loading…</div><div></div></div>
+    </div>
+  </div>
+</div>
+<script src="js/sysAdminDashboard.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

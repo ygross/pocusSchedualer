@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>סוגי פעילויות</title>
+  <link rel="stylesheet" href="css/activityTypes.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+<body>
+<header>
+  <div class="hcol">
+    <div class="purpose">ייעוד הדף: ניהול סוגי פעילויות (Activity Types) – הוספה, עריכה ומחיקה מול ה־API.</div>
+    <div style="font-weight:800">SimPocus Scheduler • Activity Types</div>
+    <div class="purpose">API בסיס: <span class="mono" id="apiBaseLabel">...</span></div>
+  </div>
+  <div class="userbox">
+    <div id="meLine">משתמש: טוען…</div>
+    <div id="roleLine">תפקיד: טוען…</div>
+    <div id="healthLine">DB: טוען…</div>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>
+      <span>הוספה / עריכה</span>
+      <span class="badge" id="modeBadge">מצב: חדש</span>
+    </h2>
+
+    <div class="row">
+      <div class="field">
+        <label for="typeName">שם סוג פעילות</label>
+        <input id="typeName" type="text" placeholder="לדוגמה: חיצוני / פקולטה / מד״א / אולטרסאונד..." />
+        <div class="msg muted">נשמר בטבלה: <span class="mono">dbo.ActivityTypes.TypeName</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="btnSave" type="button">שמור</button>
+        <button class="secondary" id="btnClear" type="button">נקה</button>
+      </div>
+    </div>
+
+    <div class="msg muted" id="formMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>
+      <span>רשימה</span>
+      <span class="badge" id="countBadge">סה״כ: 0</span>
+    </h2>
+
+    <div class="row">
+      <div class="field" style="min-width:320px;flex:2">
+        <label for="q">חיפוש</label>
+        <input id="q" type="text" placeholder="חיפוש לפי שם סוג פעילות..." />
+      </div>
+      <div class="actions">
+        <button class="secondary" id="btnRefresh" type="button">רענן</button>
+      </div>
+    </div>
+
+    <div style="overflow:auto;max-height:55vh;border-radius:10px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px">#</th>
+            <th>שם סוג פעילות</th>
+            <th style="width:240px">פעולות</th>
+          </tr>
+        </thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </div>
+
+    <div class="msg muted" id="listMsg"></div>
+  </section>
+
+</main>
+
+<script src="js/activityTypes.js"></script>
+</body>
+</html>

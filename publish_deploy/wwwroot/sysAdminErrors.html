@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — Errors</title>
+  <link rel="stylesheet" href="css/SysAdminShared.css?v=1" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">Errors — failed email sends and exhausted OTP attempts. Both indicate delivery or auth problems.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">🚨 Errors</div>
+      <div class="subtitle">Failed sends · Auth failures</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">Logged in</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Failed Email Sends</div><div id="statEmailFails" class="stat-value red">—</div></div>
+    <div class="stat-card"><div class="stat-label">Exhausted OTPs</div><div id="statOtpFails" class="stat-value amber">—</div></div>
+  </div>
+
+  <div class="toolbar-row">
+    <select id="filterDays">
+      <option value="1">Last 24h</option>
+      <option value="7" selected>Last 7 days</option>
+      <option value="30">Last 30 days</option>
+    </select>
+    <button id="loadBtn" class="btn btn-primary" type="button">🔍 Load</button>
+    <span id="summaryLine" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="section-title">Failed Email Sends</div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr>
+        <th>Log ID</th><th>Email ID</th><th>To</th><th>Subject</th>
+        <th>Provider</th><th>Attempt</th><th>Fail Reason</th><th>Time (UTC)</th>
+      </tr></thead>
+      <tbody id="emailBody"><tr><td colspan="8" class="empty-row">Click Load</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Exhausted OTP Attempts</div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr>
+        <th>OTP ID</th><th>Email</th><th>Attempts</th><th>Max</th><th>Used</th><th>Expires (UTC)</th><th>Created (UTC)</th>
+      </tr></thead>
+      <tbody id="otpBody"><tr><td colspan="7" class="empty-row">Click Load</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="js/sysAdminErrors.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>

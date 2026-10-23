@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin Module Home</title>
+<style>
+:root{--nav:#0b2c66;--bg:#f4f7fb;--card:#fff;--line:#dbe4f0;--muted:#64748b;--ok:#16a34a}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#0f172a}
+header{background:linear-gradient(180deg,#0b2c66,#082247);color:#fff;padding:18px 22px}
+header h1{margin:0;font-size:30px} header p{margin:8px 0 0;opacity:.95}
+main{max-width:1280px;margin:0 auto;padding:20px;display:grid;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 28px rgba(15,23,42,.06)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+h2{margin:0 0 10px;color:var(--nav)} .muted{color:var(--muted)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:10px}
+.item b{display:block;margin-bottom:4px}
+.badge{padding:5px 10px;border-radius:999px;background:#eaf7ee;color:var(--ok);font-size:12px;font-weight:700;white-space:nowrap}
+.note{font-size:14px;line-height:1.6}
+</style>
+<link rel="stylesheet" href="css/shared.css?v=4" />
+</head>
+<body>
+<header>
+  <h1>מרכז בקרה – מודול Admin</h1>
+  <p>ייעוד הדף: דף כניסה למודול האדמין. מכאן ניגשים לכל דפי הניהול, מחולקים לפי פעילויות, מדריכים ודוחות.</p>
+</header>
+<main>
+  <section class="card note">
+    <h2>מה עודכן במודול</h2>
+    <div>הוסר פריט התפריט <b>אישור מדריך חדש</b> מהניווט הראשי של Admin. התפריט מחולק כעת ל־<b>פעילויות</b>, <b>מדריכים</b> ו־<b>דוחות</b>. עודכנו גם הפניות API ישנות מסוג <code>api/api</code> כדי שהעמודים הראשיים של Admin יוכלו לעבוד מתוך הנתיב של האפליקציה.</div>
+  </section>
+
+  <section class="grid">
+    <section class="card">
+      <h2>פעילויות</h2>
+      <div class="item"><div><b>הוספת פעילות</b><div class="muted">יצירת פעילות ומופעים</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>עדכון / מחיקה פעילויות</b><div class="muted">עריכת פעילות, מופעים ומחיקת Admin</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>שיבוץ פעילויות</b><div class="muted">בחירת מדריכים ושיבוץ למופעים</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>סוגי פעילויות</b><div class="muted">ניהול רשימת activity types</div></div><span class="badge">מוכן לבדיקה</span></div>
+    </section>
+
+    <section class="card">
+      <h2>מדריכים</h2>
+      <div class="item"><div><b>ניהול הסמכות מדריכים</b><div class="muted">שיוך הסמכות וסטטוסים</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>הוספת מדריך</b><div class="muted">יצירת מדריך חדש יזומה על ידי Admin</div></div><span class="badge">מוכן לבדיקה</span></div>
+    </section>
+
+    <section class="card">
+      <h2>דוחות</h2>
+      <div class="item"><div><b>דוח מדריכים</b><div class="muted">סיכום שעות, הסמכות וקורסים</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>דוח שעות מנהלה</b><div class="muted">תצוגת שעות ופעילויות</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>גאנט פעילויות</b><div class="muted">מבט רוחבי על מופעים</div></div><span class="badge">מוכן לבדיקה</span></div>
+      <div class="item"><div><b>דוח עומסים</b><div class="muted">עומס שיבוצים ושעות</div></div><span class="badge">מוכן לבדיקה</span></div>
+    </section>
+  </section>
+</main>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
+</body>
+</html>

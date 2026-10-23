@@ -5,9 +5,9 @@
 // - Search expects nameContains (not name).  :contentReference[oaicite:2]{index=2}
 // - Hard delete should be separated from soft delete, e.g. DELETE /api/admin/activities/{id}
 
-const baseDir = "/simcenter/PocusSchedualer";
-const API_BASE = `${window.location.origin}${baseDir}/api/api`;
-const ADMIN_API_BASE = `${window.location.origin}${baseDir}/api/api/admin`;
+const baseDir = window.location.pathname.replace(/\/[^\/]*$/, "");
+const API_BASE = `${baseDir}/api/api`;
+const ADMIN_API_BASE = `${baseDir}/api/api/admin`;
 
 const $ = (id) => document.getElementById(id);
 

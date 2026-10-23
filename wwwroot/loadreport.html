@@ -1,9 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<title>דוח עומסים – PocusSchedualer</title>
+<title>דוח עומסים – simCenterSchedualer</title>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/shared.css?v=4" />
 </head>
 <body>
 <div class="app">
@@ -110,7 +111,7 @@ ${rows}
 
 מצורף גם פירוט מופעים בדף.
 
-PocusSchedualer`;
+simCenterSchedualer`;
 
   document.getElementById("modalMail").textContent = mail;
   openModal("#modal1");
@@ -136,5 +137,7 @@ render();
 <script src="js/ui.js"></script>
 <script src="js/app.js"></script>
 <script>requireUser();</script>
+  <script src="js/page-collapse.js"></script>
+  <script src="js/page-timestamp.js"></script>
 </body>
 </html>

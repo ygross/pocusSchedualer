@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>הגדרות מערכת – SimPocus</title>
+  <link rel="stylesheet" href="css/settings.css" />
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div>
+        <div class="page-purpose">ייעוד הדף: ניהול הגדרות מערכת – מייל, WhatsApp, זמינות, ביטולים ומערכת.</div>
+        <div class="page-title">SimPocus Scheduler · הגדרות מערכת</div>
+        <div class="page-sub">Admin בלבד · שינויים נכנסים לתוקף מיידית</div>
+      </div>
+      <div class="user-info">
+        <div id="meLine">טוען...</div>
+        <div id="apiLine" style="font-size:11px;opacity:.7"></div>
+      </div>
+    </div>
+
+    <div id="globalMsg" class="msg" style="display:none"></div>
+
+    <div id="catsGrid" class="cats-grid">
+      <div class="cat-card" style="grid-column:1/-1;padding:18px;color:var(--muted);font-size:14px">טוען הגדרות...</div>
+    </div>
+
+  </div>
+  <script src="js/settings.js"></script>
+</body>
+</html>

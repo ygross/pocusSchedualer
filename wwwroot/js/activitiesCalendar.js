@@ -1,75 +1,50 @@
 /**
- * activitiesCalendar.js
+ * activitiesCalendar.js (INSTRUCTOR PAGE)
  * ------------------------------------------------------------
- * ייעוד: הצגת קלנדר חודשי של מופעי פעילויות למדריך, כולל הצעת/ביטול זמינות מול DB.
+ * State logic (STRICT priority):
+ * 1) IsAssignedToMe => GREEN + no buttons
+ * 2) HasAvailability => ORANGE + "הסר זמינות" + note
+ * 3) default => BLUE + "הצע זמינות"
  *
- * מקורות מידע:
- * - GET  /api/activities/calendar?from=&to=&activityTypeId=
- *   מחזיר מערך ActivityCalendarItemDto (כולל הדגלים):
- *   - hasAvailability  (bool)  -> המדריך הציע זמינות
- *   - isAssignedToMe   (bool)  -> המדריך משובץ (נעילה)
+ * Works even if user is Admin/Lead, because we NEVER use role to color.
  *
- * פעולות:
- * - POST   /api/api/activity-instances/{instanceId}/availability  -> הצע זמינות (DB)
- * - DELETE /api/api/activity-instances/{instanceId}/availability  -> בטל זמינות (DB)
- *
- * כללי UI:
- * - isAssignedToMe === true  => ירוק, ללא כפתורים
- * - אחרת, hasAvailability===true => חום + כפתור "בטל זמינות"
- * - אחרת => כחול + כפתור "הצע זמינות"
+ * Requires calendar API to return:
+ * - HasAvailability / hasAvailability
+ * - IsAssignedToMe / isAssignedToMe
  */
 
 const $ = (id) => document.getElementById(id);
 
-const APP_PATH = new URL(".", window.location.href).pathname; // .../PocusSchedualer/
-const API_CANDIDATES = [
-  `${window.location.origin}${APP_PATH}api`,
-  `${window.location.origin}${APP_PATH}api/api`
-];
-
-let API_BASE = API_CANDIDATES[0];
-let ME = null;
-
 function setStatus(text, kind = "") {
   const el = $("status");
-  el.className = "msg" + (kind ? " " + kind : "");
+  if (!el) return;
+  el.className = "msg" + (kind ? ` ${kind}` : "");
   el.textContent = text || "";
 }
 
 function pad2(n) { return String(n).padStart(2, "0"); }
-
+function fmtTime(dt) {
+  if (!dt) return "";
+  const d = new Date(dt);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
 function formatMonthYear(year, monthIndex) {
   const monthsHe = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
   return `${monthsHe[monthIndex]} ${year}`;
 }
-
-function daysInMonth(year, monthIndex) {
-  return new Date(year, monthIndex + 1, 0).getDate();
-}
-
-function firstDow(year, monthIndex) {
-  return new Date(year, monthIndex, 1).getDay(); // 0=Sun..6=Sat
-}
-
+function daysInMonth(year, monthIndex) { return new Date(year, monthIndex + 1, 0).getDate(); }
+function firstDow(year, monthIndex) { return new Date(year, monthIndex, 1).getDay(); }
 function esc(s) {
   return (s ?? "").toString()
     .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
     .replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
 
-function fmtTime(dt) {
-  if (!dt) return "";
-  const d = new Date(dt);
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+async function http(url, opts = {}) {
+  return fetch(url, { credentials: "include", ...opts });
 }
-
-async function fetchTry(url, opts = {}) {
-  return await fetch(url, { credentials: "include", ...opts });
-}
-
 async function httpJson(url, opts = {}) {
-  const res = await fetch(url, {
-    credentials: "include",
+  const res = await http(url, {
     headers: { "Accept": "application/json", ...(opts.headers || {}) },
     ...opts
   });
@@ -81,62 +56,174 @@ async function httpJson(url, opts = {}) {
   if (ct.includes("application/json")) return await res.json();
   return null;
 }
-
-/**
- * Endpoints builder
- * NOTE:
- * - API_BASE is expected to be .../api  (because /api/me exists there)
- * - availability endpoints are under /api/api/... in your backend,
- *   therefore we use `${API_BASE}/api/...`
- */
-function EP() {
-  return {
-    me: `${API_BASE}/me`,
-    activityTypes: `${API_BASE}/api/activity-types`,
-    calendar: (fromIso, toIso, activityTypeId) => {
-      const qs = new URLSearchParams();
-      qs.set("from", fromIso);
-      qs.set("to", toIso);
-      if (activityTypeId) qs.set("activityTypeId", activityTypeId);
-      return `${API_BASE}/activities/calendar?${qs.toString()}`;
-    },
-    proposeAvailability: (instanceId) => `${API_BASE}/api/activity-instances/${instanceId}/availability`,
-    cancelAvailability:  (instanceId) => `${API_BASE}/api/activity-instances/${instanceId}/availability`,
-  };
+async function probe(url) {
+  try {
+    const r = await http(url, { method: "GET", headers: { "Accept": "application/json" } });
+    if (r.status === 404) return false;
+    return [200, 201, 204, 400, 401, 403, 405].includes(r.status);
+  } catch {
+    return false;
+  }
 }
 
-async function detectApiBase() {
-  for (const cand of API_CANDIDATES) {
-    const res = await fetchTry(`${cand}/me`);
-    if (res.ok || res.status === 401) {
-      API_BASE = cand;
-      $("apiBase").textContent = API_BASE;
-      return;
+function getBaseDir() {
+  const u = new URL(".", window.location.href);
+  return u.pathname.endsWith("/") ? u.pathname : (u.pathname + "/");
+}
+
+const origin = window.location.origin;
+const baseDir = getBaseDir();
+
+// ---- Page mode (Instructor menu page)
+const CALENDAR_MODE = "instructor";
+
+// ---- API roots (try to find calendar endpoint)
+const ROOTS = [
+  `${origin}${baseDir}api/api`,
+  `${origin}${baseDir}api`,
+  `${origin}${baseDir}api/api/api`,
+];
+
+const EP = {
+  base: null,
+  me: null,
+  activityTypes: null,
+  calBase: null, // no query
+};
+
+function setApiDebug() {
+  const el = $("apiBase");
+  if (el) el.textContent = EP.base || "(API לא זוהה)";
+}
+
+async function discoverBase() {
+  const now = new Date();
+  const fromIso = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}T00:00:00`;
+  const toD = new Date(now.getTime() + 24*60*60*1000);
+  const toIso = `${toD.getFullYear()}-${pad2(toD.getMonth()+1)}-${pad2(toD.getDate())}T00:00:00`;
+
+  for (const r of ROOTS) {
+    const urlA = `${r}/activities/calendar?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}&mode=${encodeURIComponent(CALENDAR_MODE)}`;
+    const urlB = `${r}/api/activities/calendar?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}&mode=${encodeURIComponent(CALENDAR_MODE)}`;
+
+    if (await probe(urlA)) { EP.base = r; EP.calBase = `${r}/activities/calendar`; break; }
+    if (await probe(urlB)) { EP.base = r; EP.calBase = `${r}/api/activities/calendar`; break; }
+  }
+
+  if (!EP.base) throw new Error("לא נמצא endpoint של Calendar (404). בדוק מיפוי ב-Program.cs");
+
+  // optional me
+  const me1 = `${EP.base}/me`;
+  const me2 = `${EP.base}/api/me`;
+  EP.me = (await probe(me1)) ? me1 : ((await probe(me2)) ? me2 : null);
+
+  // optional activity-types
+  const t1 = `${EP.base}/activity-types`;
+  const t2 = `${EP.base}/api/activity-types`;
+  EP.activityTypes = (await probe(t1)) ? t1 : ((await probe(t2)) ? t2 : null);
+
+  setApiDebug();
+}
+
+function calendarUrl(fromIso, toIso, activityTypeId) {
+  const qs = new URLSearchParams();
+  qs.set("from", fromIso);
+  qs.set("to", toIso);
+  if (activityTypeId) qs.set("activityTypeId", activityTypeId);
+  qs.set("mode", CALENDAR_MODE);
+  return `${EP.calBase}?${qs.toString()}`;
+}
+
+/* ----------------------------
+   Availability route auto-fix
+----------------------------- */
+
+let _availabilityBaseWorking = null;
+
+function availabilityCandidates(instanceId) {
+  const b = EP.base;
+
+  const basePrefixes = [
+    _availabilityBaseWorking,
+    `${b}/api`,
+    `${b}`,
+    b.endsWith("/api") ? b.replace(/\/api$/, "/api/api") : `${b}/api/api`,
+    b.endsWith("/api/api") ? b.replace(/\/api\/api$/, "/api") : `${b}/api`,
+    b.replace(/\/api\/api$/, "/api"),
+    b.replace(/\/api$/, ""),
+  ].filter(Boolean);
+
+  const paths = [
+    // newer instructor routes (if you have them):
+    `/instructors/instances/${instanceId}/availability`,
+
+    // older routes:
+    `/activity-instances/${instanceId}/availability`,
+    `/activities/activity-instances/${instanceId}/availability`,
+    `/activities/instances/${instanceId}/availability`,
+    `/availability/activity-instances/${instanceId}`,
+    `/availability/${instanceId}`,
+  ];
+
+  const urls = [];
+  for (const prefix of basePrefixes) {
+    for (const p of paths) urls.push(`${prefix}${p}`);
+  }
+  return [...new Set(urls)];
+}
+
+async function callAvailability(instanceId, method) {
+  const tries = availabilityCandidates(instanceId);
+  let lastErr = null;
+
+  for (const url of tries) {
+    try {
+      const res = await http(url, { method, headers: { "Accept": "application/json" } });
+      if (res.status === 404) { lastErr = new Error(`404 ${url}`); continue; }
+      if (res.ok) return { ok: true, usedUrl: url };
+
+      const t = await res.text().catch(() => "");
+      throw new Error(`${res.status} ${t}`.trim());
+    } catch (e) {
+      lastErr = e;
     }
   }
-  $("apiBase").textContent = API_BASE;
+
+  throw new Error(`לא נמצא Route לזמינות (${method}).\nדוגמה: ${tries[0]}\nאחרון: ${lastErr?.message || "unknown"}`);
 }
 
+/* ----------------------------
+   Loaders
+----------------------------- */
+
 async function loadMe() {
+  if (!EP.me) {
+    $("meName").textContent = "לא ידוע";
+    $("meRole").textContent = "-";
+    return;
+  }
   try {
-    ME = await httpJson(EP().me);
-    $("meName").textContent = ME.fullName || ME.email || "לא ידוע";
-    $("meRole").textContent = ME.roleName || "-";
+    const me = await httpJson(EP.me);
+    $("meName").textContent = me.fullName || me.email || "לא ידוע";
+    $("meRole").textContent = me.roleName || me.role || "-";
   } catch {
-    ME = null;
     $("meName").textContent = "לא מחובר";
     $("meRole").textContent = "-";
   }
 }
 
 async function loadActivityTypes() {
+  const sel = $("activityTypeId");
+  if (!sel || !EP.activityTypes) return;
   try {
-    const items = await httpJson(EP().activityTypes);
-    const sel = $("activityTypeId");
-    for (const it of (items || [])) {
+    const items = await httpJson(EP.activityTypes);
+    for (const raw of (items || [])) {
+      const id = raw.activityTypeId ?? raw.ActivityTypeId;
+      const name = raw.typeName ?? raw.TypeName ?? `סוג #${id}`;
+      if (id == null) continue;
       const opt = document.createElement("option");
-      opt.value = String(it.activityTypeId);
-      opt.textContent = it.typeName;
+      opt.value = String(id);
+      opt.textContent = name;
       sel.appendChild(opt);
     }
   } catch {
@@ -149,12 +236,12 @@ function setPickerToToday() {
   $("monthPicker").value = `${t.getFullYear()}-${pad2(t.getMonth() + 1)}`;
 }
 
+/** local-like ISO without Z */
 function monthRangeLocal(ym) {
   const [y, m] = ym.split("-").map(Number);
   const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
   const end = new Date(y, m, 1, 0, 0, 0, 0);
 
-  // send "local-like" ISO (without Z). Program.cs converts local -> UTC.
   const toIsoLocal = (d) => {
     const yyyy = d.getFullYear();
     const mm = pad2(d.getMonth() + 1);
@@ -178,31 +265,144 @@ function groupByDay(instances) {
   }
   for (const [k, arr] of map.entries()) {
     arr.sort((a, b) => new Date(a.startUtc) - new Date(b.startUtc));
-    map.set(k, arr);
   }
   return map;
 }
 
-/**
- * Applies UI status classes based on server flags.
- * @param {HTMLDivElement} instEl
- * @param {any} it
- */
-function applyStatusClasses(instEl, it) {
-  instEl.classList.remove("assigned", "proposed");
-  if (it.isAssignedToMe) instEl.classList.add("assigned");
-  else if (it.hasAvailability) instEl.classList.add("proposed");
+function normalizeInstance(raw) {
+  return {
+    activityInstanceId: raw.activityInstanceId ?? raw.ActivityInstanceId,
+    activityId: raw.activityId ?? raw.ActivityId,
+    activityName: raw.activityName ?? raw.ActivityName,
+    courseId: raw.courseId ?? raw.CourseId,
+    leadInstructorName: raw.leadInstructorName ?? raw.LeadInstructorName,
+    startUtc: raw.startUtc ?? raw.StartUtc,
+    endUtc: raw.endUtc ?? raw.EndUtc,
+    roomsCount: raw.roomsCount ?? raw.RoomsCount,
+    requiredInstructors: raw.requiredInstructors ?? raw.RequiredInstructors,
+    assignedInstructors: raw.assignedInstructors ?? raw.AssignedInstructors,
+
+    // the only two fields that control coloring/buttons:
+    hasAvailability: !!(raw.hasAvailability ?? raw.HasAvailability),
+    isAssignedToMe: !!(raw.isAssignedToMe ?? raw.IsAssignedToMe),
+  };
 }
 
-function renderCalendar(year, monthIndex, instances) {
+/* ----------------------------
+   State logic (THE FIX)
+----------------------------- */
+
+function resolveInstanceState(it) {
+  // strict priority
+  if (it.isAssignedToMe === true) return "assigned"; // green
+  if (it.hasAvailability === true) return "proposed"; // orange
+  return "default"; // blue
+}
+
+function applyState(instEl, state) {
+  instEl.classList.remove("default", "proposed", "assigned");
+  instEl.classList.add(state);
+}
+
+function animate(instEl) {
+  instEl.classList.remove("anim-pop", "anim-pulse");
+  void instEl.offsetWidth; // restart animation
+  instEl.classList.add("anim-pop", "anim-pulse");
+  setTimeout(() => instEl.classList.remove("anim-pop", "anim-pulse"), 750);
+}
+
+function renderInstanceActions(it, instEl, actionsEl, noteEl) {
+  // clear previous buttons area (keep meta already inserted outside if needed)
+  // Here actionsEl is dedicated to buttons area in our renderer
+  actionsEl.innerHTML = "";
+
+  // assigned => no buttons
+  if (it.isAssignedToMe === true) {
+    noteEl.textContent = "שובצת למופע";
+    return;
+  }
+
+  if (it.hasAvailability === true) {
+    noteEl.textContent = "זמינות הוצעה";
+
+    const btn = document.createElement("button");
+    btn.className = "btn-mini";
+    btn.textContent = "הסר זמינות";
+    btn.title = "מוחק את הצעת הזמינות שלך למופע הזה";
+
+    btn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      btn.disabled = true;
+      try {
+        await callAvailability(it.activityInstanceId, "DELETE");
+        it.hasAvailability = false;
+
+        const st = resolveInstanceState(it);
+        applyState(instEl, st);
+        animate(instEl);
+
+        noteEl.textContent = "";
+        setStatus(`הזמינות הוסרה למופע ${it.activityInstanceId}.`, "ok");
+        renderInstanceActions(it, instEl, actionsEl, noteEl);
+      } catch (e) {
+        setStatus(`שגיאה בהסרת זמינות: ${e.message}`, "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    actionsEl.appendChild(btn);
+    return;
+  }
+
+  // default
+  noteEl.textContent = "";
+
+  const btn = document.createElement("button");
+  btn.className = "btn-mini";
+  btn.textContent = "הצע זמינות";
+  btn.title = "מסמן שהמדריך המחובר מציע זמינות למופע הזה";
+
+  btn.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    btn.disabled = true;
+    try {
+      await callAvailability(it.activityInstanceId, "POST");
+      it.hasAvailability = true;
+
+      const st = resolveInstanceState(it);
+      applyState(instEl, st);
+      animate(instEl);
+
+      setStatus(`זמינות הוצעה למופע ${it.activityInstanceId}.`, "ok");
+      renderInstanceActions(it, instEl, actionsEl, noteEl);
+    } catch (e) {
+      setStatus(`שגיאה בהצעת זמינות: ${e.message}`, "err");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  actionsEl.appendChild(btn);
+}
+
+/* ----------------------------
+   Render
+----------------------------- */
+
+function renderCalendar(year, monthIndex, rawInstances) {
   $("calTitle").textContent = formatMonthYear(year, monthIndex);
+
   const grid = $("grid");
   grid.innerHTML = "";
 
-  const first = firstDow(year, monthIndex);
-  const days = daysInMonth(year, monthIndex);
+  const instances = (rawInstances || []).map(normalizeInstance);
   const dayMap = groupByDay(instances);
 
+  const first = firstDow(year, monthIndex);
+  const days = daysInMonth(year, monthIndex);
+
+  // leading blanks
   for (let i = 0; i < first; i++) {
     const cell = document.createElement("div");
     cell.className = "day";
@@ -224,25 +424,13 @@ function renderCalendar(year, monthIndex, instances) {
     const key = `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
     const arr = dayMap.get(key) || [];
 
-    for (const raw of arr) {
-      // Normalize potential casing differences
-      const it = {
-        activityInstanceId: raw.activityInstanceId ?? raw.ActivityInstanceId,
-        activityId: raw.activityId ?? raw.ActivityId,
-        activityName: raw.activityName ?? raw.ActivityName,
-        courseId: raw.courseId ?? raw.CourseId,
-        leadInstructorName: raw.leadInstructorName ?? raw.LeadInstructorName,
-        startUtc: raw.startUtc ?? raw.StartUtc,
-        endUtc: raw.endUtc ?? raw.EndUtc,
-        roomsCount: raw.roomsCount ?? raw.RoomsCount,
-        requiredInstructors: raw.requiredInstructors ?? raw.RequiredInstructors,
-        hasAvailability: !!(raw.hasAvailability ?? raw.HasAvailability),
-        isAssignedToMe: !!(raw.isAssignedToMe ?? raw.IsAssignedToMe),
-      };
-
+    for (const it of arr) {
       const inst = document.createElement("div");
       inst.className = "inst";
-      applyStatusClasses(inst, it);
+
+      // ✅ apply correct state on first render (fix for refresh)
+      const state = resolveInstanceState(it);
+      applyState(inst, state);
 
       const top = document.createElement("div");
       top.className = "inst-top";
@@ -261,79 +449,42 @@ function renderCalendar(year, monthIndex, instances) {
 
       const pills = document.createElement("div");
       pills.className = "pills";
-
-      const rooms = Number(it.roomsCount ?? 0);
-      const req = Number(it.requiredInstructors ?? 0);
-
       pills.innerHTML = `
-        <span class="pill">חדרים: ${rooms}</span>
-        <span class="pill">נדרשים: ${req}</span>
+        <span class="pill">חדרים: ${Number(it.roomsCount ?? 0)}</span>
+        <span class="pill">נדרשים: ${Number(it.requiredInstructors ?? 0)}</span>
+        <span class="pill muted">שובצו: ${Number(it.assignedInstructors ?? 0)}</span>
         <span class="pill muted">מרכז: ${esc(it.leadInstructorName || "—")}</span>
       `;
 
-      const actions = document.createElement("div");
-      actions.className = "actions";
+      const actionsWrap = document.createElement("div");
+      actionsWrap.className = "actions";
 
       const meta = document.createElement("div");
       meta.className = "small";
       meta.textContent = `מופע #${it.activityInstanceId} · פעילות #${it.activityId} · קורס #${it.courseId}`;
 
-      actions.appendChild(meta);
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.gap = "10px";
+      right.style.alignItems = "center";
 
-      // ✅ RULE: if assigned => green + NO buttons
-      if (!it.isAssignedToMe) {
-        if (it.hasAvailability) {
-          // brown + cancel
-          const btnCancel = document.createElement("button");
-          btnCancel.className = "btn-mini cancel";
-          btnCancel.textContent = "בטל זמינות";
-          btnCancel.title = "מבטל את הצעת הזמינות שלך למופע הזה";
+      const note = document.createElement("div");
+      note.className = "small";
 
-          btnCancel.addEventListener("click", async (ev) => {
-            ev.stopPropagation();
-            try {
-              btnCancel.disabled = true;
-              await httpJson(EP().cancelAvailability(it.activityInstanceId), { method: "DELETE" });
-              it.hasAvailability = false;
-              applyStatusClasses(inst, it);
-              setStatus(`בוטלה זמינות למופע ${it.activityInstanceId}.`, "ok");
-            } catch (e) {
-              setStatus(`שגיאה בביטול זמינות: ${e.message}`, "err");
-            } finally {
-              btnCancel.disabled = false;
-            }
-          });
+      const btnBox = document.createElement("div"); // buttons go here
 
-          actions.appendChild(btnCancel);
-        } else {
-          // blue + propose
-          const btnPropose = document.createElement("button");
-          btnPropose.className = "btn-mini primary";
-          btnPropose.textContent = "הצע זמינות";
-          btnPropose.title = "מסמן שהמדריך המחובר מציע זמינות למופע הזה";
+      right.appendChild(note);
+      right.appendChild(btnBox);
 
-          btnPropose.addEventListener("click", async (ev) => {
-            ev.stopPropagation();
-            try {
-              btnPropose.disabled = true;
-              await httpJson(EP().proposeAvailability(it.activityInstanceId), { method: "POST" });
-              it.hasAvailability = true;
-              applyStatusClasses(inst, it);
-              setStatus(`זמינות הוצעה למופע ${it.activityInstanceId}.`, "ok");
-            } catch (e) {
-              setStatus(`שגיאה בהצעת זמינות: ${e.message}`, "err");
-            } finally {
-              btnPropose.disabled = false;
-            }
-          });
+      actionsWrap.appendChild(meta);
+      actionsWrap.appendChild(right);
 
-          actions.appendChild(btnPropose);
-        }
-      }
+      // ✅ render buttons based on state
+      renderInstanceActions(it, inst, btnBox, note);
 
       inst.appendChild(top);
       inst.appendChild(pills);
-      inst.appendChild(actions);
+      inst.appendChild(actionsWrap);
 
       list.appendChild(inst);
     }
@@ -342,11 +493,11 @@ function renderCalendar(year, monthIndex, instances) {
     grid.appendChild(cell);
   }
 
+  // trailing blanks
   const totalCells = first + days;
-  const remainder = totalCells % 7;
-  if (remainder !== 0) {
-    const add = 7 - remainder;
-    for (let i = 0; i < add; i++) {
+  const rem = totalCells % 7;
+  if (rem !== 0) {
+    for (let i = 0; i < 7 - rem; i++) {
       const cell = document.createElement("div");
       cell.className = "day";
       grid.appendChild(cell);
@@ -354,21 +505,21 @@ function renderCalendar(year, monthIndex, instances) {
   }
 }
 
+/* ----------------------------
+   Refresh
+----------------------------- */
+
 async function refresh() {
   const ym = $("monthPicker").value;
-  if (!ym) {
-    setStatus("בחר חודש.", "err");
-    return;
-  }
+  if (!ym) return setStatus("בחר חודש.", "err");
 
   const { fromIso, toIso, y, monthIndex } = monthRangeLocal(ym);
-  const activityTypeId = $("activityTypeId").value || "";
+  const activityTypeId = $("activityTypeId")?.value || "";
 
   try {
     setStatus("טוען מופעים מהשרת…");
-    const data = await httpJson(EP().calendar(fromIso, toIso, activityTypeId));
+    const data = await httpJson(calendarUrl(fromIso, toIso, activityTypeId));
     if (!Array.isArray(data)) throw new Error("תגובה לא תקינה מהשרת (ציפיתי למערך).");
-
     renderCalendar(y, monthIndex, data);
     setStatus(`נטענו ${data.length} מופעים לחודש ${ym}`, "ok");
   } catch (e) {
@@ -376,18 +527,30 @@ async function refresh() {
   }
 }
 
-(async function init() {
-  await detectApiBase();
-  $("apiBase").textContent = API_BASE;
+/* ----------------------------
+   Init
+----------------------------- */
 
+window.requireUser = window.requireUser || (async function requireUser(){ return true; });
+
+(async function init() {
   setPickerToToday();
+
+  try {
+    await discoverBase();
+  } catch (e) {
+    setApiDebug();
+    setStatus(e.message, "err");
+    return;
+  }
+
   await loadMe();
   await loadActivityTypes();
 
-  $("btnReload").addEventListener("click", refresh);
-  $("btnToday").addEventListener("click", async () => { setPickerToToday(); await refresh(); });
-  $("monthPicker").addEventListener("change", refresh);
-  $("activityTypeId").addEventListener("change", refresh);
+  $("btnReload")?.addEventListener("click", refresh);
+  $("btnToday")?.addEventListener("click", async () => { setPickerToToday(); await refresh(); });
+  $("monthPicker")?.addEventListener("change", refresh);
+  $("activityTypeId")?.addEventListener("change", refresh);
 
   await refresh();
 })();

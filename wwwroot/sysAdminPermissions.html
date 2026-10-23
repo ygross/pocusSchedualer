@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SysAdmin — הרשאות מנהל</title>
+  <link rel="stylesheet" href="css/SysAdminshared.css?v=4" />
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+  <style>
+    html,body { direction:rtl }
+    .data-table th { text-align:right }
+    .toolbar-row { direction:rtl }
+    .summary-line { margin-right:8px; margin-left:0 }
+
+    /* Role badges */
+    .role-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap }
+    .rbg-sysadmin { background:rgba(248,113,113,.2); color:var(--red) }
+    .rbg-admin     { background:rgba(251,191,36,.2);  color:var(--amber) }
+    .rbg-cm        { background:rgba(167,139,250,.15); color:var(--purple) }
+    .rbg-inst      { background:var(--panel); color:var(--muted); border:1px solid var(--line) }
+
+    /* Action buttons */
+    .action-group { display:flex; gap:6px; flex-wrap:wrap }
+    .btn-grant-admin { background:rgba(251,191,36,.15); border-color:var(--amber); color:var(--amber) }
+    .btn-grant-admin:hover { background:rgba(251,191,36,.3) }
+    .btn-grant-sys   { background:rgba(248,113,113,.15); border-color:var(--red); color:var(--red) }
+    .btn-grant-sys:hover   { background:rgba(248,113,113,.3) }
+    .btn-grant-cm    { background:rgba(167,139,250,.15); border-color:var(--purple); color:var(--purple) }
+    .btn-grant-cm:hover    { background:rgba(167,139,250,.3) }
+    .btn-revoke      { background:var(--panel); border-color:var(--line2); color:var(--muted) }
+    .btn-revoke:hover { background:var(--btn-hover) }
+    .btn-spin { opacity:.5; cursor:not-allowed }
+
+    .warn-info { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.3);
+      border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:13px; color:var(--amber) }
+
+    .changed-row td { background:rgba(52,211,153,.04) !important }
+
+    /* Inline confirm overlay for dangerous actions */
+    .confirm-row { display:none; font-size:12px; color:var(--red) }
+    .confirm-row.visible { display:flex; gap:8px; align-items:center }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="purpose">מתן הרשאות Admin ו-SysAdmin — שינוי תפקיד יכנס לתוקף מיד, אך המשתמש המושפע יצטרך <b>להתחבר מחדש</b>.</div>
+
+  <header class="topbar">
+    <div class="title-card">
+      <div class="title">🔐 הרשאות מנהל</div>
+      <div class="subtitle">Grant / Revoke Admin · SysAdmin · CourseManager</div>
+    </div>
+    <div class="user-card">
+      <div class="user-info">
+        <div class="user-label">מחובר</div>
+        <div class="user-name" id="meName">…</div>
+        <div class="user-role" id="meRole"></div>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button">🌙</button>
+    </div>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">סה"כ משתמשים</div><div id="statTotal" class="stat-value blue">—</div></div>
+    <div class="stat-card"><div class="stat-label">SysAdmin</div><div id="statSys" class="stat-value red">—</div></div>
+    <div class="stat-card"><div class="stat-label">Admin</div><div id="statAdmin" class="stat-value amber">—</div></div>
+    <div class="stat-card"><div class="stat-label">CourseManager</div><div id="statCM" class="stat-value purple">—</div></div>
+    <div class="stat-card"><div class="stat-label">Instructor</div><div id="statInst" class="stat-value green">—</div></div>
+  </div>
+
+  <div class="warn-info">
+    ⚠ שינוי תפקיד נכנס לתוקף מיד בצד השרת — המשתמש המושפע יצטרך <b>להתחבר מחדש</b> כדי שהשינוי ישתקף בסשן שלו.
+  </div>
+
+  <div class="toolbar-row">
+    <input id="searchInput" type="text" placeholder="חיפוש שם / אימייל…" oninput="renderTable()" style="min-width:220px" />
+    <select id="filterRole" onchange="renderTable()">
+      <option value="">כל התפקידים</option>
+      <option value="SystemAdmin">SystemAdmin</option>
+      <option value="Admin">Admin</option>
+      <option value="CourseManager">CourseManager</option>
+      <option value="Instructor">Instructor</option>
+    </select>
+    <button class="btn btn-primary" type="button" onclick="load()">🔄 רענון</button>
+    <span id="summaryLine" class="summary-line"></span>
+  </div>
+
+  <div id="pageMsg" class="msg" style="display:none"></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>שם מלא</th>
+          <th>אימייל</th>
+          <th>מחלקה</th>
+          <th>תפקיד נוכחי</th>
+          <th>שינוי הרשאה</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="5" class="empty-row">לחץ רענון לטעינת נתונים</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="js/sysAdminPermissions.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
+</body>
+</html>
