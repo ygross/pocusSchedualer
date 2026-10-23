@@ -89,6 +89,44 @@
     <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
   </div>
 
+  <!-- v3.7 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.7</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-infra">Deploy</span>
+    </div>
+    <ul class="items">
+      <li><span class="tag tag-infra">deploy</span> גרסת v3.6 הופצה לשרת הייצור (IIS AppPool: PocusSchedualer)</li>
+      <li><span class="tag tag-infra">deploy</span> backend פורסם ל-api/ ו-frontend (HTML/css/js/config) פורסם לשורש</li>
+    </ul>
+  </div>
+
+  <!-- v3.6 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.6</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-fix">Security</span>
+      <span class="v-badge badge-improve">QA</span>
+      <span class="v-badge badge-new">Mobile</span>
+    </div>
+    <ul class="items">
+      <li><span class="tag tag-fix">fix</span> <b>SEC-01:</b> /auth/impersonate — נוספה בדיקת session חובה (privilege escalation fix)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-03:</b> EmailService — תוקן SMTP key שגוי Smtp:EnableSsl → Smtp:UseSsl (OTP לא נשלח)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-07:</b> הוסרו exception messages מתגובות API (information disclosure)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-08:</b> DevBypassEnabled הוגדר false ב-production config</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-09:</b> כתובת מייל hardcoded הוסרה מתגובות API — עבר ל-config (SystemAdmin:SeedEmail)</li>
+      <li><span class="tag tag-improve">improve</span> <b>SEC-10:</b> Migration failures עכשיו מתועדות ב-Critical log (עוזר לאבחן שרת שני)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-03:</b> ממומש DevBypass ב-/auth/otp/verify (קריאה מ-config)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-06:</b> CreateAvailabilityRequests עטוף ב-transaction (data consistency)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-07:</b> UpsertInstructorAvailability — MERGE WITH HOLDLOCK (race condition)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-11:</b> הוסרו candidates כפולים /api/api מ-detectApiBase ב-login-otp.js</li>
+      <li><span class="tag tag-new">mobile</span> login-otp.html — card מותאם לנייד (iPhone SE ומעלה)</li>
+      <li><span class="tag tag-new">mobile</span> activitieslist.css — media query responsive ל-600px (מדריך בנייד)</li>
+    </ul>
+  </div>
+
   <!-- v3.0 -->
   <div class="version">
     <div class="v-head">
