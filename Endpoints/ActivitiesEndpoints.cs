@@ -62,9 +62,9 @@ public static class ActivitiesEndpoints
 
                 return Results.Ok(rows);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -86,9 +86,9 @@ public static class ActivitiesEndpoints
                 var rows = await db.GetGanttAsync(fromUtc, toUtc, activityTypeId, q);
                 return Results.Ok(rows);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -117,9 +117,9 @@ public static class ActivitiesEndpoints
                 var dto = await db.GetActivityForEditAsync(activityId);
                 return dto == null ? Results.NotFound() : Results.Ok(dto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -149,9 +149,9 @@ public static class ActivitiesEndpoints
                 var (ok, err) = await db.UpdateActivityAsync(activityId, dto);
                 return ok ? Results.NoContent() : Results.BadRequest(err);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -191,9 +191,9 @@ public static class ActivitiesEndpoints
                 );
                 return Results.Ok(rows);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -218,9 +218,9 @@ public static class ActivitiesEndpoints
                 var dto = await db.GetActivityForEditAsync(activityId);
                 return dto == null ? Results.NotFound() : Results.Ok(dto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -248,9 +248,9 @@ public static class ActivitiesEndpoints
                 var (ok, err) = await db.UpdateActivityAsync(activityId, dto);
                 return ok ? Results.NoContent() : Results.BadRequest(err);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -260,13 +260,13 @@ public static class ActivitiesEndpoints
         api.MapGet("/courses/by-type/{activityTypeId:int}", async (int activityTypeId, Db db) =>
         {
             try { return Results.Ok(await db.GetCoursesByActivityTypeAsync(activityTypeId)); }
-            catch (Exception ex) { return Results.Problem(ex.Message); }
+            catch (Exception) { return Results.Problem("An error occurred"); }
         });
 
         api.MapGet("/instructors/by-course/{courseId:int}", async (int courseId, Db db) =>
         {
             try { return Results.Ok(await db.GetInstructorsByCourseAsync(courseId)); }
-            catch (Exception ex) { return Results.Problem(ex.Message); }
+            catch (Exception) { return Results.Problem("An error occurred"); }
         });
 
         api.MapGet("/courses", async (Db db) => Results.Ok(await db.GetCoursesAsync()));
@@ -290,7 +290,7 @@ public static class ActivitiesEndpoints
         api.MapGet("/activity-types", async (Db db) =>
         {
             try { return Results.Ok(await db.GetActivityTypesAsync()); }
-            catch (Exception ex) { return Results.Problem(ex.Message); }
+            catch (Exception) { return Results.Problem("An error occurred"); }
         });
 
         api.MapPost("/activity-types", async (ActivityTypeDto dto, Db db) =>
@@ -303,9 +303,9 @@ public static class ActivitiesEndpoints
                 var id = await db.CreateActivityTypeAsync(dto.TypeName.Trim());
                 return Results.Ok(new { activityTypeId = id });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 
@@ -319,9 +319,9 @@ public static class ActivitiesEndpoints
                 var ok = await db.UpdateActivityTypeAsync(id, dto.TypeName.Trim());
                 return ok ? Results.NoContent() : Results.NotFound("ActivityType not found");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
         // =======================
@@ -377,9 +377,9 @@ public static class ActivitiesEndpoints
                 var (ok, err) = await db.DeleteActivityTypeAsync(id);
                 return ok ? Results.NoContent() : Results.BadRequest(err);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("An error occurred");
             }
         });
 

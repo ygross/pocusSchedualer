@@ -144,7 +144,7 @@ public static class AuthEndpoints
             return Results.Ok(new { ok = true, emailId });
         });
 
-        api.MapPost("/auth/otp/verify", async (HttpContext ctx, OtpVerifyDto dto, Db db) =>
+        api.MapPost("/auth/otp/verify", async (HttpContext ctx, OtpVerifyDto dto, Db db, IConfiguration cfg) =>
         {
             var email = dto.Email?.Trim().ToLowerInvariant();
             var code = dto.Code?.Trim();
@@ -152,21 +152,35 @@ public static class AuthEndpoints
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
                 return Results.BadRequest(new { ok = false, error = "Missing email/code" });
 
-            var otp = await db.GetLatestOtpAsync(email);
-            if (otp == null) return Results.Unauthorized();
-
-            var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
-            if (used || attempts >= maxAttempts || DateTime.UtcNow > expires)
-                return Results.Unauthorized();
-
-            var calc = Db.HashOtp(code, salt);
-            if (!CryptographicOperations.FixedTimeEquals(calc, hash))
+            // DevBypass — only active in Development environment
+            var bypassEnabled = cfg.GetValue("Otp:DevBypassEnabled", false);
+            if (bypassEnabled)
             {
-                await db.IncrementOtpAttemptsAsync(email);
-                return Results.Unauthorized();
+                var bypassEmails = cfg.GetSection("Otp:DevBypassEmails").Get<string[]>() ?? [];
+                var bypassCode = cfg.GetValue("Otp:DevBypassCode", "");
+                if (bypassEmails.Contains(email) && code == bypassCode)
+                    goto LoginSuccess;
             }
 
-            await db.MarkOtpUsedAsync(email);
+            {
+                var otp = await db.GetLatestOtpAsync(email);
+                if (otp == null) return Results.Unauthorized();
+
+                var (hash, salt, attempts, maxAttempts, used, expires) = otp.Value;
+                if (used || attempts >= maxAttempts || DateTime.UtcNow > expires)
+                    return Results.Unauthorized();
+
+                var calc = Db.HashOtp(code, salt);
+                if (!CryptographicOperations.FixedTimeEquals(calc, hash))
+                {
+                    await db.IncrementOtpAttemptsAsync(email);
+                    return Results.Unauthorized();
+                }
+
+                await db.MarkOtpUsedAsync(email);
+            }
+
+            LoginSuccess:
 
             var me = await db.GetMeByEmailAsync(email);
             if (me == null) return Results.Unauthorized();
@@ -200,11 +214,12 @@ public static class AuthEndpoints
 
         // Bootstrap: updates DB role to SystemAdmin AND re-issues the cookie immediately.
         // Only works for ygross@bgu.ac.il. No logout/login needed — just reload after calling.
-        api.MapPost("/auth/bootstrap-sysadmin", async (HttpContext ctx, Db db) =>
+        api.MapPost("/auth/bootstrap-sysadmin", async (HttpContext ctx, Db db, IConfiguration cfg2) =>
         {
             if (ctx.User?.Identity?.IsAuthenticated != true) return Results.Unauthorized();
             var email = ctx.User.FindFirstValue(ClaimTypes.Email)?.Trim().ToLowerInvariant();
-            if (email != "ygross@bgu.ac.il") return Results.Forbid();
+            var sysEmail = cfg2["SystemAdmin:SeedEmail"] ?? "ygross@bgu.ac.il";
+            if (email != sysEmail) return Results.Forbid();
 
             await db.EnsureSysAdminSeedAsync();
 
@@ -225,10 +240,14 @@ public static class AuthEndpoints
             return Results.Ok(new { ok = true, roleName = me.RoleName });
         });
 
-        api.MapPost("/auth/impersonate", async (HttpContext ctx, Db db, ImpersonateReq req) =>
+        api.MapPost("/auth/impersonate", async (HttpContext ctx, Db db, IConfiguration cfg, ImpersonateReq req) =>
         {
+            if (ctx.User?.Identity?.IsAuthenticated != true) return Results.Unauthorized();
+            var callerEmail = ctx.User.FindFirstValue(ClaimTypes.Email)?.Trim().ToLowerInvariant();
+            var sysAdminEmail = cfg["SystemAdmin:SeedEmail"] ?? "ygross@bgu.ac.il";
+            if (callerEmail != sysAdminEmail) return Results.Forbid();
             var email = (req.Email ?? string.Empty).Trim().ToLowerInvariant();
-            if (email != "ygross@bgu.ac.il") return Results.Forbid();
+            if (string.IsNullOrWhiteSpace(email)) return Results.BadRequest(new { ok = false, error = "Missing email" });
 
             var me = await db.ImpersonateByEmailAsync(email);
             if (me == null) return Results.Unauthorized();

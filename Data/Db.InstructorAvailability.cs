@@ -47,18 +47,15 @@ SELECT CASE WHEN EXISTS (
         // If your system already uses only 'Approved' for lead decisions,
         // you can still store a 'Submitted' status to represent "offered availability".
         const string sql = @"
-IF EXISTS (SELECT 1 FROM dbo.AvailabilityRequests WHERE InstanceId=@instanceId AND InstructorId=@instructorId)
-BEGIN
-  UPDATE dbo.AvailabilityRequests
-  SET SubmittedAtUtc = SYSUTCDATETIME(),
-      Status = ISNULL(NULLIF(Status,''),'Submitted')
-  WHERE InstanceId=@instanceId AND InstructorId=@instructorId;
-END
-ELSE
-BEGIN
-  INSERT INTO dbo.AvailabilityRequests (InstanceId, InstructorId, Status, SubmittedAtUtc)
-  VALUES (@instanceId, @instructorId, 'Submitted', SYSUTCDATETIME());
-END";
+MERGE dbo.AvailabilityRequests WITH (HOLDLOCK) AS t
+USING (VALUES (@instanceId, @instructorId)) AS s(InstanceId, InstructorId)
+  ON t.InstanceId = s.InstanceId AND t.InstructorId = s.InstructorId
+WHEN MATCHED THEN
+  UPDATE SET SubmittedAtUtc = SYSUTCDATETIME(),
+             Status = ISNULL(NULLIF(t.Status,''),'Submitted')
+WHEN NOT MATCHED THEN
+  INSERT (InstanceId, InstructorId, Status, SubmittedAtUtc)
+  VALUES (@instanceId, @instructorId, 'Submitted', SYSUTCDATETIME());";
 
         await using var c = Open();
         await c.ExecuteAsync(sql, new { instanceId, instructorId });

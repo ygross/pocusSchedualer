@@ -30,11 +30,13 @@ BEGIN
 END";
 
         await using var c = Open();
+        await using var tx = await c.BeginTransactionAsync();
         var inserted = 0;
         foreach (var iid in instructorIds)
         {
-            inserted += await c.ExecuteAsync(sql, new { instanceId, instructorId = iid });
+            inserted += await c.ExecuteAsync(sql, new { instanceId, instructorId = iid }, tx);
         }
+        await tx.CommitAsync();
         return inserted;
     }
 

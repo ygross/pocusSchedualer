@@ -151,7 +151,7 @@ public sealed class EmailService
 
         using var client = new SmtpClient(host)
         {
-            EnableSsl = _cfg.GetValue("Smtp:EnableSsl", true),
+            EnableSsl = _cfg.GetValue("Smtp:UseSsl", false),
             Port = _cfg.GetValue("Smtp:Port", 587),
         };
 

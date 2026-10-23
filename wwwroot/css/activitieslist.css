@@ -99,3 +99,13 @@ body:not(.theme-dark) .btn-mini.danger{border-color:#ef4444;background:#fef2f2;c
 @keyframes pop{0%{transform:scale(.985)}100%{transform:scale(1)}}
 @keyframes pulse{0%{box-shadow:0 0 0 rgba(59,130,246,0)}50%{box-shadow:0 0 0 8px rgba(59,130,246,.12)}100%{box-shadow:0 0 0 rgba(59,130,246,0)}}
 .empty{padding:14px;border:1px dashed var(--border);border-radius:16px;color:var(--muted);background:rgba(128,128,128,.04)}
+@media(max-width:600px){
+  .wrap{padding:10px}
+  .left-card{width:100%}
+  .rowTitle{max-width:100%;white-space:normal;word-break:break-word}
+  .ctrl-row{flex-direction:column;align-items:stretch}
+  .ctrl{flex-direction:column;align-items:stretch}
+  input[type="month"],select{width:100%}
+  .rowTop{flex-direction:column;gap:6px}
+  .sectionTitle{font-size:15px}
+}

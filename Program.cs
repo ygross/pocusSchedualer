@@ -48,9 +48,12 @@ builder.Services.AddHostedService<ReminderBackgroundService>();
 var app = builder.Build();
 
 // DB migrations (separate try so seed always runs)
-try { var mDb = app.Services.GetRequiredService<Db>(); await mDb.RunMigrationsAsync(); } catch { }
-// Startup seed: ensure ygross@bgu.ac.il = SystemAdmin
-try { var sDb = app.Services.GetRequiredService<Db>(); await sDb.EnsureSysAdminSeedAsync(); } catch { }
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+try { var mDb = app.Services.GetRequiredService<Db>(); await mDb.RunMigrationsAsync(); }
+catch (Exception ex) { startupLogger.LogCritical(ex, "DB migrations failed on startup — schema may be outdated"); }
+// Startup seed: ensure sysadmin record exists
+try { var sDb = app.Services.GetRequiredService<Db>(); await sDb.EnsureSysAdminSeedAsync(); }
+catch (Exception ex) { startupLogger.LogError(ex, "SysAdmin seed failed"); }
 
 // Static files served BEFORE auth so HTML/JS/CSS never require a valid session
 app.UseDefaultFiles();

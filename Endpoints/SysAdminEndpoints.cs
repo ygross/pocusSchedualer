@@ -88,7 +88,7 @@ public static class SysAdminEndpoints
         {
             if (!IsSysAdmin(ctx)) return Results.Forbid();
             await db.EnsureSysAdminSeedAsync();
-            return Results.Ok(new { ok = true, message = "ygross@bgu.ac.il ensured as SystemAdmin" });
+            return Results.Ok(new { ok = true });
         });
 
         grp.MapPost("/maintenance/run-migrations", async (HttpContext ctx, Db db) =>
@@ -99,9 +99,9 @@ public static class SysAdminEndpoints
                 await db.RunMigrationsAsync();
                 return Results.Ok(new { ok = true, message = "Migrations ran successfully" });
             }
-            catch (Exception ex)
+            catch
             {
-                return Results.Problem(ex.Message);
+                return Results.Problem("Migration failed");
             }
         });
 

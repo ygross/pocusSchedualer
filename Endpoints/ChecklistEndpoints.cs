@@ -20,7 +20,7 @@ public static class ChecklistEndpoints
             if (!isAdmin && !isCM) return Results.Forbid();
 
             try { return Results.Ok(await db.GetChecklistsAsync()); }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // GET /api/admin/checklists/{id}
@@ -35,7 +35,7 @@ public static class ChecklistEndpoints
                 var detail = await db.GetChecklistDetailAsync(id);
                 return detail is null ? Results.NotFound() : Results.Ok(detail);
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // POST /api/admin/checklists
@@ -52,7 +52,7 @@ public static class ChecklistEndpoints
                 var id = await db.CreateChecklistAsync(dto.Title.Trim(), dto.Description?.Trim(), myId);
                 return Results.Ok(new { ok = true, checklistId = id });
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // PUT /api/admin/checklists/{id}
@@ -69,7 +69,7 @@ public static class ChecklistEndpoints
                 var ok = await db.UpdateChecklistAsync(id, dto.Title.Trim(), dto.Description?.Trim());
                 return ok ? Results.Ok(new { ok = true }) : Results.NotFound();
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // DELETE /api/admin/checklists/{id}
@@ -84,7 +84,7 @@ public static class ChecklistEndpoints
                 var ok = await db.DeleteChecklistAsync(id);
                 return ok ? Results.Ok(new { ok = true }) : Results.NotFound();
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // ── Items ────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ public static class ChecklistEndpoints
                 var itemId = await db.AddChecklistItemAsync(id, dto.ItemText.Trim(), dto.SortOrder);
                 return Results.Ok(new { ok = true, itemId });
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // PUT /api/admin/checklists/{id}/items/{itemId}
@@ -122,7 +122,7 @@ public static class ChecklistEndpoints
                 var ok = await db.UpdateChecklistItemAsync(itemId, dto.ItemText.Trim(), dto.SortOrder);
                 return ok ? Results.Ok(new { ok = true }) : Results.NotFound();
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // DELETE /api/admin/checklists/{id}/items/{itemId}
@@ -138,7 +138,7 @@ public static class ChecklistEndpoints
                 var ok = await db.DeleteChecklistItemAsync(itemId);
                 return ok ? Results.Ok(new { ok = true }) : Results.NotFound();
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // ── Course Assignments ────────────────────────────────────────────────
@@ -157,7 +157,7 @@ public static class ChecklistEndpoints
                 if (!ok) return Results.BadRequest(new { ok = false, error });
                 return Results.Ok(new { ok = true, linkId });
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // DELETE /api/admin/checklists/links/{linkId}
@@ -173,7 +173,7 @@ public static class ChecklistEndpoints
                 var ok = await db.UnassignChecklistFromCourseAsync(linkId);
                 return ok ? Results.Ok(new { ok = true }) : Results.NotFound();
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // ── Progress ─────────────────────────────────────────────────────────
@@ -187,7 +187,7 @@ public static class ChecklistEndpoints
             if (!isAdmin && !isCM) return Results.Forbid();
 
             try { return Results.Ok(await db.GetProgressAsync(linkId)); }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // PUT /api/admin/checklists/links/{linkId}/progress/{itemId}
@@ -204,7 +204,7 @@ public static class ChecklistEndpoints
                 await db.ToggleProgressAsync(linkId, itemId, dto.IsChecked, myId);
                 return Results.Ok(new { ok = true });
             }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
 
         // ── Reminder log (read-only admin view) ───────────────────────────────
@@ -217,7 +217,7 @@ public static class ChecklistEndpoints
             if (!isAdmin) return Results.Forbid();
 
             try { return Results.Ok(await db.GetReminderLogAsync(days)); }
-            catch (Exception ex) { return Results.Problem(ex.Message, statusCode: 500); }
+            catch { return Results.Problem("An error occurred", statusCode: 500); }
         });
     }
 }
