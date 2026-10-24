@@ -2,8 +2,6 @@
    LeadCalendar – Course filter
    ============================ */
 
-requireUser();
-
 const API_BASE = "/simcenter/PocusSchedualer/api";
 
 const EP = {
