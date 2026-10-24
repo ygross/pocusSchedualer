@@ -58,7 +58,7 @@ async function loadStats() {
 
   // Courses
   try {
-    const courses = await fetchJson(`${API_BASE}/activities/courses`);
+    const courses = await fetchJson(`${API_BASE}/courses`);
     const elCourses = document.getElementById('kpiCourses');
     if (elCourses && courses) elCourses.textContent = Array.isArray(courses) ? courses.length : (courses.total ?? 0);
   } catch { }

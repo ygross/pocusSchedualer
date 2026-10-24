@@ -1,4 +1,5 @@
-const API_BASE = "/simcenter/PocusSchedualer/api/api/admin";
+const _dir = window.location.pathname.replace(/\/[^\/]*$/, "");
+const API_BASE = `${_dir}/api/api/admin`;
 
 const state = {
   instructors: [],
