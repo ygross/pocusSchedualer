@@ -156,11 +156,13 @@ async function fillSelect(el, items, valueKey, textKey, selectedValue, addAll=fa
 async function loadTypes(){
   const types = await fetchJson(endpoints().activityTypes);
   await fillSelect($("eType"), types, "activityTypeId", "typeName", null, false);
+  await fillSelect($("sType"), types, "activityTypeId", "typeName", null, true);
   return types;
 }
 
 function populateSearchTypes(allTypes) {
   const relevant = allTypes.filter(t => coursesByType[t.activityTypeId]?.length > 0);
+  if (!relevant.length) return;
   const sel = $("sType");
   sel.innerHTML = '<option value="">כל הסוגים</option>' +
     relevant.map(t => `<option value="${t.activityTypeId}">${esc(t.typeName)}</option>`).join('');
@@ -437,7 +439,7 @@ async function saveUpdate(){
     await detectApiBase();
     await loadMe();
     const allTypes = await loadTypes();
-    await loadMyCourses(allTypes);
+    try { await loadMyCourses(allTypes); } catch { /* fallback: show all types already loaded */ }
     await showMine();
   })().catch(e => setMsg("searchMsg", e.message, "err"));
 })();
