@@ -120,7 +120,8 @@ async function loadMeAndGate() {
     $("meLine").textContent = "משתמש: " + (me.fullName || me.email || "לא ידוע");
     $("roleLine").textContent = "תפקיד: " + (me.roleName || "-");
 
-    const isAdmin = String(me.roleName || "").toLowerCase() === "admin";
+    const roleNorm = String(me.roleName || "").toLowerCase();
+    const isAdmin = roleNorm === "admin" || roleNorm === "systemadmin";
     setDot("sessionDot", true);
     setDot("adminDot", isAdmin);
     $("adminLabel").textContent = isAdmin ? "Admin" : "Not Admin";

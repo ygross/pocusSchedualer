@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Routing;
 
 namespace PocusSchedualer.Endpoints;
@@ -39,9 +38,8 @@ public static class AdminPendingApprovalsEndpoints
 
     private static bool IsAdmin(HttpContext ctx)
     {
-        if (ctx.User?.Identity?.IsAuthenticated != true) return false;
-        var role = ctx.User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-        return string.Equals(role, Roles.Admin, StringComparison.OrdinalIgnoreCase);
+        var (isAuth, isAdmin, _) = AuthHelpers.GetAuthInfo(ctx);
+        return isAuth && isAdmin;
     }
 }
 
