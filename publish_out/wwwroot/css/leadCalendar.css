@@ -39,7 +39,7 @@ body{
   display:flex;gap:10px;align-items:center;
 }
 
-.month-label{
+.month-label, .monthTitle{
   min-width:160px;
   text-align:center;
   padding:10px 12px;
@@ -362,7 +362,7 @@ body:not(.theme-dark){--bg:#eef4fb;--panel:#fff;--panel2:#f4f8fd;--text:#12243c;
 body:not(.theme-dark) .topbar{background:linear-gradient(180deg,#1e3a8a,#1e40af);border-color:#3b82f6}
 body:not(.theme-dark) .brand .title{color:#fff}
 body:not(.theme-dark) .brand .subtitle{color:rgba(255,255,255,.8)}
-body:not(.theme-dark) .month-label{background:#fff;border-color:#e5e7eb;color:#12243c}
+body:not(.theme-dark) .month-label, .monthTitle{background:#fff;border-color:#e5e7eb;color:#12243c}
 body:not(.theme-dark) .controls{background:#f8fafc;border-color:#e5e7eb}
 body:not(.theme-dark) .control{background:#fff;border-color:#e5e7eb}
 body:not(.theme-dark) .control select,body:not(.theme-dark) .control input{background:#fff;border-color:#e5e7eb;color:#12243c}
@@ -379,3 +379,21 @@ body:not(.theme-dark) .rec-row{background:#fff;border-color:#e5e7eb}
 body:not(.theme-dark) .modal-footer{border-color:#e5e7eb}
 body:not(.theme-dark) .statusbar{background:rgba(248,250,252,.95);border-color:#e5e7eb}
 body:not(.theme-dark) .btn{background:#fff;border-color:#e5e7eb;color:#12243c}
+
+/* Course filter select in toolbar */
+.selectFilter {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #2a3a66;
+  background: #0d1632;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+body:not(.theme-dark) .selectFilter {
+  background: #fff;
+  border-color: #e5e7eb;
+  color: #12243c;
+}
+

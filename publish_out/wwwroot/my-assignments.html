@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>simCenter Schedualer · השיבוצים שלי</title>
+<title>simCenterSchedualer · השיבוצים שלי</title>
 <link rel="stylesheet" href="css/my-assignments.css?v=1" />
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 <body>
 
@@ -19,18 +20,16 @@
   <div class="topbar">
     <div class="title-card">
       <div class="title">השיבוצים שלי</div>
-      <div class="subtitle">API: <span class="mono" id="apiBase">בודק…</span></div>
       <div class="subsubtitle">פירוט מופעים + סיכום שעות</div>
+      <span id="apiBase" style="display:none"></span>
+      <span id="dotSession" style="display:none"></span>
+      <span id="dotApi" style="display:none"></span>
+      <span id="dotDb" style="display:none"></span>
     </div>
     <div class="user-card">
       <div class="user-title">משתמש מחובר</div>
       <div class="user-line">משתמש: <b id="meName">טוען…</b></div>
       <div class="user-line">תפקיד: <b id="meRole">…</b></div>
-      <div class="status-row">
-        <span class="status-pill">Session <span id="dotSession" class="dot is-warn"></span></span>
-        <span class="status-pill">API <span id="dotApi" class="dot is-warn"></span></span>
-        <span class="status-pill">DB <span id="dotDb" class="dot is-warn"></span></span>
-      </div>
       <button id="themeToggle" class="theme-toggle" type="button" title="בהיר / כהה">🌙</button>
     </div>
   </div>

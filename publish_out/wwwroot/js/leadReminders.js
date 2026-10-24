@@ -1,6 +1,7 @@
-const _dir    = window.location.pathname.replace(/\/[^\/]*$/, "");
-const API_BASE = `${window.location.origin}${_dir}/api/api`;
+const API_BASE = "/simcenter/PocusSchedualer/api";
 const $ = id => document.getElementById(id);
+
+let allActivities = []; // cache: all lead activities loaded once
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 async function fetchJson(url, opts = {}) {
@@ -9,7 +10,7 @@ async function fetchJson(url, opts = {}) {
     headers: { "Accept": "application/json", ...(opts.headers || {}) },
     ...opts
   });
-  if (res.status === 401) { window.top.location.href = `${_dir}/login-otp.html`; return null; }
+  if (res.status === 401) { window.top.location.href = "/simcenter/PocusSchedualer/login-otp.html"; return null; }
   if (!res.ok) {
     const t = await res.text().catch(() => "");
     throw new Error(`${res.status} ${t}`.trim());
@@ -20,40 +21,81 @@ async function fetchJson(url, opts = {}) {
 
 function fmtDate(utcStr) {
   if (!utcStr) return "";
-  const d = new Date(utcStr);
-  return d.toLocaleDateString("he-IL", { day:"2-digit", month:"2-digit", year:"numeric",
-    hour:"2-digit", minute:"2-digit", timeZone:"Asia/Jerusalem" });
+  return new Date(utcStr).toLocaleDateString("he-IL", {
+    day:"2-digit", month:"2-digit", year:"numeric",
+    hour:"2-digit", minute:"2-digit", timeZone:"Asia/Jerusalem"
+  });
 }
 
 function showResult(text, kind, bullets) {
   const el = $("resultBox");
-  el.className = "result-box " + (kind || "ok");
+  el.className = "msg " + (kind === "ok" ? "ok" : kind === "warn" ? "warn" : "err");
   let html = text;
-  if (bullets && bullets.length) {
-    html += `<ul>${bullets.map(b => `<li>${b}</li>`).join("")}</ul>`;
-  }
+  if (bullets && bullets.length)
+    html += `<ul style="margin:6px 0 0;padding-right:18px;font-size:12px">${bullets.map(b=>`<li>${b}</li>`).join("")}</ul>`;
   el.innerHTML = html;
   el.style.display = "block";
-  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-// ─── load activities ──────────────────────────────────────────────────────────
-async function loadActivities() {
+// ─── load courses (only mine) ─────────────────────────────────────────────────
+async function loadCourses() {
   try {
-    const rows = await fetchJson(`${API_BASE}/lead/activities`) || [];
-    const sel = $("activitySelect");
+    const courses = await fetchJson(`${API_BASE}/lead/my-courses`) || [];
+    const sel = $("courseSelect");
     sel.innerHTML = `<option value="">— בחר קורס —</option>`;
-    rows.forEach(a => {
+    courses.forEach(c => {
       const opt = document.createElement("option");
-      opt.value = a.activityId ?? a.ActivityId ?? a.id;
-      opt.textContent = a.activityName ?? a.ActivityName ?? a.name ?? `פעילות ${opt.value}`;
+      opt.value = c.courseId;
+      opt.textContent = c.courseName;
       sel.appendChild(opt);
     });
-    if (!rows.length) {
+    if (!courses.length)
       sel.innerHTML = `<option value="">אין קורסים מוגדרים עבורך</option>`;
-    }
   } catch(e) {
     showResult("שגיאה בטעינת קורסים: " + e.message, "err");
+  }
+}
+
+// load all lead activities once (filtered server-side to lead own)
+async function loadAllActivities() {
+  try {
+    allActivities = await fetchJson(`${API_BASE}/activities/search?take=200`) || [];
+  } catch(e) {
+    allActivities = [];
+    console.warn("Could not load activities:", e);
+  }
+}
+
+// ─── on course change ─────────────────────────────────────────────────────────
+function onCourseChange() {
+  const courseId = +$("courseSelect").value || 0;
+  const actSel = $("activitySelect");
+  const instSel = $("instanceSelect");
+  $("instanceInfo").style.display = "none";
+  $("resultBox").style.display = "none";
+
+  instSel.innerHTML = `<option value="">— קודם בחר פעילות —</option>`;
+  instSel.disabled = true;
+
+  if (!courseId) {
+    actSel.innerHTML = `<option value="">— קודם בחר קורס —</option>`;
+    actSel.disabled = true;
+    return;
+  }
+
+  const forCourse = allActivities.filter(a => (a.courseId ?? a.CourseId) === courseId);
+  actSel.innerHTML = `<option value="">— בחר פעילות —</option>`;
+  forCourse.forEach(a => {
+    const opt = document.createElement("option");
+    opt.value = a.activityId ?? a.ActivityId;
+    opt.textContent = a.activityName ?? a.ActivityName;
+    actSel.appendChild(opt);
+  });
+  if (!forCourse.length) {
+    actSel.innerHTML = `<option value="">אין פעילויות בקורס זה</option>`;
+    actSel.disabled = true;
+  } else {
+    actSel.disabled = false;
   }
 }
 
@@ -61,22 +103,19 @@ async function loadActivities() {
 async function onActivityChange() {
   const activityId = +$("activitySelect").value || 0;
   const instSel = $("instanceSelect");
-  const instInfo = $("instanceInfo");
+  $("instanceInfo").style.display = "none";
+  $("resultBox").style.display = "none";
 
   instSel.innerHTML = `<option value="">טוען מופעים…</option>`;
   instSel.disabled = true;
-  instInfo.style.display = "none";
-  $("resultBox").style.display = "none";
 
   if (!activityId) {
-    instSel.innerHTML = `<option value="">— קודם בחר קורס —</option>`;
+    instSel.innerHTML = `<option value="">— קודם בחר פעילות —</option>`;
     return;
   }
 
   try {
-    const instances = await fetchJson(
-      `${API_BASE}/leadcalendar/activities/${activityId}/instances`) || [];
-
+    const instances = await fetchJson(`${API_BASE}/leadcalendar/activities/${activityId}/instances`) || [];
     instSel.innerHTML = `<option value="">— בחר מופע —</option>`;
     instances.forEach(i => {
       const opt = document.createElement("option");
@@ -88,9 +127,8 @@ async function onActivityChange() {
       opt.dataset.info = JSON.stringify(i);
       instSel.appendChild(opt);
     });
-
     if (!instances.length) {
-      instSel.innerHTML = `<option value="">אין מופעים לקורס זה</option>`;
+      instSel.innerHTML = `<option value="">אין מופעים לפעילות זו</option>`;
     } else {
       instSel.disabled = false;
     }
@@ -105,26 +143,19 @@ function onInstanceChange() {
   const sel  = $("instanceSelect");
   const info = $("instanceInfo");
   const opt  = sel.options[sel.selectedIndex];
+  $("resultBox").style.display = "none";
 
-  if (!sel.value || !opt?.dataset?.info) {
-    info.style.display = "none";
-    return;
-  }
+  if (!sel.value || !opt?.dataset?.info) { info.style.display = "none"; return; }
 
   try {
     const d = JSON.parse(opt.dataset.info);
-    const start = fmtDate(d.startUtc);
-    const end   = fmtDate(d.endUtc);
-    const loc   = d.location || "—";
-    const cnt   = d.assignedCount;
-    info.innerHTML = `<b>מופע:</b> ${start} עד ${end} | <b>מיקום:</b> ${loc} | <b>מדריכים משובצים:</b> ${cnt}`;
+    const start = fmtDate(d.startUtc), end = fmtDate(d.endUtc);
+    const loc = d.location || "—", cnt = d.assignedCount;
+    info.innerHTML = `<b>מופע:</b> ${start} עד ${end} | <b>מיקום:</b> ${loc} | <b>מדריכים:</b> ${cnt}`;
     info.style.display = "block";
 
-    if (cnt === 0) {
-      showResult("⚠ לא קיימים מדריכים משובצים למופע זה — ההודעה לא תישלח לאף אחד.", "warn");
-    } else {
-      $("resultBox").style.display = "none";
-    }
+    if (cnt === 0)
+      showResult("⚠ לא קיימים מדריכים משובצים למופע זה.", "warn");
   } catch { info.style.display = "none"; }
 }
 
@@ -139,8 +170,7 @@ async function sendMessage() {
   if (!message)    { showResult("נא להזין תוכן הודעה.", "err"); return; }
 
   const btn = $("sendBtn");
-  btn.disabled = true;
-  btn.textContent = "שולח…";
+  btn.disabled = true; btn.textContent = "שולח…";
   $("resultBox").style.display = "none";
 
   try {
@@ -154,7 +184,7 @@ async function sendMessage() {
     if (!result) { showResult("לא התקבלה תשובה מהשרת.", "err"); return; }
 
     if (result.status === "no-recipients") {
-      showResult("לא נמצאו מדריכים משובצים למופע זה.", "warn");
+      showResult("לא נמצאו מדריכים משובצים למופע.", "warn");
     } else if (result.status === "whatsapp-not-configured") {
       showResult("ווטסאפ אינו מוגדר במערכת. פנה לאדמין.", "warn");
     } else if (result.ok) {
@@ -168,26 +198,22 @@ async function sendMessage() {
   } catch(e) {
     showResult("שגיאה: " + e.message, "err");
   } finally {
-    btn.disabled = false;
-    btn.textContent = "📤 שלח הודעה";
+    btn.disabled = false; btn.textContent = "שלח הודעה";
   }
 }
 
-// expose inline handlers
-window.onActivityChange = onActivityChange;
-window.onInstanceChange = onInstanceChange;
-window.sendMessage      = sendMessage;
-
 // ─── init ─────────────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", async () => {
-  $("themeToggle")?.addEventListener("click", () => {
-    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-    $("themeToggle").textContent = next === "dark" ? "🌙" : "☀️";
-  });
-  if (localStorage.getItem("theme") === "dark") $("themeToggle").textContent = "🌙";
-  else $("themeToggle").textContent = "☀️";
+$("courseSelect").addEventListener("change", onCourseChange);
+$("activitySelect").addEventListener("change", onActivityChange);
+$("instanceSelect").addEventListener("change", onInstanceChange);
+$("sendBtn").addEventListener("click", sendMessage);
 
-  await loadActivities();
-});
+// Load user info
+fetch(`${API_BASE}/me`, { credentials: "include" })
+  .then(r => r.ok ? r.json() : null)
+  .then(u => { if (u) $("meLabel").textContent = u.fullName || u.email || "—"; })
+  .catch(() => {});
+
+// Load data
+Promise.all([loadCourses(), loadAllActivities()]);
+

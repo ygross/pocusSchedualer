@@ -24,7 +24,8 @@
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+html{ height:100%; }
+body{ min-height:100%; overflow-y:auto; }
 
 body{
   margin:0;
@@ -328,3 +329,4 @@ tbody tr:hover td{
 @media (max-width: 980px){
   table{ min-width: 640px; }
 }
+

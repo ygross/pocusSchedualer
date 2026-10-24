@@ -1,9 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<title>שיבוצים – simCenter Schedualer</title>
+<title>שיבוצים – simCenterSchedualer</title>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 <body>
 <div class="app">
@@ -99,7 +100,7 @@ ${c.map(x=>`- ${x.instance} => ${x.instructor}`).join("\\n")}
 2) מרכז פעילות (סיכום)
 (אופציונלי) למגישים שלא נבחרו.
 
-PocusSchedualer`;
+simCenterSchedualer`;
   document.getElementById("modalMail").textContent = mail;
   openModal("#modal1");
 }

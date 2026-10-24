@@ -1,6 +1,6 @@
 :root{--nav:#0b2c66;--bg:#f3f4f6;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--bad:#dc2626;--ok:#16a34a;--warn:#b45309;--shadow:0 14px 34px rgba(15,23,42,.08);--r:18px}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eaf1ff,#f3f4f6);color:#0f172a}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eaf1ff,#f3f4f6);color:#0f172a;overflow-x:hidden;width:100%}
 header{background:var(--nav);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .purpose{font-size:12px;opacity:.95;font-weight:900}
 .title{font-weight:1000;font-size:18px;margin-top:4px}
@@ -57,4 +57,34 @@ body.theme-dark .modalHead{background:#131f35;border-color:var(--line)}
 body.theme-dark .modalTitle{color:#93c5fd}
 body.theme-dark .modalBody,.modalFoot{border-color:var(--line)}
 body.theme-dark .cand{background:#131f35;border-color:var(--line)}
+
+/* ── new flat-table layout ── */
+.purpose{font-size:11px;background:rgba(11,44,102,.07);color:var(--nav);padding:4px 14px;border-bottom:1px solid var(--line);font-weight:900}
+.page-header{padding:8px 14px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line)}
+.page-title-row{display:flex;align-items:center;gap:10px}
+.page-title{font-size:16px;font-weight:1000;color:var(--nav)}
+.ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-inp{flex:1;min-width:180px;max-width:340px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:900;cursor:pointer}
+.table-wrap{padding:0 14px 14px;overflow-x:auto;width:100%}
+#mainTable{margin-top:8px;min-width:700px}
+thead th{white-space:nowrap;font-size:12px;padding:8px 7px}
+tbody td{font-size:13px;padding:8px 7px}
+.act-name{font-weight:1000;font-size:13px}
+.btn.small{padding:5px 9px;font-size:12px;border-radius:10px}
+
+/* modal candidates table */
+.cand-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cand-table thead th{background:#f8fafc;padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-weight:1000;font-size:12px}
+.cand-table tbody td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px;text-align:right;vertical-align:middle}
+.cand-table tbody tr:last-child td{border-bottom:none}
+.cand-table tbody tr:hover{background:#f8fafc}
+
+body.theme-dark .purpose{background:rgba(147,197,253,.06);color:#93c5fd}
+body.theme-dark .page-title{color:#93c5fd}
+body.theme-dark .search-inp{background:#131f35;color:#e5e7eb;border-color:var(--line)}
+body.theme-dark .cand-table{background:var(--card);border-color:var(--line)}
+body.theme-dark .cand-table thead th{background:#131f35;border-color:var(--line)}
+body.theme-dark .cand-table tbody td{border-color:var(--line)}
+body.theme-dark .cand-table tbody tr:hover{background:#1a2744}
 

@@ -19,6 +19,7 @@
       });
     })();
   </script>
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 
 <body>
@@ -28,9 +29,8 @@
     <!-- TOPBAR – collapsible via page-collapse.js -->
     <div class="topbar">
       <div class="right-card">
-        <div class="page-title">simCenter Schedualer · Instructor Activity List</div>
-        <div class="api-base-line">API בסיסי: <span class="mono" id="apiBase">בודק…</span></div>
-        <div class="page-sub-line">Activities · List · mode=instructor</div>
+        <div class="page-title">רשימת פעילויות</div>
+        <span id="apiBase" style="display:none"></span>
       </div>
 
       <div class="left-card">
@@ -84,6 +84,7 @@
   </div>
 
   <script src="js/activitiesList.js?v=3"></script>
+  <script src="js/page-collapse.js"></script>
   <script src="js/page-timestamp.js"></script>
 </body>
 </html>

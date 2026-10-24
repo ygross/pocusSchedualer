@@ -30,6 +30,8 @@ async function loadCourses() {
     sel.innerHTML = courses.length
       ? courses.map(c => `<option value="${c.courseId}">${c.courseName}</option>`).join('')
       : '<option value="">אין קורסים</option>';
+    const saved = window.getLeadCourseId?.();
+    if (saved && sel.querySelector(`option[value="${saved}"]`)) sel.value = String(saved);
     if (courses.length) loadLoad();
   } catch(e) { showErr('שגיאה: ' + e.message); }
 }
@@ -69,8 +71,18 @@ function renderTable(rows) {
 function showErr(msg) { const e = document.getElementById('msgErr'); if(e){e.textContent=msg;e.style.display='block';} }
 async function fetchJson(url) { const r = await fetch(url,{credentials:'include'}); if(!r.ok) throw new Error('API error '+r.status); return r.json(); }
 
-document.getElementById('selCourse').addEventListener('change', loadLoad);
+document.getElementById('selCourse').addEventListener('change', () => {
+  try { localStorage.setItem('pocus_lead_course', document.getElementById('selCourse').value); } catch {}
+  loadLoad();
+});
 document.getElementById('selMonth').addEventListener('change', loadLoad);
+window.addEventListener('leadCourseChanged', e => {
+  const sel = document.getElementById('selCourse');
+  if (sel && sel.querySelector(`option[value="${e.detail.courseId}"]`)) {
+    sel.value = String(e.detail.courseId);
+    loadLoad();
+  }
+});
 
 const themeBtn = document.getElementById('themeToggle');
 if (localStorage.getItem('theme') === 'light') document.body.classList.remove('theme-dark');

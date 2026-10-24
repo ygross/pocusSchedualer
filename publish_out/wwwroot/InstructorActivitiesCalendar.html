@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>יומן פעילויות – מדריך</title>
-  <link rel="stylesheet" href="css/InstructorActivitiesCalendar.css" />
+  <link rel="stylesheet" href="css/InstructorActivitiesCalendar.css?v=2" />
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 
 <body>
@@ -20,11 +21,8 @@
     <div class="topbar">
 
       <div class="right-card">
-        <div class="page-title">simCenter Schedualer · InstructorActivitiesCalendar</div>
-        <div class="api-base">
-          API בסיסי: <span class="mono" id="apiBase">(מאתר...)</span>
-        </div>
-        <div class="page-sub">Activities · Calendar · mode=instructor</div>
+        <div class="page-title">יומן פעילויות</div>
+        <span id="apiBase" style="display:none"></span>
       </div>
 
       <div class="left-card">
@@ -32,7 +30,7 @@
           <div class="me-label">משתמש מחובר</div>
           <div class="me-line">שם: <b id="meName">—</b></div>
           <div class="me-line">תפקיד: <b id="meRole">—</b></div>
-          <div class="me-line roleline">תפקיד המשתמש המחובר שביצע לוגין דרך OTP: <b id="meOtpRole">—</b></div>
+          <div class="me-line roleline">תפקיד: <b id="meOtpRole">—</b></div>
         </div>
 
         <button id="themeToggle" class="theme-btn" title="בהיר / כהה">🌙</button>
@@ -107,7 +105,7 @@
     });
   </script>
 
-  <script src="js/InstructorActivitiesCalendar.js"></script>
+  <script src="js/InstructorActivitiesCalendar.js?v=2"></script>
   <script src="js/page-collapse.js"></script>
   <script src="js/page-timestamp.js"></script>
 </body>

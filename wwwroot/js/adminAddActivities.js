@@ -375,6 +375,11 @@ async function saveActivityAndInstances(){
     return;
   }
 
+  if (!leadInstructorId){
+    showErr("יש לבחור מדריך מוביל.");
+    return;
+  }
+
   if (!occurrences.length){
     showErr("אין מופעים לשמירה. יש לבצע Preview קודם.");
     return;

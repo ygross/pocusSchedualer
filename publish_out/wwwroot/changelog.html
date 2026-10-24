@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Changelog - simCenter Schedualer</title>
+  <title>Changelog - simCenterSchedualer</title>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.documentElement.setAttribute('data-theme',e.data.value)})})();</script>
   <style>
     :root{
@@ -74,6 +74,7 @@
     .item-text{flex:1;line-height:1.5}
     .item-sub{font-size:11px;color:var(--muted2);margin-top:1px}
   </style>
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 <body>
 <div class="wrap">
@@ -83,9 +84,85 @@
   <div class="topbar">
     <div>
       <div class="title">&#128221; עדכוני גרסאות</div>
-      <div class="subtitle">simCenter Schedualer &middot; Changelog</div>
+      <div class="subtitle">simCenterSchedualer &middot; Changelog</div>
     </div>
     <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
+  </div>
+
+  <!-- v3.9 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.9</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-fix">Security</span>
+      <span class="v-badge badge-improve">UX</span>
+    </div>
+    <div class="items">
+      <div class="item"><strong>מניעת חשיפת קיום מייל (email enumeration)</strong> — ממשק ה-OTP מחזיר כעת תמיד HTTP 200 עם הודעה גנרית "אם המייל רשום ופעיל, נשלח קוד", ללא חשיפת 404/403.</div>
+      <div class="item"><strong>הגבלת קצב בקשות OTP (Rate Limiting)</strong> — מקסימום 3 קודים פר אימייל בתוך 10 דקות. חריגה מחזירה הודעה ידידותית ומונעת הצפת מיילים.</div>
+      <div class="item"><strong>אימות מקור הפניית Redirect</strong> — כפתור "לא רשום?" מאמת כעת שה-URL הוא מאותו אתר (same-origin) לפני הפניה.</div>
+      <div class="item"><strong>שיפור מקלדת מובייל בשדה OTP</strong> — הוסף <code>inputmode="numeric"</code> לשדה הקוד — מקלדת מספרים נפתחת ישירות בנייד.</div>
+      <div class="item"><strong>תיקון מפתחות Data Protection</strong> — הוספת <code>/XD keys</code> ל-robocopy כדי לשמר מפתחות ה-session בין דיפלויים.</div>
+    </div>
+  </div>
+
+  <!-- v3.8 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.8</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-improve">UX</span>
+      <span class="v-badge badge-fix">Fix</span>
+    </div>
+    <div class="section-title">שיפורי חוויית משתמש</div>
+    <div class="items">
+      <div class="item"><div class="item-dot green"></div><div class="item-text">הוסתרו פרטים טכניים (API base, role label) מכל הדפים — גלוי למפתחים בלבד<div class="item-sub">CSS: shared.css — .api-base-line, .roleline, .purpose-role הוסתרו globally</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">תפריט ניווט עודכן — הוסרו קישורים שבורים, נוספו דפים חסרים<div class="item-sub">menu.html — מבנה ניווט נוכחי ומדויק</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">כותרות דפים תורגמו לעברית ברורה (activitieslist, InstructorActivitiesCalendar, my-assignments)<div class="item-sub">הוסרו כותרות משניות בסגנון מפתח</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">login-otp: נוסף ספירה לאחור (10 דקות) וכפתור "שלח קוד חדש"<div class="item-sub">login-otp.html + js/login-otp.js</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">תיקון API detection — מקבל 401/403 (לא רק 200), קורא sessionStorage ראשון<div class="item-sub">leadassignment.html, js/lead-assignment.js, js/activitiesList.js</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">modal שיבוץ: כותרת מציגה שם פעילות במקום מזהה טכני, תת-כותרת מציגה תאריך ושעות<div class="item-sub">leadassignment.html inline script</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">תיקון קישור שבור ב-verify.html (login.html → login-otp.html)</div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">גרסת app עודכנה ל-v3.7 ב-app.html</div></div>
+    </div>
+  </div>
+
+  <!-- v3.7 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.7</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-infra">Deploy</span>
+    </div>
+    <ul class="items">
+      <li><span class="tag tag-infra">deploy</span> גרסת v3.6 הופצה לשרת הייצור (IIS AppPool: PocusSchedualer)</li>
+      <li><span class="tag tag-infra">deploy</span> backend פורסם ל-api/ ו-frontend (HTML/css/js/config) פורסם לשורש</li>
+    </ul>
+  </div>
+
+  <!-- v3.6 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.6</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-fix">Security</span>
+      <span class="v-badge badge-improve">QA</span>
+      <span class="v-badge badge-new">Mobile</span>
+    </div>
+    <ul class="items">
+      <li><span class="tag tag-fix">fix</span> <b>SEC-01:</b> /auth/impersonate — נוספה בדיקת session חובה (privilege escalation fix)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-03:</b> EmailService — תוקן SMTP key שגוי Smtp:EnableSsl → Smtp:UseSsl (OTP לא נשלח)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-07:</b> הוסרו exception messages מתגובות API (information disclosure)</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-08:</b> DevBypassEnabled הוגדר false ב-production config</li>
+      <li><span class="tag tag-fix">fix</span> <b>SEC-09:</b> כתובת מייל hardcoded הוסרה מתגובות API — עבר ל-config (SystemAdmin:SeedEmail)</li>
+      <li><span class="tag tag-improve">improve</span> <b>SEC-10:</b> Migration failures עכשיו מתועדות ב-Critical log (עוזר לאבחן שרת שני)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-03:</b> ממומש DevBypass ב-/auth/otp/verify (קריאה מ-config)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-06:</b> CreateAvailabilityRequests עטוף ב-transaction (data consistency)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-07:</b> UpsertInstructorAvailability — MERGE WITH HOLDLOCK (race condition)</li>
+      <li><span class="tag tag-fix">fix</span> <b>QA-11:</b> הוסרו candidates כפולים /api/api מ-detectApiBase ב-login-otp.js</li>
+      <li><span class="tag tag-new">mobile</span> login-otp.html — card מותאם לנייד (iPhone SE ומעלה)</li>
+      <li><span class="tag tag-new">mobile</span> activitieslist.css — media query responsive ל-600px (מדריך בנייד)</li>
+    </ul>
   </div>
 
   <!-- v3.0 -->
@@ -108,6 +185,65 @@
     <div class="section-title">&#128640; שיפורים</div>
     <div class="items">
       <div class="item"><span class="item-dot blue"></span><div class="item-text"><b>ניהול קורסים — עיצוב מחדש של מודל הוספה/עריכה</b> — שדות קלט, כותרת, כפתורים ותיבת שימוש בעיצוב מוגדר וברור<div class="item-sub">הוספת סגנונות .pill / .pill.ok / .pill.bad לטבלת הקורסים שהיו חסרים. שיפור הצל והמרווחים במודל.</div></div></div>
+    </div>
+  </div>
+
+  <!-- v3.5 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.5</span>
+      <span class="v-date">ספטמבר 2026</span>
+      <span class="v-badge badge-improve">Improve</span>
+    </div>
+    <div class="section-title">&#128640; שיפורים</div>
+    <div class="items">
+      <div class="item"><span class="item-dot blue"></span><div class="item-text"><b>דף שליחת הודעה / תזכורת — עיצוב אחיד ותזרים משופר</b> — הדף עוצב מחדש עם CSS אחיד (app.css + shared.css). תוקן נתיב API שגוי (double /api/api). רשימת הקורסים מסוננת לקורסים שהמשתמש מרכז. תזרים 3-שלבים: קורס ← פעילות ← מופע.<div class="item-sub">תוקן גלילה בדף עריכת פעילויות (lead.css: body min-height במקום height:100%). כותרת חודש בקלנדר מוצגת מיד בטעינת הדף.</div></div></div>
+    </div>
+  </div>
+
+  <!-- v3.4 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.4</span>
+      <span class="v-date">ספטמבר 2026</span>
+      <span class="v-badge badge-feature">Feature</span>
+    </div>
+    <div class="section-title">&#127314; תכונות חדשות</div>
+    <div class="items">
+      <div class="item"><span class="item-dot green"></span><div class="item-text"><b>פילטר קורסים בדפי מרכז קורס</b> — קלנדר מרכז קורס (leadCalendar) כעת מציג dropdown לבחירת קורס. הרשימה מציגה רק קורסים שהמשתמש מוגדר כמרכז שלהם (Admin רואה את כולם). הפילטר מועבר ל-API והשאילתה ממסה את הנתונים ב-SQL.<div class="item-sub">Backend: endpoint חדש <code>/api/lead/my-courses</code>. עדכון ל-<code>/api/leadcalendar</code> עם פרמטר אופציונלי <code>courseId</code> + <code>leadInstructorId</code>.</div></div></div>
+    </div>
+  </div>
+
+  <!-- v3.3 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.3</span>
+      <span class="v-date">ספטמבר 2026</span>
+      <span class="v-badge badge-improve">Improve</span>
+    </div>
+    <div class="section-title">&#128640; שיפורים</div>
+    <div class="items">
+      <div class="item"><span class="item-dot blue"></span><div class="item-text"><b>דף שיבוץ פעילות — עיצוב טבלה שטוחה</b> — הדף הוסב מ-dropdown-בחירה לטבלה שטוחה שמציגה את כל המופעים בלי צורך לבחור פעילות ראשית. טעינה מקבילית (parallel) של כל הפעילויות + מופעים + נתוני זמינות בהפעלת הדף.<div class="item-sub">מסנן חיפוש + סינון "הצג רק עם חסרים". כפתור שבץ פותח מודל עם טבלת מועמדים (שם, אימייל, זמינות, צדק).</div></div></div>
+    </div>
+  </div>
+
+  <!-- v3.2 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.2</span>
+      <span class="v-date">ספטמבר 2026</span>
+      <span class="v-badge badge-improve">Improve</span>
+    </div>
+
+    <div class="section-title">&#128204; שינוי מיתוג</div>
+    <div class="items">
+      <div class="item"><span class="item-dot blue"></span><div class="item-text"><b>שם האפליקציה שונה מ-PocusSchedualer ל-simCenterSchedualer</b> — כל הכותרות, חתימות המיילים וטקסטים גלויים למשתמש עודכנו לשם החדש</div></div>
+    </div>
+
+    <div class="section-title">&#128640; שיפורים</div>
+    <div class="items">
+      <div class="item"><span class="item-dot blue"></span><div class="item-text"><b>עיצוב מחדש — app.css v4 (Clean)</b> — ניווט פשוט, גופן ברור, ללא גרדיינטים מיותרים. תפריט צדדי ב-240px עם ניגודיות גבוהה<div class="item-sub">כולל: שיפור כפתורים, כרטיסיות, טבלאות ו-dark mode</div></div></div>
+      <div class="item"><span class="item-dot green"></span><div class="item-text"><b>מדריך למשתמש (guide.html)</b> — דף HTML עם 5 טאבים לפי תפקיד: מדריך, מרכז קורס, מנהל, אדמין מערכת, עקרונות<div class="item-sub">קישור ❓ עזרה בתפריט של כל תפקיד פותח את הטאב הרלוונטי ישירות (via URL hash)</div></div></div>
     </div>
   </div>
 
@@ -306,3 +442,5 @@
 <script src="js/page-timestamp.js"></script>
 </body>
 </html>
+
+

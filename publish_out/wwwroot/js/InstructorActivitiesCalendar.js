@@ -453,6 +453,7 @@ function renderCalendar(year, monthIndex, rawInstances) {
       const state = resolveInstanceState(it);
       applyState(inst, state);
 
+      // ── compact header (always visible) ──────────────────
       const top = document.createElement("div");
       top.className = "inst-top";
 
@@ -467,49 +468,35 @@ function renderCalendar(year, monthIndex, rawInstances) {
       top.appendChild(title);
       top.appendChild(time);
 
-      // Activity name shown as subtitle when course name is present
-      const subtitle = document.createElement("div");
-      subtitle.className = "inst-subtitle";
-      subtitle.textContent = (it.courseName && it.activityName) ? it.activityName : "";
-
-      const pills = document.createElement("div");
-      pills.className = "pills";
-      pills.innerHTML = `
-        <span class="pill">חדרים: ${Number(it.roomsCount ?? 0)}</span>
-        <span class="pill">נדרשים: ${Number(it.requiredInstructors ?? 0)}</span>
-        <span class="pill muted">שובצו: ${Number(it.assignedInstructors ?? 0)}</span>
-        <span class="pill muted">מרכז: ${esc(it.leadInstructorName || "—")}</span>
-      `;
-
-      const actionsWrap = document.createElement("div");
-      actionsWrap.className = "actions";
-
-      const meta = document.createElement("div");
-      meta.className = "small";
-      meta.textContent = `מופע #${it.activityInstanceId} · פעילות #${it.activityId} · קורס #${it.courseId}`;
-
-      const right = document.createElement("div");
-      right.style.display = "flex";
-      right.style.gap = "10px";
-      right.style.alignItems = "center";
-
-      const note = document.createElement("div");
-      note.className = "small";
-
-      const btnBox = document.createElement("div");
-
-      right.appendChild(note);
-      right.appendChild(btnBox);
-
-      actionsWrap.appendChild(meta);
-      actionsWrap.appendChild(right);
+      // ── action button (always visible) ───────────────────
+      const btnBox  = document.createElement("div");
+      btnBox.className = "inst-btn-row";
+      const note    = document.createElement("div");
+      note.className = "small inst-note";
 
       renderInstanceActions(it, inst, btnBox, note);
 
+      // ── tooltip (visible on hover only) ──────────────────
+      const tooltip = document.createElement("div");
+      tooltip.className = "inst-tooltip";
+
+      const subtitleText = (it.courseName && it.activityName) ? it.activityName : "";
+      tooltip.innerHTML = `
+        ${subtitleText ? `<div class="tt-subtitle">${esc(subtitleText)}</div>` : ""}
+        <div class="tt-pills">
+          <span class="pill">חדרים: ${Number(it.roomsCount ?? 0)}</span>
+          <span class="pill">נדרשים: ${Number(it.requiredInstructors ?? 0)}</span>
+          <span class="pill muted">שובצו: ${Number(it.assignedInstructors ?? 0)}</span>
+          <span class="pill muted">מרכז: ${esc(it.leadInstructorName || "—")}</span>
+        </div>
+        <div class="tt-meta">מופע #${it.activityInstanceId} · פע׳ #${it.activityId} · קורס #${it.courseId}</div>
+      `;
+      // append note element into tooltip so status text shows there
+      tooltip.appendChild(note);
+
       inst.appendChild(top);
-      if (subtitle.textContent) inst.appendChild(subtitle);
-      inst.appendChild(pills);
-      inst.appendChild(actionsWrap);
+      inst.appendChild(btnBox);
+      inst.appendChild(tooltip);
 
       list.appendChild(inst);
     }

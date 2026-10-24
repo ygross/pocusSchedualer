@@ -31,7 +31,9 @@ let rows = [];
 async function load() {
   setMsg("טוען נתונים…");
   try {
-    rows = await fetchJson(`${API_BASE}/lead/needs-attention`) || [];
+    const courseId = window.getLeadCourseId?.();
+    const qs = courseId ? `?courseId=${courseId}` : '';
+    rows = await fetchJson(`${API_BASE}/lead/needs-attention${qs}`) || [];
     render();
     setMsg("");
   } catch(e) { setMsg("שגיאה: " + e.message, "err"); }
@@ -99,5 +101,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch { /* non-fatal */ }
 
   $("refreshBtn").addEventListener("click", load);
+  window.addEventListener('leadCourseChanged', load);
   await load();
 });

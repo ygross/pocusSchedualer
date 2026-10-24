@@ -158,10 +158,10 @@ async function loadTypes(){
 }
 
 function buildScopedSearchParams() {
-  // ✅ תמיד רק פעילויות שאני מרכז:
-  // גם אם אני Admin – עדיין תציג רק שלי (לפי בקשתך)
   const qs = new URLSearchParams();
   if (MY_ID) qs.set("leadInstructorId", String(MY_ID));
+  const courseId = window.getLeadCourseId?.();
+  if (courseId) qs.set("courseId", String(courseId));
   qs.set("take", "200");
   return qs;
 }
@@ -374,6 +374,7 @@ async function saveUpdate(){
   $("themeToggle")?.addEventListener("click", toggleTheme);
 
   $("btnSearch").addEventListener("click", () => doSearch().catch(e => setMsg("searchMsg", e.message, "err")));
+  window.addEventListener('leadCourseChanged', () => doSearch().catch(() => {}));
   $("btnShowMine").addEventListener("click", () => showMine().catch(e => setMsg("searchMsg", e.message, "err")));
   $("btnClearSearch").addEventListener("click", () => {
     $("sActivityId").value = "";

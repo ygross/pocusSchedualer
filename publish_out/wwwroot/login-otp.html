@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -9,8 +9,9 @@
     html, body { height: 100%; margin: 0; font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #0b2c5f, #0f5fb4);
       display: flex; align-items: center; justify-content: center; }
-    .card { background: #fff; width: 380px; padding: 30px; border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; }
+    .card { background: #fff; width: 380px; max-width: calc(100vw - 32px); padding: 30px; border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center; box-sizing: border-box; }
+    @media (max-width: 420px) { .card { padding: 22px 18px; border-radius: 12px; } .brand { font-size: 22px; } }
     .brand { font-size: 28px; font-weight: 800; color: #0b2c5f;
       letter-spacing: -0.5px; margin-bottom: 4px; }
     .brand span { color: #0f5fb4; }
@@ -28,6 +29,7 @@
 
   <!-- JS חיצוני בלבד -->
   <script src="js/login-otp.js" defer></script>
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 
 <body>
@@ -42,8 +44,15 @@
 
     <div id="otpSection" style="display:none">
       <label for="otp">קוד שקיבלת במייל</label>
-      <input id="otp" type="text" maxlength="6" placeholder="******" autocomplete="one-time-code" />
+      <input id="otp" type="text" inputmode="numeric" maxlength="6" placeholder="******" autocomplete="one-time-code" />
+      <div id="otpCountdown" style="font-size:12px;color:#64748b;margin-bottom:10px;min-height:16px;"></div>
       <button id="btnVerify">התחבר</button>
+      <div style="margin-top:10px">
+        <button id="btnResend" type="button"
+          style="background:none;border:none;color:#0f5fb4;cursor:pointer;font-size:13px;text-decoration:underline;padding:0">
+          שלח קוד חדש
+        </button>
+      </div>
     </div>
 
     <div class="msg" id="msg"></div>

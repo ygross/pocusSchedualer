@@ -56,9 +56,22 @@ async function loadCourses(){
       (courses || []).map(c =>
         `<option value="${c.courseId}">${c.courseName}</option>`
       ).join("");
+    const saved = window.getLeadCourseId?.();
+    if (saved && els.courseFilter.querySelector(`option[value="${saved}"]`)) {
+      els.courseFilter.value = String(saved);
+      selectedCourseId = saved;
+    }
     els.courseFilter.addEventListener("change", () => {
       selectedCourseId = els.courseFilter.value ? Number(els.courseFilter.value) : null;
+      try { localStorage.setItem('pocus_lead_course', selectedCourseId || ''); } catch {}
       loadMonth();
+    });
+    window.addEventListener('leadCourseChanged', e => {
+      if (els.courseFilter?.querySelector(`option[value="${e.detail.courseId}"]`)) {
+        els.courseFilter.value = String(e.detail.courseId);
+        selectedCourseId = e.detail.courseId;
+        loadMonth();
+      }
     });
   } catch(e) {
     console.warn("Could not load courses:", e);

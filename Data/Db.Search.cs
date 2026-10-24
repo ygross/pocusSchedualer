@@ -17,6 +17,7 @@ public sealed partial class Db
         string? nameContains,
         int? activityTypeId,
         int? leadInstructorId,
+        int? courseId = null,
         int take = 50)
     {
         const string sql = @"
@@ -45,6 +46,7 @@ WHERE
     (@activityId IS NULL OR a.ActivityId = @activityId)
     AND (@activityTypeId IS NULL OR a.ActivityTypeId = @activityTypeId)
     AND (@leadInstructorId IS NULL OR a.LeadInstructorId = @leadInstructorId)
+    AND (@courseId IS NULL OR a.CourseId = @courseId)
     AND (
         @nameContains IS NULL OR @nameContains = '' OR
         a.ActivityName LIKE '%' + @nameContains + '%'
@@ -61,6 +63,7 @@ ORDER BY
             nameContains,
             activityTypeId,
             leadInstructorId,
+            courseId,
             take
         });
     }

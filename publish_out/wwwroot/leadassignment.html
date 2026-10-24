@@ -1,126 +1,362 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>שיבוץ פעילות – מרכז קורס</title>
-  <link rel="stylesheet" href="css/leadassignment.css?v=2" />
+  <title>שיבוץ פעילות</title>
+  <link rel="stylesheet" href="css/shared.css?v=5" />
+  <style>
+:root{--nav:#0b2c66;--bg:#f3f4f6;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--bad:#dc2626;--ok:#16a34a;--warn:#b45309}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:#f3f4f6;color:#0f172a;overflow-x:hidden}
+.purpose{font-size:11px;background:rgba(11,44,102,.07);color:var(--nav);padding:4px 14px;border-bottom:1px solid var(--line);font-weight:900}
+.page-header{padding:8px 14px 6px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);background:#fff}
+.page-title-row{display:flex;align-items:center;gap:10px}
+.page-title{font-size:16px;font-weight:1000;color:var(--nav)}
+.ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-inp{flex:1;min-width:160px;max-width:320px;padding:5px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:900;cursor:pointer}
+.btn{border:1px solid var(--nav);background:#fff;color:var(--nav);border-radius:12px;padding:6px 12px;font-weight:900;cursor:pointer;font-size:13px}
+.btn.primary{background:var(--nav);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;color:var(--muted);font-weight:900}
+.msg.ok{color:var(--ok)}.msg.err{color:var(--bad)}
+.pill{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:900;font-size:12px;white-space:nowrap}
+.pill.ok{border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.08);color:var(--ok)}
+.pill.bad{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.08);color:var(--bad)}
+.pill.warn{border-color:rgba(180,83,9,.3);background:rgba(180,83,9,.08);color:var(--warn)}
+.pill.muted{color:var(--muted)}
+.table-wrap{padding:8px 14px 20px;overflow-x:auto}
+#mainTable{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;min-width:680px}
+#mainTable thead th{background:#f8fafc;padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-weight:900;font-size:12px;white-space:nowrap}
+#mainTable tbody td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px;text-align:right;vertical-align:middle}
+#mainTable tbody tr:last-child td{border-bottom:none}
+#mainTable tbody tr:hover{background:#f8fafc}
+.act-name{font-weight:900;font-size:13px}
+.small{font-size:11px}.muted{color:var(--muted)}
+/* Modal */
+.backdrop{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;padding:12px;z-index:9999}
+.modal{width:min(900px,100%);max-height:90vh;background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+.modal-head{background:#f8fafc;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-shrink:0}
+.modal-title{font-weight:900;color:var(--nav);font-size:15px}
+.modal-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.modal-foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.kpi-row{display:flex;gap:8px;flex-wrap:wrap}
+/* Candidates TABLE */
+#candTable{width:100%;border-collapse:collapse;font-size:13px}
+#candTable thead th{background:#f0f4ff;padding:7px 10px;border-bottom:2px solid var(--line);text-align:right;font-weight:900;font-size:12px}
+#candTable tbody td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+#candTable tbody tr:last-child td{border-bottom:none}
+#candTable tbody tr:hover{background:#f8fafc}
+#candTable input[type=checkbox]{width:16px;height:16px;cursor:pointer}
+body.theme-dark{background:#08172e;color:#e5e7eb}
+body.theme-dark .page-header{background:#0f172a;border-color:rgba(255,255,255,.1)}
+body.theme-dark .page-title{color:#93c5fd}
+body.theme-dark .purpose{background:rgba(147,197,253,.06);color:#93c5fd}
+body.theme-dark #mainTable,body.theme-dark .modal{background:#0f172a;border-color:rgba(255,255,255,.1)}
+body.theme-dark #mainTable thead th,body.theme-dark .modal-head,body.theme-dark #candTable thead th{background:#131f35;border-color:rgba(255,255,255,.1)}
+body.theme-dark #mainTable tbody td,body.theme-dark #candTable tbody td{border-color:rgba(255,255,255,.08)}
+body.theme-dark #mainTable tbody tr:hover,body.theme-dark #candTable tbody tr:hover{background:#1a2744}
+body.theme-dark .btn{background:#131f35;color:#93c5fd;border-color:#3b82f6}
+body.theme-dark .btn.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+body.theme-dark .search-inp{background:#131f35;color:#e5e7eb;border-color:rgba(255,255,255,.1)}
+body.theme-dark .pill{background:#131f35;border-color:rgba(255,255,255,.12);color:#e5e7eb}
+  </style>
   <script>(function(){var t=localStorage.getItem('theme');if(t!=='light')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
 </head>
-
 <body>
-<header>
-  <div>
-    <div class="purpose">ייעוד הדף: מרכז קורס (Lead) רואה רק את הפעילויות שלו, מנהל זמינויות למופעים, משבץ מדריכים ושולח מיילים.</div>
-    <div class="title">LEAD-ASSIGNMENT</div>
-    <div class="purpose">API בסיס: <span id="apiBaseLabel" class="mono">…</span></div>
+
+<div class="purpose">שיבוץ פעילות — מרכז קורס רואה את פעילויותיו, Admin רואה הכל</div>
+
+<div class="page-header">
+  <div class="page-title-row">
+    <span class="page-title">שיבוץ פעילות</span>
+    <span id="statusLabel" class="pill muted">טוען…</span>
   </div>
-  <div style="text-align:left;font-size:12px;opacity:.95">
-    <div id="meLine">משתמש: טוען…</div>
-    <div id="roleLine">תפקיד: טוען…</div>
+  <div class="ctrl-bar">
+    <input id="searchInp" class="search-inp" placeholder="חיפוש פעילות / תאריך…" type="search"/>
+    <label class="chk"><input type="checkbox" id="chkOnlyMissing"/> רק עם חסרים</label>
+    <button id="btnReload" class="btn" type="button">↺ רענן</button>
+    <span id="mainMsg" class="msg"></span>
   </div>
-</header>
+</div>
 
-<main>
-
-  <section class="card">
-    <h2>בחירת פעילות</h2>
-    <div class="sub">רק פעילויות שאתה מרכז (Lead). Admin רואה הכל.</div>
-
-    <div class="row" style="margin-top:10px">
-      <div class="field">
-        <label>פעילות</label>
-        <select id="activitySel"></select>
-      </div>
-
-      <div class="actions">
-        <button id="btnReload" class="btn" type="button">רענן</button>
-      </div>
-    </div>
-
-    <div id="activityMsg" class="msg"></div>
-  </section>
-
-  <section class="card">
-    <h2>מופעים לפעילות</h2>
-    <div class="sub">ליד כל מופע: נדרש / הציעו זמינות / שובצו + פעולות בקשת זמינות ושיבוץ.</div>
-
-    <div class="kpiRow" style="margin:10px 0">
-      <span id="kpiInstances" class="pill">מופעים: -</span>
-      <span id="kpiEligible" class="pill">מדריכים רלוונטיים: -</span>
-    </div>
-
-    <div class="small muted" id="instancesHint">בחר פעילות כדי לראות מופעים.</div>
-
-    <div style="overflow:auto;margin-top:10px">
-      <table>
-        <thead>
-          <tr>
-            <th>מופע</th>
-            <th>טווח</th>
-            <th>נדרש</th>
-            <th title="בקשות שנשלחו">📤 הוזמנו</th>
-            <th title="הציעו זמינות / אישרו">✅ אישרו</th>
-            <th title="דחו את הבקשה">❌ דחו</th>
-            <th title="שובצו רשמית">🏁 שובצו</th>
-            <th>פעולות</th>
-          </tr>
-        </thead>
-        <tbody id="instancesBody">
-          <tr><td colspan="8" class="muted">—</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div id="instancesMsg" class="msg"></div>
-  </section>
-
-</main>
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th>פעילות</th>
+        <th>תאריך</th>
+        <th>שעות</th>
+        <th>נדרש</th>
+        <th>הוזמנו</th>
+        <th>זמינים</th>
+        <th>דחו</th>
+        <th>שובצו</th>
+        <th>חסרים</th>
+        <th>פעולות</th>
+      </tr>
+    </thead>
+    <tbody id="mainBody">
+      <tr><td colspan="10" class="muted" style="text-align:center;padding:24px">טוען…</td></tr>
+    </tbody>
+  </table>
+</div>
 
 <!-- Modal -->
-<div id="backdrop" class="backdrop" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modalHead">
+<div id="backdrop" class="backdrop">
+  <div class="modal">
+    <div class="modal-head">
       <div>
-        <div id="modalTitle" class="modalTitle">שיבוץ מדריכים</div>
-        <div id="modalSub" class="small muted">—</div>
+        <div id="mTitle" class="modal-title">שיבוץ מדריכים</div>
+        <div id="mSub" class="small muted">—</div>
       </div>
-      <button id="btnClose" class="btn" type="button">סגור</button>
+      <button id="btnClose" class="btn" type="button">סגור ✕</button>
     </div>
-
-    <div class="modalBody">
-      <div class="kpiRow">
+    <div class="modal-body">
+      <div class="kpi-row">
         <span id="mReq" class="pill">נדרש: -</span>
-        <span id="mAssigned" class="pill">שובצו: -</span>
-        <span id="mMissing" class="pill">חסרים: -</span>
+        <span id="mAss" class="pill">שובצו: -</span>
+        <span id="mMis" class="pill bad">חסרים: -</span>
       </div>
-
-      <div class="small muted">
-        הרשימה כוללת רק מדריכים שהציעו זמינות למופע. הסדר: <b>צדק (פחות שיבוצים קודם)</b> → <b>זמינות</b> → שם.
+      <div style="display:flex;justify-content:flex-end">
+        <button id="btnAuto" class="btn" type="button" disabled>בחר אוטומטי עד החסרים</button>
       </div>
-
-      <div class="right">
-        <button id="btnAutoPick" class="btn" type="button" disabled>בחר אוטומטי עד החסרים</button>
-      </div>
-
       <div id="candWrap">
-        <div class="muted">טוען…</div>
+        <table id="candTable">
+          <thead><tr><th style="width:32px"></th><th>שם מדריך</th><th>אימייל</th><th>זמינות</th><th>שיבוצים</th></tr></thead>
+          <tbody id="candBody"><tr><td colspan="5" class="muted" style="text-align:center;padding:16px">טוען…</td></tr></tbody>
+        </table>
       </div>
-
-      <div id="modalMsg" class="msg"></div>
+      <div id="mMsg" class="msg"></div>
     </div>
-
-    <div class="modalFoot">
-      <div class="small muted">בעת אישור – המדריכים שנבחרו יקבלו מייל.</div>
-      <div class="right">
-        <button id="btnApprove" class="btn primary" type="button" disabled>אשר שיבוץ + שלח מייל</button>
-      </div>
+    <div class="modal-foot">
+      <span class="small muted">המדריכים שנבחרו יקבלו מייל אישור.</span>
+      <button id="btnApprove" class="btn primary" type="button" disabled>אשר שיבוץ + שלח מייל</button>
     </div>
   </div>
 </div>
 
-<script src="js/lead-assignment.js"></script>
-  <script src="js/page-collapse.js"></script>
-  <script src="js/page-timestamp.js"></script>
+<script>
+// lead-assignment inline v5
+(function(){
+'use strict';
+const basePath = new URL(".", window.location.href).pathname.replace(/\/+$/,"/");
+const CANDS = [
+  sessionStorage.getItem('pocus_api_base'),
+  `${location.origin}${basePath}api/api`,
+  `${location.origin}${basePath}api`
+].filter(Boolean);
+let API = CANDS[0] ?? `${location.origin}${basePath}api/api`;
+const $ = id => document.getElementById(id);
+const esc = s => (s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function pad2(n){return String(n).padStart(2,'0')}
+function fmtDate(dt){if(!dt)return'-';const d=new Date(dt);return`${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`}
+function fmtTime(dt){if(!dt)return'-';const d=new Date(dt);return`${pad2(d.getHours())}:${pad2(d.getMinutes())}`}
+
+async function fj(url,opts={}){
+  const r=await fetch(url,{credentials:'include',headers:{'Accept':'application/json',...(opts.headers||{})},...opts});
+  if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(`${r.status} ${t}`);}
+  const ct=r.headers.get('content-type')||'';
+  return ct.includes('application/json')?r.json():null;
+}
+const EP=()=>({
+  acts: `${API}/lead/activities?take=400${window.getLeadCourseId?.()?'&courseId='+window.getLeadCourseId():''}`,
+  act:  id=>`${API}/lead/activities/${id}`,
+  avail:id=>`${API}/lead/instances/${id}/availability`,
+  elig: id=>`${API}/lead/activities/${id}/eligible-instructors`,
+  reqAv:id=>`${API}/lead/instances/${id}/request-availability`,
+  remind:id=>`${API}/lead/instances/${id}/send-availability-reminder`,
+  fair: id=>`${API}/lead/instances/${id}/fairness`,
+  approve:id=>`${API}/lead/instances/${id}/approve`,
+});
+
+function isAssigned(r){return Number(r?.isAssigned??r?.IsAssigned??0)===1}
+function bySt(arr,s){return arr.filter(r=>(r.status??r.Status??'').toUpperCase()===s).length}
+function availRank(s){s=(s||'').toUpperCase();return s==='AVAILABLE'||s==='APPROVED'?0:s==='MAYBE'||s==='SUBMITTED'||s==='REQUESTED'?1:2}
+function availLabel(s){const m={AVAILABLE:'זמין',MAYBE:'אולי',NOT_AVAILABLE:'לא זמין',SUBMITTED:'הוגש',REQUESTED:'התבקש',APPROVED:'אושר',REJECTED:'נדחה'};return m[(s||'').toUpperCase()]||s||'-'}
+
+let allRows=[], eligCache={}, mInstId=null, mActId=null, mReq=0, mAss=0, mCands=[], mSel=new Set(), mFair=new Map();
+
+async function detectApi(){
+  for(const c of CANDS){
+    try{const r=await fetch(`${c}/me`,{credentials:'include'});if(r.ok||r.status===401||r.status===403){API=c;return;}}catch{}
+  }
+}
+
+async function loadAll(){
+  $('statusLabel').className='pill muted';$('statusLabel').textContent='טוען…';
+  $('mainBody').innerHTML=`<tr><td colspan="10" class="muted" style="text-align:center;padding:24px">טוען…</td></tr>`;
+  const raw=await fj(EP().acts);
+  const acts=(Array.isArray(raw)?raw:[]).filter(a=>a.nextStartUtc!=null);
+  const details=await Promise.all(acts.map(a=>fj(EP().act(a.activityId)).catch(()=>null)));
+  const flat=[];
+  acts.forEach((a,i)=>{(Array.isArray(details[i]?.instances)?details[i].instances:[]).forEach(inst=>flat.push({a,inst}))});
+  const avails=await Promise.all(flat.map(({inst})=>fj(EP().avail(inst.instanceId)).catch(()=>[])));
+  allRows=flat.map(({a,inst},i)=>{
+    const arr=Array.isArray(avails[i])?avails[i]:[];
+    return{actId:a.activityId,actName:a.activityName,typeName:a.typeName||'',courseName:a.courseName||'',
+      instanceId:inst.instanceId,startUtc:inst.startUtc,endUtc:inst.endUtc,
+      required:Number(inst.requiredInstructors||0),
+      requested:bySt(arr,'REQUESTED'),submitted:bySt(arr,'SUBMITTED'),
+      rejected:bySt(arr,'REJECTED'),assigned:arr.filter(isAssigned).length};
+  });
+  renderTable();
+  const miss=allRows.filter(r=>Math.max(0,r.required-r.assigned)>0).length;
+  $('statusLabel').className='pill ok';
+  $('statusLabel').textContent=`${allRows.length} מופעים | ${miss} עם חסרים`;
+}
+
+function renderTable(){
+  const q=($('searchInp').value||'').trim().toLowerCase();
+  const onlyM=$('chkOnlyMissing').checked;
+  const rows=allRows.filter(r=>{
+    if(onlyM&&r.required-r.assigned<=0)return false;
+    if(q&&!`${r.actName} ${r.typeName} ${r.courseName} ${fmtDate(r.startUtc)}`.toLowerCase().includes(q))return false;
+    return true;
+  });
+  if(!rows.length){$('mainBody').innerHTML=`<tr><td colspan="10" class="muted" style="text-align:center;padding:16px">אין תוצאות</td></tr>`;return;}
+  $('mainBody').innerHTML=rows.map(r=>{
+    const mis=Math.max(0,r.required-r.assigned);
+    return`<tr>
+      <td><div class="act-name">${esc(r.actName)}</div><div class="small muted">${esc(r.typeName)}${r.courseName?' · '+esc(r.courseName):''}</div></td>
+      <td>${esc(fmtDate(r.startUtc))}</td>
+      <td style="white-space:nowrap">${esc(fmtTime(r.startUtc))}–${esc(fmtTime(r.endUtc))}</td>
+      <td><span class="pill">${r.required}</span></td>
+      <td><span class="pill">${r.requested}</span></td>
+      <td><span class="pill warn">${r.submitted}</span></td>
+      <td><span class="pill bad">${r.rejected}</span></td>
+      <td><span class="pill ok">${r.assigned}</span></td>
+      <td><span class="pill ${mis>0?'bad':'ok'}">${mis}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn" style="font-size:11px;padding:4px 8px" data-act="remind" data-iid="${r.instanceId}" data-aid="${r.actId}">בקש זמינות</button>
+        <button class="btn primary" style="font-size:11px;padding:4px 8px" data-act="assign" data-iid="${r.instanceId}" data-aid="${r.actId}">שבץ</button>
+      </td>
+    </tr>`;
+  }).join('');
+  $('mainBody').querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const iid=Number(btn.dataset.iid),aid=Number(btn.dataset.aid);
+      if(btn.dataset.act==='remind')await sendReminder(iid,aid);
+      else await openModal(iid,aid);
+    });
+  });
+}
+
+async function getElig(aid){
+  if(!eligCache[aid])eligCache[aid]=await fj(EP().elig(aid)).catch(()=>[]);
+  return Array.isArray(eligCache[aid])?eligCache[aid]:[];
+}
+async function refreshRow(iid){
+  const i=allRows.findIndex(r=>r.instanceId===iid);if(i<0)return;
+  const arr=await fj(EP().avail(iid)).catch(()=>[]);const a=Array.isArray(arr)?arr:[];
+  allRows[i].requested=bySt(a,'REQUESTED');allRows[i].submitted=bySt(a,'SUBMITTED');
+  allRows[i].rejected=bySt(a,'REJECTED');allRows[i].assigned=a.filter(isAssigned).length;
+}
+async function sendReminder(iid,aid){
+  setMsg('mainMsg','שולח…');
+  try{
+    const elig=await getElig(aid);
+    const ids=elig.map(x=>Number(x.instructorId??x.InstructorId)).filter(Boolean);
+    if(ids.length){const res=await fj(EP().reqAv(iid),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instructorIds:ids,sendEmail:true})});setMsg('mainMsg',`נשלחו ${res?.emailsSent??0} מיילים ✅`,'ok');}
+    else{const res=await fj(EP().remind(iid),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({onlyNotResponded:true})});setMsg('mainMsg',`נשלחו ${res?.sent??0} תזכורות ✅`,'ok');}
+    await refreshRow(iid);renderTable();
+  }catch(e){setMsg('mainMsg',e.message,'err');}
+}
+
+async function openModal(iid,aid){
+  mInstId=iid;mActId=aid;mSel.clear();
+  const row=allRows.find(r=>r.instanceId===iid);if(!row)return;
+  mReq=row.required;mAss=row.assigned;
+  const mis=Math.max(0,mReq-mAss);
+  $('mTitle').textContent=`שיבוץ מדריכים — ${esc(row.actName)}`;
+  $('mSub').textContent=`${fmtDate(row.startUtc)} ${fmtTime(row.startUtc)}–${fmtTime(row.endUtc)}${row.courseName?' · '+esc(row.courseName):''}`;
+  $('mReq').textContent=`נדרש: ${mReq}`;$('mAss').textContent=`שובצו: ${mAss}`;
+  $('mMis').textContent=`חסרים: ${mis}`;$('mMis').className='pill '+(mis>0?'bad':'ok');
+  $('candBody').innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center;padding:14px">טוען…</td></tr>`;
+  $('btnAuto').disabled=true;$('btnApprove').disabled=true;setMsg('mMsg','');
+  showModal(true);
+  const [avail,fair]=await Promise.all([fj(EP().avail(iid)).catch(()=>[]),fj(EP().fair(iid)).catch(()=>[])]);
+  const arr=Array.isArray(avail)?avail:[];
+  mFair=new Map(Array.isArray(fair)?fair.map(x=>[Number(x.instructorId),Number(x.approvedCount||0)]):[]);
+  mCands=arr.filter(r=>!isAssigned(r)).sort((a,b)=>{
+    const fa=mFair.get(Number(a.instructorId))??999,fb=mFair.get(Number(b.instructorId))??999;
+    if(fa!==fb)return fa-fb;
+    if(availRank(a.status)!==availRank(b.status))return availRank(a.status)-availRank(b.status);
+    return(a.fullName||'').localeCompare(b.fullName||'','he');
+  });
+  renderCandTable();
+  setMsg('mMsg',mis<=0?'אין חסרים':mCands.length?`${mCands.length} מועמדים`:'אין מועמדים');
+}
+
+function renderCandTable(){
+  if(!mCands.length){$('candBody').innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center;padding:14px">אין מגישי זמינות למופע זה</td></tr>`;return;}
+  const mis=Math.max(0,mReq-mAss);
+  $('candBody').innerHTML=mCands.map(r=>{
+    const lbl=availLabel(r.status);const rank=availRank(r.status);
+    const pc=rank===0?'ok':rank===1?'warn':'bad';
+    const fair=mFair.get(Number(r.instructorId));
+    const chk=mSel.has(Number(r.instructorId))?'checked':'';
+    return`<tr>
+      <td style="text-align:center"><input type="checkbox" class="candPick" data-id="${r.instructorId}" ${chk}></td>
+      <td><b>${esc(r.fullName)}</b></td>
+      <td class="small muted">${esc(r.email||'')}</td>
+      <td><span class="pill ${pc}">${esc(lbl)}</span></td>
+      <td>${fair==null?'—':fair}</td>
+    </tr>`;
+  }).join('');
+  $('candBody').querySelectorAll('.candPick').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      const id=Number(cb.dataset.id);cb.checked?mSel.add(id):mSel.delete(id);
+      refreshApprove();
+    });
+  });
+  $('btnAuto').disabled=mis<=0;
+  refreshApprove();
+}
+function refreshApprove(){
+  const mis=Math.max(0,mReq-mAss);
+  $('btnApprove').disabled=mSel.size===0||mSel.size>mis;
+}
+function autoPick(){
+  const mis=Math.max(0,mReq-mAss);mSel.clear();
+  $('candBody').querySelectorAll('.candPick').forEach((cb,i)=>{cb.checked=i<mis;if(cb.checked)mSel.add(Number(cb.dataset.id));});
+  refreshApprove();
+}
+async function approveAssign(){
+  const ids=[...mSel].filter(n=>n>0);if(!ids.length){setMsg('mMsg','לא נבחרו','err');return;}
+  const mis=Math.max(0,mReq-mAss);if(ids.length>mis){setMsg('mMsg',`בחרת ${ids.length}, חסרים רק ${mis}`,'err');return;}
+  setMsg('mMsg','מאשר…');
+  try{
+    await fj(EP().approve(mInstId),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instructorIds:ids,note:'Assigned via Lead-Assignment',sendEmail:true})});
+    try{await fj(`${API}/lead/instances/${mInstId}/notify-assigned`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instructorIds:ids})});}catch{}
+    setMsg('mMsg','שובץ ✅','ok');
+    await refreshRow(mInstId);renderTable();
+    setTimeout(()=>showModal(false),1800);
+  }catch(e){setMsg('mMsg',e.message,'err');}
+}
+function setMsg(id,txt,kind=''){const el=$(id);if(!el)return;el.className='msg'+(kind?' '+kind:'');el.textContent=txt||'';}
+function showModal(v){const bd=$('backdrop');bd.style.display=v?'flex':'none';}
+
+// Wire events
+document.addEventListener('DOMContentLoaded',function(){
+  $('btnReload').addEventListener('click',()=>loadAll().catch(e=>setMsg('mainMsg',e.message,'err')));
+  window.addEventListener('leadCourseChanged',()=>loadAll().catch(e=>setMsg('mainMsg',e.message,'err')));
+  $('searchInp').addEventListener('input',renderTable);
+  $('chkOnlyMissing').addEventListener('change',renderTable);
+  $('btnClose').addEventListener('click',()=>showModal(false));
+  $('backdrop').addEventListener('click',e=>{if(e.target===$('backdrop'))showModal(false);});
+  window.addEventListener('keydown',e=>{if(e.key==='Escape')showModal(false);});
+  $('btnAuto').addEventListener('click',autoPick);
+  $('btnApprove').addEventListener('click',()=>approveAssign().catch(e=>setMsg('mMsg',e.message,'err')));
+  detectApi().then(loadAll).catch(e=>{$('mainBody').innerHTML=`<tr><td colspan="10" class="msg err" style="padding:20px">${esc(e.message)}</td></tr>`;});
+});
+})();
+</script>
+<script src="js/lead-course-filter.js?v=1"></script>
+<script src="js/page-collapse.js"></script>
+<script src="js/page-timestamp.js"></script>
 </body>
 </html>

@@ -75,11 +75,12 @@ async function probe(url){
 
 // -------- API discovery
 const baseDir = getBaseDir();
+const _storedBase = sessionStorage.getItem('pocus_api_base');
 const ROOTS = [
+  _storedBase,
   `${origin}${baseDir}api/api`,
   `${origin}${baseDir}api`,
-  `${origin}${baseDir}api/api/api`,
-];
+].filter(Boolean);
 
 const EP = {
   base: null,

@@ -170,6 +170,10 @@ async function onTypeChange() {
       sel.appendChild(o);
     });
     sel.disabled = false;
+    const savedCourse = window.getLeadCourseId?.();
+    if (savedCourse && sel.querySelector(`option[value="${savedCourse}"]`)) {
+      sel.value = String(savedCourse);
+    }
   } catch (e) {
     sel.innerHTML = `<option value=''>שגיאה: ${e.message}</option>`;
   }

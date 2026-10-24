@@ -48,6 +48,16 @@
     contentFrame?.addEventListener("load", () => setHeaderPageName(contentFrame.getAttribute("src") || ""));
     logoutBtn?.addEventListener("click", onLogout);
     stopImpersonateBtn?.addEventListener("click", onStopImpersonate);
+    // Mobile hamburger
+    const burgerBtn    = document.getElementById("burgerBtn");
+    const menuEl       = document.querySelector(".menu");
+    const menuOverlay  = document.getElementById("menuOverlay");
+    function openMenu()  { menuEl?.classList.add("open");  menuOverlay?.classList.add("show"); }
+    function closeMenu() { menuEl?.classList.remove("open"); menuOverlay?.classList.remove("show"); }
+    burgerBtn?.addEventListener("click", () => menuEl?.classList.contains("open") ? closeMenu() : openMenu());
+    menuOverlay?.addEventListener("click", closeMenu);
+    // Close menu when a page is loaded on mobile
+    contentFrame?.addEventListener("load", () => { if(window.innerWidth <= 768) closeMenu(); });
     startImpersonateBtn?.addEventListener("click", onStartImpersonate);
     goLoginBtn?.addEventListener("click", () => {
       const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
@@ -223,12 +233,19 @@
       const title = document.createElement("div");
       title.className = "menuGroupTitle";
       title.dataset.group = g;
+      const GUIDE_HASH = {Instructor:'instructor',CourseManager:'lead',Admin:'admin',SystemAdmin:'sysadmin'};
       title.innerHTML = `
         <div class="right">
           <span class="groupName">${escapeHtml(GROUP_TITLES_HE[g] || g)}</span>
         </div>
         <span class="count">${groupItems.length} פריטים</span>
+        <span class="menuHelpBtn" data-hash="${GUIDE_HASH[g]||'intro'}" title="מדריך למשתמש">?</span>
         <span class="chev">▸</span>`;
+
+      title.querySelector('.menuHelpBtn').addEventListener('click', function(e){
+        e.stopPropagation();
+        navigateTo('guide.html#' + this.dataset.hash, true);
+      });
 
       const wrap = document.createElement("div");
       wrap.className = "menuGroupItems";
@@ -326,8 +343,8 @@
     if(allowedPages.has("help.html")) return "help.html";
     return allowedItems[0]?.page || "help.html";
   }
-  const _NAV_V = Date.now();
-  function navigateTo(page, save){ if(!page) return; markActive(page); const sep=page.includes('?')?'&':'?'; contentFrame.src = page+sep+'_v='+_NAV_V; setHeaderPageName(page); if(save) localStorage.setItem(KEY_LAST_PAGE, page); }
+  function navigateTo(page, save){ if(!page) return; markActive(page); const sep=page.includes('?')?'&':'?'; contentFrame.src = page+sep+'_v='+Date.now(); setHeaderPageName(page); if(save) localStorage.setItem(KEY_LAST_PAGE, page); }
+  window.addEventListener('message', e => { if(e.data?.type==='navigate' && e.data?.page) navigateTo(e.data.page, true); });
   function renderGuestMenu(){
     menuRoleLine.textContent = "תפקיד: Guest";
     menuContainer.innerHTML = "";

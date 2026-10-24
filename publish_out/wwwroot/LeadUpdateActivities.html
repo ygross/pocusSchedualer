@@ -1,12 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>עריכת פעילות – מרכז קורס</title>
   <link rel="stylesheet" href="css/app.css">
-  <link rel="stylesheet" href="css/lead.css">
+  <link rel="stylesheet" href="css/lead.css?v=2">
   <script>(function(){var t=localStorage.getItem('theme');document.addEventListener('DOMContentLoaded',function(){if(t!=='light')document.body.classList.add('theme-dark')});window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme')document.body.classList.toggle('theme-dark',e.data.value==='dark')})})();</script>
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 
 <body class="app-page">
@@ -125,8 +126,10 @@
   </div>
 
   <!-- ✅ חשוב: תטען את הקובץ הזה (בשם שלו), לא UpdateActivities.js אחר -->
+  <script src="js/lead-course-filter.js?v=1"></script>
   <script src="js/LeadUpdateActivities.js"></script>
   <script src="js/page-collapse.js"></script>
   <script src="js/page-timestamp.js"></script>
 </body>
 </html>
+

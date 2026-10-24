@@ -41,7 +41,9 @@ function fmtRange(start, end) {
 async function load() {
   setMsg("טוען נתונים…");
   try {
-    const rows = await fetchJson(`${API_BASE}/lead/conflicts`) || [];
+    const courseId = window.getLeadCourseId?.();
+    const qs = courseId ? `?courseId=${courseId}` : '';
+    const rows = await fetchJson(`${API_BASE}/lead/conflicts${qs}`) || [];
     render(rows);
     setMsg("");
   } catch(e) { setMsg("שגיאה: " + e.message, "err"); }
@@ -107,5 +109,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch { /* non-fatal */ }
 
   $("refreshBtn").addEventListener("click", load);
+  window.addEventListener('leadCourseChanged', load);
   await load();
 });

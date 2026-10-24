@@ -163,7 +163,7 @@ async function fj(url,opts={}){
   return ct.includes('application/json')?r.json():null;
 }
 const EP=()=>({
-  acts: `${API}/lead/activities?take=400`,
+  acts: `${API}/lead/activities?take=400${window.getLeadCourseId?.()?'&courseId='+window.getLeadCourseId():''}`,
   act:  id=>`${API}/lead/activities/${id}`,
   avail:id=>`${API}/lead/instances/${id}/availability`,
   elig: id=>`${API}/lead/activities/${id}/eligible-instructors`,
@@ -343,6 +343,7 @@ function showModal(v){const bd=$('backdrop');bd.style.display=v?'flex':'none';}
 // Wire events
 document.addEventListener('DOMContentLoaded',function(){
   $('btnReload').addEventListener('click',()=>loadAll().catch(e=>setMsg('mainMsg',e.message,'err')));
+  window.addEventListener('leadCourseChanged',()=>loadAll().catch(e=>setMsg('mainMsg',e.message,'err')));
   $('searchInp').addEventListener('input',renderTable);
   $('chkOnlyMissing').addEventListener('change',renderTable);
   $('btnClose').addEventListener('click',()=>showModal(false));
@@ -354,6 +355,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 })();
 </script>
+<script src="js/lead-course-filter.js?v=1"></script>
 <script src="js/page-collapse.js"></script>
 <script src="js/page-timestamp.js"></script>
 </body>
