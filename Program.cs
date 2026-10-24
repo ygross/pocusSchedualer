@@ -82,6 +82,7 @@ api.MapLeadCalendarEndpoints();
 api.MapLeadCalendarReminderEndpoints();
 api.MapLeadCalendarWhatsAppEndpoints();
 api.MapInstructorOnboardingEndpoints();
+api.MapBugReportEndpoints();
 api.MapAvailabilityRequestEndpoints();
 api.MapInstructorCancellationEndpoints();
 
