@@ -155,8 +155,8 @@ async function fillSelect(el, items, valueKey, textKey, selectedValue, addAll=fa
 
 async function loadTypes(){
   const types = await fetchJson(endpoints().activityTypes);
-  await fillSelect($("sType"), types, "activityTypeId", "typeName", null, true);
   await fillSelect($("eType"), types, "activityTypeId", "typeName", null, false);
+  return types;
 }
 
 function populateSearchCourses(typeId) {
@@ -166,7 +166,14 @@ function populateSearchCourses(typeId) {
     list.map(c => `<option value="${c.courseId}">${esc(c.courseName)}</option>`).join('');
 }
 
-async function loadMyCourses() {
+function populateSearchTypes(allTypes) {
+  const relevant = allTypes.filter(t => coursesByType[t.activityTypeId]?.length > 0);
+  const sel = $("sType");
+  sel.innerHTML = '<option value="">כל הסוגים</option>' +
+    relevant.map(t => `<option value="${t.activityTypeId}">${esc(t.typeName)}</option>`).join('');
+}
+
+async function loadMyCourses(allTypes) {
   allMyCourses = await fetchJson(`${API_BASE}/lead/my-courses`) || [];
   coursesByType = {};
   for (const c of allMyCourses) {
@@ -176,6 +183,7 @@ async function loadMyCourses() {
       coursesByType[tid].push(c);
     }
   }
+  populateSearchTypes(allTypes);
   populateSearchCourses(null);
 }
 
@@ -428,8 +436,8 @@ async function saveUpdate(){
   (async ()=>{
     await detectApiBase();
     await loadMe();
-    await loadTypes();
-    await loadMyCourses();
+    const allTypes = await loadTypes();
+    await loadMyCourses(allTypes);
     await showMine();
   })().catch(e => setMsg("searchMsg", e.message, "err"));
 })();
