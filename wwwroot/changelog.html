@@ -74,7 +74,7 @@
     .item-text{flex:1;line-height:1.5}
     .item-sub{font-size:11px;color:var(--muted2);margin-top:1px}
   </style>
-<link rel="stylesheet" href="css/shared.css?v=4" />
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 <body>
 <div class="wrap">
@@ -87,6 +87,27 @@
       <div class="subtitle">simCenterSchedualer &middot; Changelog</div>
     </div>
     <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
+  </div>
+
+  <!-- v3.8 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.8</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-improve">UX</span>
+      <span class="v-badge badge-fix">Fix</span>
+    </div>
+    <div class="section-title">שיפורי חוויית משתמש</div>
+    <div class="items">
+      <div class="item"><div class="item-dot green"></div><div class="item-text">הוסתרו פרטים טכניים (API base, role label) מכל הדפים — גלוי למפתחים בלבד<div class="item-sub">CSS: shared.css — .api-base-line, .roleline, .purpose-role הוסתרו globally</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">תפריט ניווט עודכן — הוסרו קישורים שבורים, נוספו דפים חסרים<div class="item-sub">menu.html — מבנה ניווט נוכחי ומדויק</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">כותרות דפים תורגמו לעברית ברורה (activitieslist, InstructorActivitiesCalendar, my-assignments)<div class="item-sub">הוסרו כותרות משניות בסגנון מפתח</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">login-otp: נוסף ספירה לאחור (10 דקות) וכפתור "שלח קוד חדש"<div class="item-sub">login-otp.html + js/login-otp.js</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">תיקון API detection — מקבל 401/403 (לא רק 200), קורא sessionStorage ראשון<div class="item-sub">leadassignment.html, js/lead-assignment.js, js/activitiesList.js</div></div></div>
+      <div class="item"><div class="item-dot blue"></div><div class="item-text">modal שיבוץ: כותרת מציגה שם פעילות במקום מזהה טכני, תת-כותרת מציגה תאריך ושעות<div class="item-sub">leadassignment.html inline script</div></div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">תיקון קישור שבור ב-verify.html (login.html → login-otp.html)</div></div>
+      <div class="item"><div class="item-dot green"></div><div class="item-text">גרסת app עודכנה ל-v3.7 ב-app.html</div></div>
+    </div>
   </div>
 
   <!-- v3.7 -->

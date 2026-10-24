@@ -153,6 +153,11 @@ h4, .subsubtitle, .card-sub, .user-line { font-size: 11px !important; font-weigh
   margin-bottom: 4px !important; border-radius: 4px !important;
 }
 
+/* ── Hide dev/technical elements from end users ── */
+.api-base-line, .api-base, .api-base-row { display: none !important; }
+.roleline { display: none !important; }
+.purpose-role { display: none !important; }
+
 /* ── Full-width containers ── */
 .wrap, .page-wrap, .aci-page, main, .container, form {
   max-width: 100% !important; width: 100% !important; box-sizing: border-box !important;

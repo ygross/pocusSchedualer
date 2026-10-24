@@ -29,7 +29,7 @@
 
   <!-- JS חיצוני בלבד -->
   <script src="js/login-otp.js" defer></script>
-<link rel="stylesheet" href="css/shared.css?v=4" />
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 
 <body>
@@ -45,7 +45,14 @@
     <div id="otpSection" style="display:none">
       <label for="otp">קוד שקיבלת במייל</label>
       <input id="otp" type="text" maxlength="6" placeholder="******" autocomplete="one-time-code" />
+      <div id="otpCountdown" style="font-size:12px;color:#64748b;margin-bottom:10px;min-height:16px;"></div>
       <button id="btnVerify">התחבר</button>
+      <div style="margin-top:10px">
+        <button id="btnResend" type="button"
+          style="background:none;border:none;color:#0f5fb4;cursor:pointer;font-size:13px;text-decoration:underline;padding:0">
+          שלח קוד חדש
+        </button>
+      </div>
     </div>
 
     <div class="msg" id="msg"></div>

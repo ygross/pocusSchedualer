@@ -23,7 +23,7 @@
       border-top:1px solid rgba(255,255,255,.18)}
     .link{color:#fff;text-decoration:none;opacity:.9}
   </style>
-<link rel="stylesheet" href="css/shared.css?v=4" />
+<link rel="stylesheet" href="css/shared.css?v=5" />
 </head>
 <body>
 
@@ -33,60 +33,71 @@
 
   <div class="hr"></div>
 
-  <div class="secTitle">מרכז פעילות (Coordinator)</div>
-
-  <button class="btn" onclick="go('addactivities.html')">
-    <span>הוסף פעילות</span><span>➕</span>
-  </button>
-
-  <button class="btn" onclick="go('updateactivity.html')">
-    <span>עדכון/מחיקה פעילויות</span><span>🗑️</span>
-  </button>
-
-  <button class="btn" onclick="go('assignments.html')">
-    <span>שיבוצים (בחירה מזמינים)</span><span>✅</span>
-  </button>
-
-  <button class="btn" onclick="go('loadreport.html')">
-    <span>דוח שעות</span><span>📊</span>
-  </button>
-
-  <button class="btn" onclick="go('ganttreport.html')">
-    <span>גאנט</span><span>📆</span>
-  </button>
-
-  <button class="btn" onclick="go('instructors.html')">
-    <span>מדריכים</span><span>👥</span>
-  </button>
-
-  <div class="hr"></div>
-
   <div class="secTitle">מדריך (Instructor)</div>
-
-  <button class="btn" onclick="go('activities.html')">
-    <span>פעילויות (קלנדר)</span><span>🗓️</span>
-  </button>
-
-  <button class="btn" onclick="go('assign-activities.html')">
-    <span>הגש זמינות</span><span>🛒</span>
-  </button>
 
   <button class="btn" onclick="go('my-assignments.html')">
     <span>השיבוצים שלי</span><span>🧾</span>
   </button>
+
+  <button class="btn" onclick="go('InstructorActivitiesCalendar.html')">
+    <span>יומן פעילויות</span><span>🗓️</span>
+  </button>
+
+  <button class="btn" onclick="go('activitieslist.html')">
+    <span>רשימת פעילויות</span><span>📋</span>
+  </button>
+
+  <div class="hr"></div>
+
+  <div class="secTitle">מרכז קורס (CourseManager)</div>
+
+  <button class="btn" onclick="go('LeadUpdateActivities.html')">
+    <span>עריכת פעילות</span><span>✏️</span>
+  </button>
+
+  <button class="btn" onclick="go('leadassignment.html')">
+    <span>שיבוץ פעילות</span><span>✅</span>
+  </button>
+
+  <button class="btn" onclick="go('LeadPendingAvailability.html')">
+    <span>זמינות ממתינה</span><span>⏳</span>
+  </button>
+
+  <button class="btn" onclick="go('leadCalendar.html')">
+    <span>קלנדר מרכז קורס</span><span>📆</span>
+  </button>
+
+  <button class="btn" onclick="go('leadReminders.html')">
+    <span>שליחת הודעה / תזכורת</span><span>💬</span>
+  </button>
+
+  <div class="hr"></div>
+
+  <div class="secTitle">אדמין (Admin)</div>
+
+  <button class="btn" onclick="go('adminCoursesManagement.html')">
+    <span>ניהול קורסים</span><span>📚</span>
+  </button>
+
+  <button class="btn" onclick="go('adminPendingApprovals.html')">
+    <span>אישורים ממתינים</span><span>👤</span>
+  </button>
+
+  <button class="btn" onclick="go('adminBulkImport.html')">
+    <span>ייבוא מדריכים מקובץ</span><span>📥</span>
+  </button>
+
 </div>
 
 <div class="foot">
-  <a class="link" href="#" onclick="go('help.html');return false;">עזרה / הסבר על המערכת</a>
+  <a class="link" href="#" onclick="go('guide.html');return false;">עזרה / מדריך למשתמש</a>
 </div>
 
 <script>
   function go(page){
-    // קורא לפונקציה שנמצאת ב-app.html (בחלון האב)
     if (window.parent && typeof window.parent.loadPage === "function"){
       window.parent.loadPage(page);
     } else {
-      // fallback אם פותחים menu.html לבד
       location.href = page;
     }
   }

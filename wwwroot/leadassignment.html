@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>שיבוץ פעילות</title>
-  <link rel="stylesheet" href="css/shared.css?v=4" />
+  <link rel="stylesheet" href="css/shared.css?v=5" />
   <style>
 :root{--nav:#0b2c66;--bg:#f3f4f6;--card:#fff;--line:#e5e7eb;--muted:#6b7280;--bad:#dc2626;--ok:#16a34a;--warn:#b45309}
 *{box-sizing:border-box}
@@ -145,10 +145,11 @@ body.theme-dark .pill{background:#131f35;border-color:rgba(255,255,255,.12);colo
 'use strict';
 const basePath = new URL(".", window.location.href).pathname.replace(/\/+$/,"/");
 const CANDS = [
+  sessionStorage.getItem('pocus_api_base'),
   `${location.origin}${basePath}api/api`,
   `${location.origin}${basePath}api`
-];
-let API = CANDS[0];
+].filter(Boolean);
+let API = CANDS[0] ?? `${location.origin}${basePath}api/api`;
 const $ = id => document.getElementById(id);
 const esc = s => (s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function pad2(n){return String(n).padStart(2,'0')}
@@ -181,7 +182,7 @@ let allRows=[], eligCache={}, mInstId=null, mActId=null, mReq=0, mAss=0, mCands=
 
 async function detectApi(){
   for(const c of CANDS){
-    try{const r=await fetch(`${c}/me`,{credentials:'include'});if(r.ok){API=c;return;}}catch{}
+    try{const r=await fetch(`${c}/me`,{credentials:'include'});if(r.ok||r.status===401||r.status===403){API=c;return;}}catch{}
   }
 }
 
@@ -270,8 +271,8 @@ async function openModal(iid,aid){
   const row=allRows.find(r=>r.instanceId===iid);if(!row)return;
   mReq=row.required;mAss=row.assigned;
   const mis=Math.max(0,mReq-mAss);
-  $('mTitle').textContent=`שיבוץ מדריכים — מופע #${iid}`;
-  $('mSub').textContent=`${esc(row.actName)} | ${fmtDate(row.startUtc)} ${fmtTime(row.startUtc)}–${fmtTime(row.endUtc)}`;
+  $('mTitle').textContent=`שיבוץ מדריכים — ${esc(row.actName)}`;
+  $('mSub').textContent=`${fmtDate(row.startUtc)} ${fmtTime(row.startUtc)}–${fmtTime(row.endUtc)}${row.courseName?' · '+esc(row.courseName):''}`;
   $('mReq').textContent=`נדרש: ${mReq}`;$('mAss').textContent=`שובצו: ${mAss}`;
   $('mMis').textContent=`חסרים: ${mis}`;$('mMis').className='pill '+(mis>0?'bad':'ok');
   $('candBody').innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center;padding:14px">טוען…</td></tr>`;
@@ -333,7 +334,7 @@ async function approveAssign(){
     try{await fj(`${API}/lead/instances/${mInstId}/notify-assigned`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instructorIds:ids})});}catch{}
     setMsg('mMsg','שובץ ✅','ok');
     await refreshRow(mInstId);renderTable();
-    setTimeout(()=>showModal(false),700);
+    setTimeout(()=>showModal(false),1800);
   }catch(e){setMsg('mMsg',e.message,'err');}
 }
 function setMsg(id,txt,kind=''){const el=$(id);if(!el)return;el.className='msg'+(kind?' '+kind:'');el.textContent=txt||'';}

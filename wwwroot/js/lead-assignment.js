@@ -1,11 +1,13 @@
 // lead-assignment.js v3 — flat table layout
 
+const KEY_API_BASE = 'pocus_api_base';
 const basePath = new URL(".", window.location.href).pathname.replace(/\/+$/, "/");
 const API_CANDIDATES = [
+  sessionStorage.getItem(KEY_API_BASE),
   `${window.location.origin}${basePath}api/api`,
   `${window.location.origin}${basePath}api`
-];
-let API_BASE = API_CANDIDATES[0];
+].filter(Boolean);
+let API_BASE = API_CANDIDATES[0] ?? `${window.location.origin}${basePath}api/api`;
 
 const $ = id => document.getElementById(id);
 
@@ -51,7 +53,10 @@ function EP() { return {
 
 async function detectApi() {
   for (const c of API_CANDIDATES) {
-    try { const r = await fetch(`${c}/me`,{credentials:"include"}); if(r.ok){API_BASE=c;return;} } catch {}
+    try {
+      const r = await fetch(`${c}/me`,{credentials:"include"});
+      if(r.ok||r.status===401||r.status===403){API_BASE=c;return;}
+    } catch {}
   }
 }
 
@@ -242,8 +247,8 @@ async function openModal(instanceId, actId) {
   modalAssigned = row.assigned;
   const missing = Math.max(0, modalRequired - modalAssigned);
 
-  $("modalTitle").textContent = `שיבוץ מדריכים — מופע #${instanceId}`;
-  $("modalSub").textContent = `${esc(row.actName)} | ${fmtDate(row.startUtc)} ${fmtTime(row.startUtc)}–${fmtTime(row.endUtc)}`;
+  $("modalTitle").textContent = `שיבוץ מדריכים — ${esc(row.actName)}`;
+  $("modalSub").textContent = `${fmtDate(row.startUtc)} ${fmtTime(row.startUtc)}–${fmtTime(row.endUtc)}${row.courseName ? " · "+esc(row.courseName) : ""}`;
   $("mReq").textContent = `נדרש: ${modalRequired}`;
   $("mAssigned").textContent = `שובצו: ${modalAssigned}`;
   $("mMissing").textContent = `חסרים: ${missing}`;
@@ -358,7 +363,7 @@ async function approveAssign() {
     setMsg("modalMsg","שובץ ✅ מרענן…","ok");
     await refreshRow(modalInstanceId);
     renderTable();
-    setTimeout(closeModal, 800);
+    setTimeout(closeModal, 1800);
   } catch(e) { setMsg("modalMsg","שגיאה: "+e.message,"err"); }
 }
 
