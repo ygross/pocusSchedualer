@@ -60,15 +60,14 @@
     try { if (courseId) localStorage.setItem(LS_COURSE, String(courseId)); } catch {}
 
     // CSS
+    const slot = document.getElementById('leadFilterSlot');
+    const inSlot = !!slot;
     const css = document.createElement('style');
     css.textContent = `
       #leadFilterBar {
         display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-        padding:10px 16px;
-        background:var(--card,#0f2340);
-        border:1px solid var(--line2,rgba(255,255,255,.15));
-        border-radius:var(--radius,12px);
-        margin-bottom:14px;
+        padding:${inSlot ? '6px 0' : '10px 16px'};
+        ${inSlot ? '' : 'background:var(--card,#0f2340); border:1px solid var(--line2,rgba(255,255,255,.15)); border-radius:var(--radius,12px); margin-bottom:14px;'}
         font-size:13px; direction:rtl;
       }
       .lfb-group { display:flex; align-items:center; gap:7px; }
@@ -117,15 +116,19 @@
         ? `<span class="lfb-group"><span class="lfb-label">קורס:</span><select id="lfbCourse" class="lfb-sel">${buildCourseOptions(typeId)}</select></span>`
         : `<span class="lfb-group"><span class="lfb-label">קורס:</span><span class="lfb-val">${esc(allCourses[0]?.courseName || '')}</span></span>`);
 
-    // Inject into .wrap after .purpose (or prepend to .wrap, or prepend body)
-    const wrap    = document.querySelector('.wrap');
-    const purpose = wrap?.querySelector('.purpose');
-    if (purpose) {
-      purpose.insertAdjacentElement('afterend', bar);
-    } else if (wrap) {
-      wrap.prepend(bar);
+    // Inject: prefer explicit slot, then .wrap/.purpose, then body
+    if (inSlot) {
+      slot.appendChild(bar);
     } else {
-      document.body.prepend(bar);
+      const wrap    = document.querySelector('.wrap');
+      const purpose = wrap?.querySelector('.purpose');
+      if (purpose) {
+        purpose.insertAdjacentElement('afterend', bar);
+      } else if (wrap) {
+        wrap.prepend(bar);
+      } else {
+        document.body.prepend(bar);
+      }
     }
 
     // Events
