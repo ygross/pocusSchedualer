@@ -171,35 +171,35 @@ public static class LeadEndpoints
         });
 
         // ── Pending Availability ───────────────────────────────────────────────
-        api.MapGet("/lead/pending-availability", async (HttpContext ctx, int? courseId, Db db) =>
+        api.MapGet("/lead/pending-availability", async (HttpContext ctx, int? courseId, int? activityTypeId, Db db) =>
         {
             var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
             if (!isAuth) return Results.Unauthorized();
             if (!isAdmin && myId == null) return Results.Unauthorized();
 
-            var rows = await db.GetLeadPendingAvailabilityAsync(isAdmin ? null : myId, courseId);
+            var rows = await db.GetLeadPendingAvailabilityAsync(isAdmin ? null : myId, courseId, activityTypeId);
             return Results.Ok(rows);
         });
 
         // ── Needs Attention (understaffed) ────────────────────────────────────
-        api.MapGet("/lead/needs-attention", async (HttpContext ctx, int? courseId, Db db) =>
+        api.MapGet("/lead/needs-attention", async (HttpContext ctx, int? courseId, int? activityTypeId, Db db) =>
         {
             var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
             if (!isAuth) return Results.Unauthorized();
             if (!isAdmin && myId == null) return Results.Unauthorized();
 
-            var rows = await db.GetLeadNeedsAttentionAsync(isAdmin ? null : myId, courseId);
+            var rows = await db.GetLeadNeedsAttentionAsync(isAdmin ? null : myId, courseId, activityTypeId);
             return Results.Ok(rows);
         });
 
         // ── Conflict Report ───────────────────────────────────────────────────
-        api.MapGet("/lead/conflicts", async (HttpContext ctx, int? courseId, Db db) =>
+        api.MapGet("/lead/conflicts", async (HttpContext ctx, int? courseId, int? activityTypeId, Db db) =>
         {
             var (isAuth, isAdmin, myId) = AuthHelpers.GetAuthInfo(ctx);
             if (!isAuth) return Results.Unauthorized();
             if (!isAdmin && myId == null) return Results.Unauthorized();
 
-            var rows = await db.GetLeadConflictsAsync(isAdmin ? null : myId, courseId);
+            var rows = await db.GetLeadConflictsAsync(isAdmin ? null : myId, courseId, activityTypeId);
             return Results.Ok(rows);
         });
 

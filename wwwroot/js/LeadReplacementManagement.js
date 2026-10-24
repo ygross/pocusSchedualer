@@ -32,7 +32,11 @@ async function load() {
   setMsg("טוען נתונים…");
   try {
     const courseId = window.getLeadCourseId?.();
-    const qs = courseId ? `?courseId=${courseId}` : '';
+    const typeId   = window.getLeadActivityTypeId?.();
+    const p = new URLSearchParams();
+    if (courseId) p.set('courseId', courseId);
+    if (typeId)   p.set('activityTypeId', typeId);
+    const qs = p.toString() ? '?' + p.toString() : '';
     rows = await fetchJson(`${API_BASE}/lead/needs-attention${qs}`) || [];
     render();
     setMsg("");

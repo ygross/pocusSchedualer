@@ -163,7 +163,7 @@ async function fj(url,opts={}){
   return ct.includes('application/json')?r.json():null;
 }
 const EP=()=>({
-  acts: `${API}/lead/activities?take=400${window.getLeadCourseId?.()?'&courseId='+window.getLeadCourseId():''}`,
+  acts: (()=>{ const p=new URLSearchParams({take:'400'}); const c=window.getLeadCourseId?.(); if(c) p.set('courseId',c); const t=window.getLeadActivityTypeId?.(); if(t) p.set('activityTypeId',t); return `${API}/lead/activities?${p}`; })(),
   act:  id=>`${API}/lead/activities/${id}`,
   avail:id=>`${API}/lead/instances/${id}/availability`,
   elig: id=>`${API}/lead/activities/${id}/eligible-instructors`,

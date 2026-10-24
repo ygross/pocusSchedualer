@@ -1,0 +1,424 @@
+{
+  "defaults": {
+    "Instructor": "my-assignments.html",
+    "CourseManager": "LeadUpdateActivities.html",
+    "Admin": "adminUpdateDeleteActivities.html",
+    "SystemAdmin": "sysAdminDashboard.html"
+  },
+  "items": [
+    {
+      "id": "myAssignments",
+      "icon": "assignment",
+      "label": "המשימות שלי",
+      "page": "my-assignments.html",
+      "roles": [
+        "Instructor"
+      ],
+      "group": "Instructor",
+      "section": "פעילות"
+    },
+    {
+      "id": "InstructorActivitiesCalendar",
+      "icon": "calendar",
+      "label": "יומן פעילויות",
+      "page": "InstructorActivitiesCalendar.html",
+      "roles": [
+        "Instructor",
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "פעילות"
+    },
+    {
+      "id": "activitiesList",
+      "icon": "activities",
+      "label": "רשימת פעילויות",
+      "page": "activitieslist.html",
+      "roles": [
+        "Instructor",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "פעילות"
+    },
+    {
+      "id": "InstructorsSummary",
+      "icon": "summary",
+      "label": "דוח מסכם",
+      "page": "instructorsSummary.html",
+      "roles": [
+        "Instructor",
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "דוחות"
+    },
+    {
+      "id": "InstructorsMessages",
+      "icon": "messages",
+      "label": "הודעות",
+      "page": "InstructorsMessages.html",
+      "roles": [
+        "Instructor",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "דוחות"
+    },
+    {
+      "id": "InstructorUpdateDetails",
+      "icon": "edit",
+      "label": "עדכון פרטים",
+      "page": "instructorUpdateDetails.html",
+      "roles": [
+        "Instructor",
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "ניהול"
+    },
+    {
+      "id": "help",
+      "icon": "help",
+      "label": "עזרה",
+      "page": "help.html",
+      "roles": [
+        "Instructor",
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "Instructor",
+      "section": "ניהול"
+    },
+    {
+      "id": "LeadUpdateActivities",
+      "icon": "edit",
+      "label": "עריכת פעילות",
+      "page": "LeadUpdateActivities.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "leadCreateActivity",
+      "icon": "add",
+      "label": "פתיחת פעילות חדשה",
+      "page": "LeadCreateActivity.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "leadAssignment",
+      "icon": "assignment",
+      "label": "שיבוץ פעילות",
+      "page": "leadassignment.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "leadPendingAvailability",
+      "icon": "report",
+      "label": "זמינות ממתינה",
+      "page": "LeadPendingAvailability.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "leadReplacementManagement",
+      "icon": "alert",
+      "label": "ניהול החלפות",
+      "page": "LeadReplacementManagement.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "leadConflictReport",
+      "icon": "report",
+      "label": "דוח התנגשויות",
+      "page": "LeadConflictReport.html",
+      "roles": ["CourseManager", "Admin"],
+      "group": "CourseManager",
+      "section": "דוחות"
+    },
+    {
+      "id": "leadCalendar",
+      "icon": "calendar",
+      "label": "קלנדר למרכז",
+      "page": "leadCalendar.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "פעילות"
+    },
+    {
+      "id": "courseManagerReport",
+      "icon": "report",
+      "label": "דוחות מרכז קורס",
+      "page": "instructorsSummary.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "דוחות"
+    },
+    {
+      "id": "adminUpdateDeleteActivities",
+      "icon": "edit",
+      "label": "עדכון / מחיקה פעילויות",
+      "page": "adminUpdateDeleteActivities.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "פעילות"
+    },
+    {
+      "id": "AdminActivityAssignment",
+      "icon": "assignment",
+      "label": "שיבוץ פעילות",
+      "page": "adminActivityAssignment.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "פעילות"
+    },
+    {
+      "id": "adminAddActivities",
+      "icon": "add",
+      "label": "הוספת פעילות",
+      "page": "adminAddActivities.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "פעילות"
+    },
+    {
+      "id": "gantt",
+      "icon": "gantt",
+      "label": "גאנט פעילויות",
+      "page": "gantt.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "פעילות"
+    },
+    {
+      "id": "adminHoursReport",
+      "icon": "report",
+      "label": "דוח שעות מנהלה",
+      "page": "admin-hours-report.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "דוחות"
+    },
+    {
+      "id": "adminInstructorSummary",
+      "icon": "summary",
+      "label": "דוחות מדריכים",
+      "page": "instructorsSummary.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "דוחות"
+    },
+    {
+      "id": "courseInstructors",
+      "icon": "courses",
+      "label": "ניהול הסמכות מדריכים",
+      "page": "admincourseInstructors.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "ניהול"
+    },
+    {
+      "id": "adminInstructorCourse",
+      "icon": "courses",
+      "label": "הסמכות לפי קורס",
+      "page": "adminInstructorCourse.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "ניהול"
+    },
+    {
+      "id": "activityTypes",
+      "icon": "settings",
+      "label": "סוגי פעילויות",
+      "page": "activityTypes.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "ניהול"
+    },
+    {
+      "id": "LeadCourseDashboard",
+      "icon": "dashboard",
+      "label": "דשבורד קורס",
+      "page": "LeadCourseDashboard.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "דוחות"
+    },
+    {
+      "id": "LeadInstructorLoad",
+      "icon": "summary",
+      "label": "עומס מדריכים",
+      "page": "LeadInstructorLoad.html",
+      "roles": [
+        "CourseManager",
+        "Admin"
+      ],
+      "group": "CourseManager",
+      "section": "דוחות"
+    },
+    {
+      "id": "AdminSystemDashboard",
+      "icon": "dashboard",
+      "label": "דשבורד מערכת",
+      "page": "AdminSystemDashboard.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+      "id": "AdminInstructorUtilizationReport",
+      "icon": "report",
+      "label": "ניצול מדריכים",
+      "page": "AdminInstructorUtilizationReport.html",
+      "roles": [
+        "Admin"
+      ],
+      "group": "Admin",
+      "section": "דוחות"
+    },
+    {
+      "id": "adminBulkImport",
+      "icon": "add",
+      "label": "ייבוא מדריכים מקובץ",
+      "page": "adminBulkImport.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+       "id": "adminCoursesManagement",
+       "icon": "courses",
+        "label": "ניהול קורסים",
+         "page": "adminCoursesManagement.html",
+         "roles": ["Admin"],
+          "group": "Admin",
+          "section": "ניהול"
+        },
+    {
+      "id": "systemSettings",
+      "icon": "settings",
+      "label": "הגדרות מערכת",
+      "page": "adminSettings.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+      "id": "changelog",
+      "icon": "summary",
+      "label": "עדכוני גרסאות",
+      "page": "changelog.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+      "id": "adminCenterOverview",
+      "icon": "dashboard",
+      "label": "מבט מרכז",
+      "page": "adminCenterOverview.html",
+      "roles": ["Admin"],
+      "group": "Admin",
+      "section": "דוחות"
+    },
+    {
+      "id": "sysAdminDashboard",
+      "icon": "dashboard",
+      "label": "Dashboard",
+      "page": "sysAdminDashboard.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+      "id": "sysAdminEmailCenter",
+      "icon": "messages",
+      "label": "Email Center",
+      "page": "sysAdminEmailCenter.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "Monitoring"
+    },
+    {
+      "id": "sysAdminAuditLog",
+      "icon": "summary",
+      "label": "Audit Log",
+      "page": "sysAdminAuditLog.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "Monitoring"
+    },
+    {
+      "id": "sysAdminErrors",
+      "icon": "alert",
+      "label": "Errors",
+      "page": "sysAdminErrors.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "Monitoring"
+    },
+    {
+      "id": "sysAdminUsers",
+      "icon": "courses",
+      "label": "User Management",
+      "page": "sysAdminUsers.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "System"
+    },
+    {
+      "id": "sysAdminMaintenance",
+      "icon": "settings",
+      "label": "Maintenance",
+      "page": "sysAdminMaintenance.html",
+      "roles": ["SystemAdmin"],
+      "group": "SystemAdmin",
+      "section": "Maintenance"
+    }
+
+  ]
+}

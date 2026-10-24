@@ -162,6 +162,8 @@ function buildScopedSearchParams() {
   if (MY_ID) qs.set("leadInstructorId", String(MY_ID));
   const courseId = window.getLeadCourseId?.();
   if (courseId) qs.set("courseId", String(courseId));
+  const typeId = window.getLeadActivityTypeId?.();
+  if (typeId) qs.set("activityTypeId", String(typeId));
   qs.set("take", "200");
   return qs;
 }
