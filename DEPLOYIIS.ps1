@@ -90,7 +90,6 @@ function Manage-AppPool([string]$action) {
 # ============================================================
 # HEADER
 # ============================================================
-Clear-Host
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "  DEPLOYIIS — PocusSchedualer" -ForegroundColor White
 Write-Host "  $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -ForegroundColor DarkGray
@@ -101,28 +100,35 @@ Write-Host "  Backend  : $ApiPublishPath" -ForegroundColor Gray
 Write-Host "  Frontend : $IisFrontend" -ForegroundColor Gray
 
 # ============================================================
-# STOP APPPOOL
-# ============================================================
-if (-not $FrontendOnly -and -not $SkipAppPool) {
-    Manage-AppPool "Stop"
-}
-
-# ============================================================
-# BACKEND: dotnet publish
+# BACKEND: build → app_offline trick → robocopy → restore
 # ============================================================
 if (-not $FrontendOnly) {
-    Write-Step "dotnet publish → $ApiPublishPath"
+    Write-Step "dotnet publish → $RepoPath\publish_out"
     Set-Location $PSScriptRoot
-    dotnet publish -c Release -o $ApiPublishPath
-    if ($LASTEXITCODE -ne 0) { Write-Host "❌ dotnet publish failed" -ForegroundColor Red; exit 1 }
-    Write-Host "  ✅ Backend published" -ForegroundColor Green
-}
 
-# ============================================================
-# START APPPOOL
-# ============================================================
-if (-not $FrontendOnly -and -not $SkipAppPool) {
-    Manage-AppPool "Start"
+    # Clean stale build cache
+    Remove-Item -Recurse -Force "C:\Temp\pocus-build" -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force (Join-Path $PSScriptRoot "obj") -ErrorAction SilentlyContinue
+
+    dotnet publish -c Release -o (Join-Path $PSScriptRoot "publish_out") /p:BaseIntermediateOutputPath=C:\Temp\pocus-build\
+    if ($LASTEXITCODE -ne 0) { Write-Host "❌ dotnet publish failed" -ForegroundColor Red; exit 1 }
+    Write-Host "  ✅ Build OK" -ForegroundColor Green
+
+    Write-Step "Deploying backend via app_offline.htm"
+    $offline = Join-Path $ApiPublishPath "app_offline.htm"
+    '<html><body>בפריסה... נא להמתין</body></html>' | Out-File $offline -Encoding utf8
+    Write-Host "  app_offline.htm created — waiting 4s..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 4
+
+    $src = Join-Path $PSScriptRoot "publish_out"
+    robocopy $src $ApiPublishPath /E /IS /IT /XF "app_offline.htm" /XD "publish_out" "publish" "publish_deploy" "publish_tmp" /R:2 /W:2 /NP /NJH /NJS
+    $rc = $LASTEXITCODE
+
+    Remove-Item $offline -Force -ErrorAction SilentlyContinue
+    Write-Host "  app_offline.htm removed — app online" -ForegroundColor Green
+
+    if ($rc -ge 8) { Write-Host "❌ Robocopy error: $rc" -ForegroundColor Red; exit 1 }
+    Write-Host "  ✅ Backend deployed" -ForegroundColor Green
 }
 
 # ============================================================
