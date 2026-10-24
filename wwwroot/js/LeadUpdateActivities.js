@@ -10,6 +10,8 @@ let MY_ID = null;
 let ROLE = "";
 let IS_ADMIN = false;
 let IS_COURSE_MANAGER = false;
+let allMyCourses = [];
+let coursesByType = {};
 
 function setMsg(id, text, kind = "") {
   const el = $(id);
@@ -157,13 +159,29 @@ async function loadTypes(){
   await fillSelect($("eType"), types, "activityTypeId", "typeName", null, false);
 }
 
+function populateSearchCourses(typeId) {
+  const list = typeId ? (coursesByType[typeId] || []) : allMyCourses;
+  const sel = $("sCourse");
+  sel.innerHTML = '<option value="">הכל</option>' +
+    list.map(c => `<option value="${c.courseId}">${esc(c.courseName)}</option>`).join('');
+}
+
+async function loadMyCourses() {
+  allMyCourses = await fetchJson(`${API_BASE}/lead/my-courses`) || [];
+  coursesByType = {};
+  for (const c of allMyCourses) {
+    const tid = c.activityTypeId;
+    if (tid) {
+      if (!coursesByType[tid]) coursesByType[tid] = [];
+      coursesByType[tid].push(c);
+    }
+  }
+  populateSearchCourses(null);
+}
+
 function buildScopedSearchParams() {
   const qs = new URLSearchParams();
   if (MY_ID) qs.set("leadInstructorId", String(MY_ID));
-  const courseId = window.getLeadCourseId?.();
-  if (courseId) qs.set("courseId", String(courseId));
-  const typeId = window.getLeadActivityTypeId?.();
-  if (typeId) qs.set("activityTypeId", String(typeId));
   qs.set("take", "200");
   return qs;
 }
@@ -193,12 +211,14 @@ async function doSearch(){
   const activityId = Number($("sActivityId").value || "0") || null;
   const name = ($("sName").value || "").trim();
   const typeId = $("sType").value ? Number($("sType").value) : null;
+  const courseId = $("sCourse").value ? Number($("sCourse").value) : null;
 
   const qs = buildScopedSearchParams();
 
   if(activityId) qs.set("activityId", String(activityId));
   if(name) qs.set("name", name);
   if(typeId) qs.set("activityTypeId", String(typeId));
+  if(courseId) qs.set("courseId", String(courseId));
 
   const rows = await fetchJson(endpoints().search(qs.toString()));
   renderResults(Array.isArray(rows) ? rows : []);
@@ -209,6 +229,7 @@ async function showMine(){
   $("sActivityId").value = "";
   $("sName").value = "";
   $("sType").value = "";
+  populateSearchCourses(null);
 
   setMsg("searchMsg", "טוען את הפעילויות שלי…");
   $("resultsBody").innerHTML = "";
@@ -376,14 +397,18 @@ async function saveUpdate(){
   $("themeToggle")?.addEventListener("click", toggleTheme);
 
   $("btnSearch").addEventListener("click", () => doSearch().catch(e => setMsg("searchMsg", e.message, "err")));
-  window.addEventListener('leadCourseChanged', () => doSearch().catch(() => {}));
   $("btnShowMine").addEventListener("click", () => showMine().catch(e => setMsg("searchMsg", e.message, "err")));
   $("btnClearSearch").addEventListener("click", () => {
     $("sActivityId").value = "";
     $("sName").value = "";
     $("sType").value = "";
+    populateSearchCourses(null);
     $("resultsBody").innerHTML = "";
     setMsg("searchMsg", "");
+  });
+  $("sType").addEventListener("change", () => {
+    const typeId = $("sType").value ? Number($("sType").value) : null;
+    populateSearchCourses(typeId);
   });
 
   $("eType").addEventListener("change", () => onEditTypeChange().catch(e => setMsg("editMsg", e.message, "err")));
@@ -404,6 +429,7 @@ async function saveUpdate(){
     await detectApiBase();
     await loadMe();
     await loadTypes();
+    await loadMyCourses();
     await showMine();
   })().catch(e => setMsg("searchMsg", e.message, "err"));
 })();
