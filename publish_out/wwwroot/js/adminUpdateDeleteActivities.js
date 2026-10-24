@@ -146,6 +146,7 @@ async function loadLookups() {
   ]);
 
   fillSelect($("sType"), TYPES, x => x.activityTypeId, x => x.typeName, "הכל");
+  fillSelect($("sCourse"), COURSES, x => x.courseId, x => x.courseName, "הכל");
   fillSelect($("eType"), TYPES, x => x.activityTypeId, x => x.typeName, "בחר סוג…");
   fillSelect($("eCourse"), COURSES, x => x.courseId, x => x.courseName, "בחר קורס…");
   fillSelect(
@@ -155,6 +156,16 @@ async function loadLookups() {
     x => `${x.fullName}${x.email ? ` (${x.email})` : ""}`,
     "בחר מדריך…"
   );
+
+  $("sType").addEventListener("change", async () => {
+    const typeId = Number($("sType").value || 0);
+    if (!typeId) {
+      fillSelect($("sCourse"), COURSES, x => x.courseId, x => x.courseName, "הכל");
+      return;
+    }
+    const byType = await httpJson(EP().coursesByType(typeId)).catch(() => []);
+    fillSelect($("sCourse"), byType, x => x.courseId, x => x.courseName, "הכל");
+  });
 
   $("eType").addEventListener("change", async () => {
     const typeId = Number($("eType").value || 0);
@@ -215,11 +226,13 @@ async function doSearch() {
   const activityId = $("sActivityId").value ? Number($("sActivityId").value) : null;
   const nameContains = $("sName").value.trim() || null;
   const activityTypeId = $("sType").value ? Number($("sType").value) : null;
+  const courseId = $("sCourse").value ? Number($("sCourse").value) : null;
 
   const qs = new URLSearchParams();
   if (activityId) qs.set("activityId", String(activityId));
-  if (nameContains) qs.set("nameContains", nameContains); // ✅ correct param
+  if (nameContains) qs.set("nameContains", nameContains);
   if (activityTypeId) qs.set("activityTypeId", String(activityTypeId));
+  if (courseId) qs.set("courseId", String(courseId));
   qs.set("take", "400");
 
   try {

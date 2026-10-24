@@ -16,6 +16,8 @@ function EP(){
   return {
     me: `${API_BASE}/me`,
     types: `${API_BASE}/activity-types`,
+    courses: `${API_BASE}/courses`,
+    coursesByType: (typeId)=> `${API_BASE}/courses/by-type/${encodeURIComponent(typeId)}`,
     leadActivities: (typeId)=> `${API_BASE}/lead/activities?take=400${typeId?`&activityTypeId=${encodeURIComponent(typeId)}`:""}`,
     leadActivity: (activityId)=> `${API_BASE}/lead/activities/${encodeURIComponent(activityId)}`,
     eligible: (activityId)=> `${API_BASE}/lead/activities/${encodeURIComponent(activityId)}/eligible-instructors`,
@@ -68,11 +70,29 @@ function availabilityLabel(status){
 }
 function isAssignedRow(r){ return Number(r?.isAssigned ?? r?.IsAssigned ?? 0) === 1; }
 
+let allCourses = [];
+
 async function loadTypes(){
-  types = await httpJson(EP().types).catch(()=>[]);
+  [types, allCourses] = await Promise.all([
+    httpJson(EP().types).catch(()=>[]),
+    httpJson(EP().courses).catch(()=>[])
+  ]);
   if($("typeSel")){
     $("typeSel").innerHTML = `<option value="">הכל</option>` + types.map(t=>`<option value="${t.activityTypeId}">${esc(t.typeName)}</option>`).join("");
-    $("typeSel").addEventListener("change", ()=> loadActivities());
+    $("typeSel").addEventListener("change", async ()=>{
+      const typeId = Number($("typeSel").value || 0);
+      if(!typeId){
+        if($("courseSel")) $("courseSel").innerHTML = `<option value="">הכל</option>` + allCourses.map(c=>`<option value="${c.courseId}">${esc(c.courseName)}</option>`).join("");
+      } else {
+        const byType = await httpJson(EP().coursesByType(typeId)).catch(()=>[]);
+        if($("courseSel")) $("courseSel").innerHTML = `<option value="">הכל</option>` + byType.map(c=>`<option value="${c.courseId}">${esc(c.courseName)}</option>`).join("");
+      }
+      loadActivities();
+    });
+  }
+  if($("courseSel")){
+    $("courseSel").innerHTML = `<option value="">הכל</option>` + allCourses.map(c=>`<option value="${c.courseId}">${esc(c.courseName)}</option>`).join("");
+    $("courseSel").addEventListener("change", ()=> loadActivities());
   }
 }
 
@@ -81,15 +101,17 @@ async function loadActivities(){
   if($("activitySel")) $("activitySel").innerHTML = `<option value="">טוען…</option>`;
   resetInstancesUI();
   const typeId = $("typeSel")?.value ? Number($("typeSel").value) : null;
+  const courseId = $("courseSel")?.value ? Number($("courseSel").value) : null;
   activities = await httpJson(EP().leadActivities(typeId)).catch(()=>[]);
   if(!Array.isArray(activities)) activities = [];
+  const filtered = courseId ? activities.filter(a => Number(a.courseId) === courseId) : activities;
   if($("activitySel")){
-    $("activitySel").innerHTML = `<option value="">בחר פעילות…</option>` + activities.map(a=>{
+    $("activitySel").innerHTML = `<option value="">בחר פעילות…</option>` + filtered.map(a=>{
       const txt = `#${a.activityId} • ${a.activityName} • ${a.typeName}${a.courseName ? " • " + a.courseName : ""}`;
       return `<option value="${a.activityId}">${esc(txt)}</option>`;
     }).join("");
   }
-  setMsg("activityMsg", `נטענו ${activities.length} פעילויות`, "ok");
+  setMsg("activityMsg", `נטענו ${filtered.length} פעילויות`, "ok");
 }
 function resetInstancesUI(){ if($("instancesBody")) $("instancesBody").innerHTML = `<tr><td colspan="8" class="muted">בחר פעילות כדי לראות מופעים.</td></tr>`; setMsg("instancesMsg",""); }
 if($("activitySel")) $("activitySel").addEventListener("change", onPickActivity);
