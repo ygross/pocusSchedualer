@@ -140,43 +140,61 @@ function resetForm() {
   instSeq = 0;
 }
 
-// ── load dropdowns ─────────────────────────────────────────
-async function loadTypes() {
-  const types = await fetchJson(`${API_BASE}/activity-types`);
-  if (!types) return;
+// ── load dropdowns (scoped to lead's courses only) ─────────
+let _myCourses = [];
+let _coursesByType = {};
+
+async function loadMyCourseDropdowns() {
+  const [allTypes, myCourses] = await Promise.all([
+    fetchJson(`${API_BASE}/activity-types`),
+    fetchJson(`${API_BASE}/lead/my-courses`)
+  ]);
+  _myCourses = myCourses || [];
+  _coursesByType = {};
+  for (const c of _myCourses) {
+    const tid = c.activityTypeId;
+    if (tid) {
+      if (!_coursesByType[tid]) _coursesByType[tid] = [];
+      _coursesByType[tid].push(c);
+    }
+  }
+
+  // Only show types the lead has courses in
+  const relevant = (allTypes || []).filter(t => _coursesByType[t.activityTypeId]?.length > 0);
   const sel = $("fType");
-  types.forEach(t => {
+  sel.innerHTML = "<option value=''>בחר סוג פעילות…</option>";
+  relevant.forEach(t => {
     const o = document.createElement("option");
     o.value = t.activityTypeId;
     o.textContent = t.typeName;
     sel.appendChild(o);
   });
+
+  // Auto-select if only one type
+  if (relevant.length === 1) {
+    sel.value = String(relevant[0].activityTypeId);
+    onTypeChange();
+  }
 }
 
-async function onTypeChange() {
-  const typeId = $("fType").value;
+function onTypeChange() {
+  const typeId = $("fType").value ? Number($("fType").value) : null;
   const sel = $("fCourse");
-  sel.innerHTML = "<option value=''>טוען…</option>";
-  sel.disabled = true;
-  if (!typeId) { sel.innerHTML = "<option value=''>בחר סוג פעילות קודם</option>"; return; }
-  try {
-    const courses = await fetchJson(`${API_BASE}/courses/by-type/${typeId}`);
-    if (!courses) return;
-    sel.innerHTML = "<option value=''>בחר קורס…</option>";
-    courses.forEach(c => {
-      const o = document.createElement("option");
-      o.value = c.courseId;
-      o.textContent = c.courseName;
-      sel.appendChild(o);
-    });
-    sel.disabled = false;
-    const savedCourse = window.getLeadCourseId?.();
-    if (savedCourse && sel.querySelector(`option[value="${savedCourse}"]`)) {
-      sel.value = String(savedCourse);
-    }
-  } catch (e) {
-    sel.innerHTML = `<option value=''>שגיאה: ${e.message}</option>`;
+  if (!typeId) {
+    sel.innerHTML = "<option value=''>בחר סוג פעילות קודם</option>";
+    sel.disabled = true;
+    return;
   }
+  const courses = _coursesByType[typeId] || [];
+  sel.innerHTML = "<option value=''>בחר קורס…</option>";
+  courses.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.courseId;
+    o.textContent = c.courseName;
+    sel.appendChild(o);
+  });
+  sel.disabled = courses.length === 0;
+  if (courses.length === 1) sel.value = String(courses[0].courseId);
 }
 
 // ── init ───────────────────────────────────────────────────
@@ -199,9 +217,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch { /* non-fatal */ }
 
-  await loadTypes();
+  await loadMyCourseDropdowns();
 
-  $("fType").addEventListener("change", () => onTypeChange().catch(e => setMsg("pageMsg", e.message, "err")));
+  $("fType").addEventListener("change", () => { onTypeChange(); });
 
   $("addInstanceBtn").addEventListener("click", () => addInstanceRow());
 

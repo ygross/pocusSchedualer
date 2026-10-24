@@ -64,6 +64,8 @@ async function detectApi() {
 // allRows[i] = { actId, actName, typeName, courseName, instanceId, startUtc, endUtc,
 //                required, requested, submitted, rejected, assigned }
 let allRows = [];
+let _filterCourseId = window.getLeadCourseId?.() || null;
+let _filterTypeId   = window.getLeadActivityTypeId?.() || null;
 // eligibleCache[actId] = array of eligible instructors
 const eligibleCache = {};
 
@@ -101,18 +103,20 @@ async function loadAll() {
   allRows = flatInst.map(({a, inst}, i) => {
     const arr = Array.isArray(availResults[i]) ? availResults[i] : [];
     return {
-      actId:      a.activityId,
-      actName:    a.activityName,
-      typeName:   a.typeName || "",
-      courseName: a.courseName || "",
-      instanceId: inst.instanceId,
-      startUtc:   inst.startUtc,
-      endUtc:     inst.endUtc,
-      required:   Number(inst.requiredInstructors || 0),
-      requested:  byStatus(arr, "REQUESTED"),
-      submitted:  byStatus(arr, "SUBMITTED"),
-      rejected:   byStatus(arr, "REJECTED"),
-      assigned:   arr.filter(isAssigned).length,
+      actId:          a.activityId,
+      actName:        a.activityName,
+      activityTypeId: a.activityTypeId || null,
+      courseId:       a.courseId || null,
+      typeName:       a.typeName || "",
+      courseName:     a.courseName || "",
+      instanceId:     inst.instanceId,
+      startUtc:       inst.startUtc,
+      endUtc:         inst.endUtc,
+      required:       Number(inst.requiredInstructors || 0),
+      requested:      byStatus(arr, "REQUESTED"),
+      submitted:      byStatus(arr, "SUBMITTED"),
+      rejected:       byStatus(arr, "REJECTED"),
+      assigned:       arr.filter(isAssigned).length,
     };
   });
 
@@ -130,6 +134,8 @@ function renderTable() {
 
   const rows = allRows.filter(r => {
     if (onlyMissing && (r.required - r.assigned) <= 0) return false;
+    if (_filterCourseId && r.courseId !== _filterCourseId) return false;
+    if (_filterTypeId   && r.activityTypeId !== _filterTypeId) return false;
     if (search) {
       const hay = `${r.actName} ${r.typeName} ${r.courseName} ${fmtDate(r.startUtc)}`.toLowerCase();
       if (!hay.includes(search)) return false;
@@ -393,6 +399,12 @@ function closeModal() {
   window.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
   $("btnAutoPick").addEventListener("click", autoPick);
   $("btnApprove").addEventListener("click", ()=>approveAssign().catch(e=>setMsg("modalMsg",e.message,"err")));
+
+  window.addEventListener("leadCourseChanged", e => {
+    _filterCourseId = e.detail?.courseId || null;
+    _filterTypeId   = e.detail?.activityTypeId || null;
+    renderTable();
+  });
 
   (async()=>{
     await detectApi();
