@@ -89,6 +89,23 @@
     <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
   </div>
 
+  <!-- v3.9 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.9</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-fix">Security</span>
+      <span class="v-badge badge-improve">UX</span>
+    </div>
+    <div class="items">
+      <div class="item"><strong>מניעת חשיפת קיום מייל (email enumeration)</strong> — ממשק ה-OTP מחזיר כעת תמיד HTTP 200 עם הודעה גנרית "אם המייל רשום ופעיל, נשלח קוד", ללא חשיפת 404/403.</div>
+      <div class="item"><strong>הגבלת קצב בקשות OTP (Rate Limiting)</strong> — מקסימום 3 קודים פר אימייל בתוך 10 דקות. חריגה מחזירה הודעה ידידותית ומונעת הצפת מיילים.</div>
+      <div class="item"><strong>אימות מקור הפניית Redirect</strong> — כפתור "לא רשום?" מאמת כעת שה-URL הוא מאותו אתר (same-origin) לפני הפניה.</div>
+      <div class="item"><strong>שיפור מקלדת מובייל בשדה OTP</strong> — הוסף <code>inputmode="numeric"</code> לשדה הקוד — מקלדת מספרים נפתחת ישירות בנייד.</div>
+      <div class="item"><strong>תיקון מפתחות Data Protection</strong> — הוספת <code>/XD keys</code> ל-robocopy כדי לשמר מפתחות ה-session בין דיפלויים.</div>
+    </div>
+  </div>
+
   <!-- v3.8 -->
   <div class="version">
     <div class="v-head">

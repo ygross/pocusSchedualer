@@ -74,13 +74,20 @@ public static class AuthEndpoints
             if (string.IsNullOrWhiteSpace(email))
                 return Results.BadRequest(new { ok = false, error = "Missing email" });
 
+            // Rate limit: max 3 OTP requests per email per 10 minutes
+            var recentCount = await db.CountRecentOtpRequestsAsync(email, windowMinutes: 10);
+            if (recentCount >= 3)
+                return Results.Ok(new { ok = false, sent = false, rateLimited = true, message = "יותר מדי בקשות. נסה שוב בעוד כמה דקות." });
+
             var authState = await db.GetInstructorAuthStateByEmailAsync(email);
             if (authState == null)
             {
-                return Results.NotFound(new
+                // Return 200 (not 404) to avoid revealing whether an email is registered
+                return Results.Ok(new
                 {
                     ok = false,
-                    notFound = true,
+                    sent = false,
+                    notRegistered = true,
                     redirect = $"CreateInstructor.html?email={Uri.EscapeDataString(email)}"
                 });
             }
@@ -91,19 +98,16 @@ public static class AuthEndpoints
 
             if (!isAllowed)
             {
-                if (status == "pendingapproval")
-                    return Results.Json(new { ok = false, pending = true, message = "Account pending admin approval" }, statusCode: StatusCodes.Status403Forbidden);
-
-                if (status == "declined")
-                    return Results.Json(new { ok = false, declined = true, message = "Account access declined" }, statusCode: StatusCodes.Status403Forbidden);
-
-                if (status == "inactive")
-                    return Results.Json(new { ok = false, inactive = true, message = "Account is inactive" }, statusCode: StatusCodes.Status403Forbidden);
-
-                if (status == "suspended")
-                    return Results.Json(new { ok = false, suspended = true, message = "Account is suspended" }, statusCode: StatusCodes.Status403Forbidden);
-
-                return Results.Json(new { ok = false, forbidden = true, message = "Account not allowed", debugStatus = statusRaw }, statusCode: StatusCodes.Status403Forbidden);
+                // Return 200 (not 403) — same HTTP status for all blocked cases
+                var accountStatus = status switch
+                {
+                    "pendingapproval" => "pending",
+                    "declined"        => "declined",
+                    "inactive"        => "inactive",
+                    "suspended"       => "suspended",
+                    _                 => "blocked"
+                };
+                return Results.Ok(new { ok = false, sent = false, accountStatus, message = "אם המייל רשום ופעיל, נשלח קוד." });
             }
 
             var minutes = cfg.GetValue("Otp:ExpireMinutes", 10);
@@ -141,7 +145,7 @@ public static class AuthEndpoints
             if (!sent)
                 return Results.Problem("Failed to send OTP email");
 
-            return Results.Ok(new { ok = true, emailId });
+            return Results.Ok(new { ok = true, sent = true, emailId });
         });
 
         api.MapPost("/auth/otp/verify", async (HttpContext ctx, OtpVerifyDto dto, Db db, IConfiguration cfg) =>

@@ -110,6 +110,21 @@ WHERE OtpId = (
     }
 
     /// <summary>
+    /// Counts OTP requests for an email within the last <paramref name="windowMinutes"/> minutes.
+    /// Used for rate limiting.
+    /// </summary>
+    public async Task<int> CountRecentOtpRequestsAsync(string email, int windowMinutes = 10)
+    {
+        const string sql = @"
+SELECT COUNT(*)
+FROM dbo.OtpCodes
+WHERE Email = @Email
+  AND CreatedAtUtc >= DATEADD(MINUTE, -@WindowMinutes, SYSUTCDATETIME());";
+        await using var c = Open();
+        return await c.ExecuteScalarAsync<int>(sql, new { Email = email, WindowMinutes = windowMinutes });
+    }
+
+    /// <summary>
     /// Generates a 6-digit OTP code as string (000000-999999).
     /// </summary>
     public static string GenerateOtpCode() =>
