@@ -190,14 +190,9 @@ async function loadInstructors(){
   sel.innerHTML = `<option value="">טוען…</option>`;
 
   try{
-    let list = [];
-    try{
-      list = await apiJson(`${API_BASE}/instructors/by-course/${courseId}`);
-    }catch(e){
-      list = await apiJson(`${API_BASE}/instructors`);
-    }
-
-    const rows = Array.isArray(list) ? list : [];
+    const all = await apiJson(`${API_BASE}/instructors`);
+    const rows = (Array.isArray(all) ? all : [])
+      .filter(x => (x.roleName || x.role || "").toLowerCase() === "coursemanager");
     sel.innerHTML = `<option value="">ללא מדריך מרכז</option>` + rows.map(x => {
       const name = x.fullName || x.name || "";
       const email = x.email ? ` (${esc(x.email)})` : "";
@@ -206,7 +201,7 @@ async function loadInstructors(){
     sel.disabled = false;
   }catch(err){
     sel.innerHTML = `<option value="">שגיאה בטעינה</option>`;
-    showErr(`שגיאה בטעינת מדריכים: ${err.message}`);
+    showErr(`שגיאה בטעינת מרכזי קורסים: ${err.message}`);
   }
 }
 
