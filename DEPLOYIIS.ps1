@@ -28,8 +28,8 @@ $ErrorActionPreference = "Stop"
 $ServerName      = "localrecord"
 $AppPoolName     = "PocusSchedualer"
 $RepoPath        = "\\$ServerName\e$\dev\simPocusSchedualerBackend\PocusSchedualer"
-$ApiPublishPath  = "\\$ServerName\e$\inetpub\wwwroot\simcenter\PocusSchedualer\api"
-$IisFrontend     = "\\$ServerName\e$\inetpub\wwwroot\simcenter\PocusSchedualer"
+$ApiPublishPath  = "\\$ServerName\e$\dev\simSchedualer\api"
+$IisFrontend     = "\\$ServerName\e$\dev\simSchedualer"
 $WwwrootSrc      = Join-Path $RepoPath "wwwroot"
 $FrontendFolders = @("css", "js", "config", "img")
 

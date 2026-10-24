@@ -233,6 +233,46 @@ function Deploy-Frontend {
 }
 
 # =====================================================
+# GIT PUSH FLOW
+# =====================================================
+
+function Git-PushFlow {
+    if (-not (Ensure-GitAvailable)) {
+        Write-Host "❌ Git not found" -ForegroundColor Red
+        Pause
+        return
+    }
+
+    Push-Location $RepoPath
+    try {
+        Clear-Host
+        Write-Host "==================================" -ForegroundColor DarkCyan
+        Write-Host " Git Commit + Push " -ForegroundColor White
+        Write-Host "==================================" -ForegroundColor DarkCyan
+        Write-Host ""
+        git status -sb
+        Write-Host ""
+
+        $msg = Read-Host "Commit message (leave blank to push only)"
+        if ($msg.Trim()) {
+            Invoke-Git @("add", "-A")
+            Invoke-Git @("commit", "-m", $msg.Trim())
+        }
+
+        Invoke-Git @("push")
+        Write-Host ""
+        Write-Host "✅ Push complete" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "❌ $($_.Exception.Message)" -ForegroundColor Red
+    }
+    finally {
+        Pop-Location
+    }
+    Pause
+}
+
+# =====================================================
 # MAIN MENU
 # =====================================================
 
