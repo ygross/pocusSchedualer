@@ -36,6 +36,7 @@ public static class AuthEndpoints
                 isAdmin = !isImpersonating && (string.Equals(me.RoleName, Roles.Admin, StringComparison.OrdinalIgnoreCase) || string.Equals(me.RoleName, Roles.SystemAdmin, StringComparison.OrdinalIgnoreCase)),
                 isCourseManager = string.Equals(me.RoleName, Roles.CourseManager, StringComparison.OrdinalIgnoreCase),
                 isInstructor = string.Equals(me.RoleName, Roles.Instructor, StringComparison.OrdinalIgnoreCase),
+                isActor = string.Equals(me.RoleName, Roles.Actor, StringComparison.OrdinalIgnoreCase),
                 isImpersonating,
                 realName = isImpersonating ? realName : null
             });

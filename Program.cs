@@ -34,7 +34,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("SysAdminOnly", p => p.RequireRole(Roles.SystemAdmin));
     options.AddPolicy("CourseManagerOnly", p => p.RequireRole(Roles.CourseManager));
     options.AddPolicy("InstructorOnly", p => p.RequireRole(Roles.Instructor));
-    options.AddPolicy("AnyUser", p => p.RequireRole(Roles.Admin, Roles.CourseManager, Roles.Instructor));
+    options.AddPolicy("AnyUser", p => p.RequireRole(Roles.Admin, Roles.CourseManager, Roles.Instructor, Roles.Actor));
+    options.AddPolicy("ActorOnly", p => p.RequireRole(Roles.Actor));
 });
 
 builder.Services.AddScoped<AuditService>();
@@ -105,5 +106,6 @@ admin.MapChecklistEndpoints();
 
 api.MapInstructorStatusEndpoints();
 api.MapLeadStatusEndpoints();
+api.MapActorEndpoints();
 
 app.Run();

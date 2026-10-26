@@ -3,7 +3,8 @@ public static class Roles
     public const string Admin = "Admin";
     public const string CourseManager = "CourseManager";
     public const string Instructor = "Instructor";
+    public const string Actor = "Actor";
     public const string SystemAdmin = "SystemAdmin";
 
-    public const string AnyUser = Admin + "," + CourseManager + "," + Instructor;
+    public const string AnyUser = Admin + "," + CourseManager + "," + Instructor + "," + Actor;
 }

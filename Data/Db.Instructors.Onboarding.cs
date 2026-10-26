@@ -11,7 +11,7 @@ public sealed partial class Db
     /// </summary>
     public async Task<InstructorAuthStateDto?> GetInstructorAuthStateByEmailAsync(string email)
     {
-        const string sql = @"
+        const string sqlInstructor = @"
 SELECT TOP 1
   InstructorId,
   Email,
@@ -23,7 +23,21 @@ FROM dbo.Instructors
 WHERE Email = @email;";
 
         await using var c = Open();
-        return await c.QueryFirstOrDefaultAsync<InstructorAuthStateDto>(sql, new { email });
+        var inst = await c.QueryFirstOrDefaultAsync<InstructorAuthStateDto>(sqlInstructor, new { email });
+        if (inst != null) return inst;
+
+        // fallback: check Actors table
+        const string sqlActor = @"
+SELECT TOP 1
+  ActorId  AS InstructorId,
+  Email,
+  FullName,
+  'Actor'  AS RoleName,
+  NULL     AS Department,
+  [Status]
+FROM dbo.Actors
+WHERE Email = @email;";
+        return await c.QueryFirstOrDefaultAsync<InstructorAuthStateDto>(sqlActor, new { email });
     }
 
     /// <summary>

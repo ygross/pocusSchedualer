@@ -95,7 +95,7 @@ ORDER BY i.FullName;";
 
     public async Task<MeDto?> GetMeByEmailAsync(string email)
     {
-        const string sql = @"
+        const string sqlInstructor = @"
 SELECT TOP 1
   InstructorId,
   Email,
@@ -106,7 +106,20 @@ SELECT TOP 1
 FROM dbo.Instructors
 WHERE Email = @email;";
         await using var c = Open();
-        return await c.QueryFirstOrDefaultAsync<MeDto>(sql, new { email });
+        var inst = await c.QueryFirstOrDefaultAsync<MeDto>(sqlInstructor, new { email });
+        if (inst != null) return inst;
+
+        const string sqlActor = @"
+SELECT TOP 1
+  ActorId  AS InstructorId,
+  Email,
+  FullName,
+  'Actor'  AS RoleName,
+  NULL     AS Department,
+  [Status]
+FROM dbo.Actors
+WHERE Email = @email;";
+        return await c.QueryFirstOrDefaultAsync<MeDto>(sqlActor, new { email });
     }
 
     public async Task<MeDto?> ImpersonateByEmailAsync(string email)

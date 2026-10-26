@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>זמינות שחקנים</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9fafb; color: #111827; margin: 0; padding: 20px; }
+  h1 { font-size: 1.4em; margin-bottom: 6px; }
+  .sub { color: #6b7280; font-size: .9em; margin-bottom: 20px; }
+  .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.1); padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 1em; margin: 0 0 12px; }
+  .select-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 16px; }
+  .select-row .field { display: flex; flex-direction: column; gap: 4px; }
+  .select-row label { font-size: .8em; color: #6b7280; }
+  select, input { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: .9em; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #f3f4f6; text-align: right; padding: 8px 12px; font-size: .85em; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; font-size: .9em; vertical-align: middle; }
+  tr:hover td { background: #f9fafb; }
+  .btn { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: .85em; font-weight: 500; }
+  .btn-available   { background: #d1fae5; color: #065f46; }
+  .btn-unavailable { background: #fee2e2; color: #991b1b; }
+  .btn-available:hover   { background: #a7f3d0; }
+  .btn-unavailable:hover { background: #fecaca; }
+  .date-cell { white-space: nowrap; }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: .9em; display: none; z-index: 99; }
+  .empty-msg { text-align: center; padding: 32px; color: #9ca3af; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.8em; font-weight:600; }
+  .badge-available   { background:#d1fae5; color:#065f46; }
+  .badge-unavailable { background:#f3f4f6; color:#6b7280; }
+</style>
+</head>
+<body>
+<h1>הגשת זמינות – שחקנים</h1>
+<p class="sub">בחרו שחקן ואת המפגשים שבהם אתם זמינים</p>
+
+<div class="card">
+  <div class="select-row">
+    <div class="field">
+      <label>שחקן</label>
+      <select id="actorSel" onchange="onActorChange()">
+        <option value="">בחר שחקן…</option>
+      </select>
+    </div>
+    <div class="field" id="noteField" style="display:none">
+      <label>הערה (אופציונלי)</label>
+      <input id="noteInput" type="text" placeholder="הערה לגורם המתאם" style="min-width:220px">
+    </div>
+  </div>
+  <div id="table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>שעה</th>
+          <th>קורס / פעילות</th>
+          <th>זמינות</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty-msg" class="empty-msg" style="display:none">אין פעילויות עתידיות</div>
+  </div>
+</div>
+
+<div id="toast">✓ נשמר</div>
+
+<script src="js/actorAvailability.js?v=1"></script>
+</body>
+</html>

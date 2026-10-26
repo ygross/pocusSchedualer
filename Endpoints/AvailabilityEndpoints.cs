@@ -25,7 +25,8 @@ public static class AvailabilityEndpoints
 
             if (!ctx.User.IsInRole(Roles.Instructor) &&
                 !ctx.User.IsInRole(Roles.CourseManager) &&
-                !ctx.User.IsInRole(Roles.Admin))
+                !ctx.User.IsInRole(Roles.Admin) &&
+                !ctx.User.IsInRole(Roles.Actor))
                 return Results.Forbid();
 
             if (await db.IsInstructorAssignedToInstanceAsync(instanceId, myId.Value))
@@ -57,7 +58,8 @@ public static class AvailabilityEndpoints
 
             if (!ctx.User.IsInRole(Roles.Instructor) &&
                 !ctx.User.IsInRole(Roles.CourseManager) &&
-                !ctx.User.IsInRole(Roles.Admin))
+                !ctx.User.IsInRole(Roles.Admin) &&
+                !ctx.User.IsInRole(Roles.Actor))
                 return Results.Forbid();
 
             if (await db.IsInstructorAssignedToInstanceAsync(instanceId, myId.Value))

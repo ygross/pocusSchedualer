@@ -67,25 +67,27 @@ Write-Host "  Frontend : $IisFrontend" -ForegroundColor Gray
 # BACKEND: build -> app_offline trick -> robocopy -> restore
 # ============================================================
 if (-not $FrontendOnly) {
-    Write-Step "dotnet publish -> $RepoPath\publish_out"
+    $TempPublish = "C:\Temp\pocus-deploy"
+    Write-Step "dotnet publish -> $TempPublish"
     Set-Location $PSScriptRoot
 
-    # Clean stale build cache
-    Remove-Item -Recurse -Force "C:\Temp\pocus-build" -ErrorAction SilentlyContinue
-    Remove-Item -Recurse -Force (Join-Path $PSScriptRoot "obj") -ErrorAction SilentlyContinue
+    # Clean previous temp publish
+    Remove-Item -Recurse -Force $TempPublish -ErrorAction SilentlyContinue
 
-    dotnet publish -c Release -o (Join-Path $PSScriptRoot "publish_out") /p:BaseIntermediateOutputPath=C:\Temp\pocus-build\
+    dotnet publish -c Release -o $TempPublish
     if ($LASTEXITCODE -ne 0) { Write-Host "[FAIL] dotnet publish failed" -ForegroundColor Red; exit 1 }
     Write-Host "  [ok] Build OK" -ForegroundColor Green
 
     Write-Step "Deploying backend via app_offline.htm"
+    # Ensure api dir exists
+    if (-not (Test-Path $ApiPublishPath)) { New-Item -ItemType Directory -Path $ApiPublishPath -Force | Out-Null }
     $offline = Join-Path $ApiPublishPath "app_offline.htm"
     '<html><body>Deploying, please wait...</body></html>' | Out-File $offline -Encoding utf8
     Write-Host "  app_offline.htm created -- waiting 4s..." -ForegroundColor Yellow
     Start-Sleep -Seconds 4
 
-    $src = Join-Path $PSScriptRoot "publish_out"
-    robocopy $src $ApiPublishPath /E /IS /IT /XF "app_offline.htm" /XD "publish_out" "publish" "publish_deploy" "publish_tmp" /R:2 /W:2 /NP /NJH /NJS
+    $src = $TempPublish
+    robocopy $src $ApiPublishPath /E /IS /IT /XF "app_offline.htm" /XD "wwwroot" /R:2 /W:2 /NP /NJH /NJS
     $rc = $LASTEXITCODE
 
     Remove-Item $offline -Force -ErrorAction SilentlyContinue

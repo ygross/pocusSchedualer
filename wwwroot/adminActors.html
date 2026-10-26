@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול שחקנים</title>
+<link rel="stylesheet" href="css/admin.css">
+<style>
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.8em; font-weight:600; }
+  .badge-male   { background:#dbeafe; color:#1e40af; }
+  .badge-female { background:#fce7f3; color:#9d174d; }
+  .badge-other  { background:#f3f4f6; color:#374151; }
+  .badge-adult  { background:#d1fae5; color:#065f46; }
+  .badge-child  { background:#fef3c7; color:#92400e; }
+  .badge-elderly{ background:#ede9fe; color:#4c1d95; }
+  .badge-active  { background:#d1fae5; color:#065f46; }
+  .badge-inactive{ background:#fee2e2; color:#991b1b; }
+  .filters-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; align-items:flex-end; }
+  .filters-row .field { display:flex; flex-direction:column; gap:4px; }
+  .filters-row label { font-size:.8em; color:#6b7280; }
+  .filters-row select, .filters-row input { padding:6px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:.9em; }
+  #modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; align-items:center; justify-content:center; }
+  #modal-overlay.open { display:flex; }
+  .modal-box { background:#fff; border-radius:10px; padding:24px; width:420px; max-width:95vw; box-shadow:0 10px 40px rgba(0,0,0,.2); }
+  .modal-box h3 { margin:0 0 16px; font-size:1.1em; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .form-grid .full { grid-column:1/-1; }
+  .form-grid label { font-size:.8em; color:#374151; margin-bottom:2px; display:block; }
+  .form-grid input, .form-grid select, .form-grid textarea { width:100%; padding:7px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:.9em; box-sizing:border-box; }
+  .form-grid textarea { resize:vertical; min-height:60px; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+  .btn { padding:7px 16px; border-radius:6px; border:none; cursor:pointer; font-size:.9em; font-weight:500; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .btn-primary:hover { background:#1d4ed8; }
+  .btn-danger  { background:#ef4444; color:#fff; }
+  .btn-danger:hover { background:#dc2626; }
+  .btn-ghost   { background:#f3f4f6; color:#374151; }
+  .btn-ghost:hover { background:#e5e7eb; }
+  .action-btn { padding:4px 10px; border-radius:4px; border:none; cursor:pointer; font-size:.8em; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="page-header">
+    <h1>ניהול שחקנים</h1>
+    <button class="btn btn-primary" onclick="openModal()">+ הוסף שחקן</button>
+  </div>
+
+  <div class="filters-row">
+    <div class="field">
+      <label>מגדר</label>
+      <select id="fGender" onchange="load()">
+        <option value="">הכל</option>
+        <option value="Male">גבר</option>
+        <option value="Female">אישה</option>
+        <option value="Other">אחר</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>קבוצת גיל</label>
+      <select id="fAge" onchange="load()">
+        <option value="">הכל</option>
+        <option value="Adult">מבוגר</option>
+        <option value="Child">ילד</option>
+        <option value="Elderly">קשיש</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>סטטוס</label>
+      <select id="fStatus" onchange="load()">
+        <option value="active">פעיל</option>
+        <option value="">הכל</option>
+        <option value="inactive">לא פעיל</option>
+      </select>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>שם</th>
+        <th>מגדר</th>
+        <th>גיל</th>
+        <th>טלפון</th>
+        <th>אימייל</th>
+        <th>סטטוס</th>
+        <th>פעולות</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="empty-msg" style="display:none;text-align:center;padding:32px;color:#6b7280;">אין שחקנים</div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title">הוסף שחקן</h3>
+    <div class="form-grid">
+      <div class="full">
+        <label>שם מלא *</label>
+        <input id="f-name" type="text" required>
+      </div>
+      <div>
+        <label>מגדר</label>
+        <select id="f-gender">
+          <option value="Male">גבר</option>
+          <option value="Female">אישה</option>
+          <option value="Other">אחר</option>
+        </select>
+      </div>
+      <div>
+        <label>קבוצת גיל</label>
+        <select id="f-age">
+          <option value="Adult">מבוגר</option>
+          <option value="Child">ילד</option>
+          <option value="Elderly">קשיש</option>
+        </select>
+      </div>
+      <div>
+        <label>טלפון</label>
+        <input id="f-phone" type="tel">
+      </div>
+      <div>
+        <label>אימייל</label>
+        <input id="f-email" type="email">
+      </div>
+      <div>
+        <label>סטטוס</label>
+        <select id="f-status">
+          <option value="active">פעיל</option>
+          <option value="inactive">לא פעיל</option>
+        </select>
+      </div>
+      <div class="full">
+        <label>הערות</label>
+        <textarea id="f-notes"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="save()">שמור</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/adminActors.js?v=1"></script>
+</body>
+</html>

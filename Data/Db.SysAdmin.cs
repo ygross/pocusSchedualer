@@ -85,6 +85,48 @@ BEGIN
     );
     CREATE UNIQUE INDEX UX_ChecklistProgress
         ON dbo.ChecklistProgress(LinkId, ItemId);
+END
+
+-- ── Feature: Actors (Standardized Patients) ──────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='Actors')
+    CREATE TABLE dbo.Actors(
+        ActorId       INT IDENTITY PRIMARY KEY,
+        FullName      NVARCHAR(120) NOT NULL,
+        Email         NVARCHAR(200) NULL,
+        Phone         NVARCHAR(30)  NULL,
+        Gender        NVARCHAR(10)  NOT NULL DEFAULT 'Male',
+        AgeGroup      NVARCHAR(10)  NOT NULL DEFAULT 'Adult',
+        Status        NVARCHAR(20)  NOT NULL DEFAULT 'active',
+        Notes         NVARCHAR(500) NULL,
+        CreatedAtUtc  DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME(),
+        UpdatedAtUtc  DATETIME2     NULL
+    );
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='ActorAvailability')
+BEGIN
+    CREATE TABLE dbo.ActorAvailability(
+        AvailabilityId INT IDENTITY PRIMARY KEY,
+        ActorId        INT NOT NULL,
+        InstanceId     INT NOT NULL,
+        Status         NVARCHAR(20) NOT NULL DEFAULT 'Submitted',
+        Note           NVARCHAR(500) NULL,
+        SubmittedAt    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE UNIQUE INDEX UX_ActorAvailability
+        ON dbo.ActorAvailability(ActorId, InstanceId);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='ActorAssignments')
+BEGIN
+    CREATE TABLE dbo.ActorAssignments(
+        AssignmentId  INT IDENTITY PRIMARY KEY,
+        InstanceId    INT NOT NULL,
+        ActorId       INT NOT NULL,
+        DecisionNote  NVARCHAR(300) NULL,
+        AssignedAt    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE UNIQUE INDEX UX_ActorAssignments
+        ON dbo.ActorAssignments(InstanceId, ActorId);
 END";
         await using var c = Open();
         await c.ExecuteAsync(sql);

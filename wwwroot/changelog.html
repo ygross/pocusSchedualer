@@ -89,6 +89,35 @@
     <button id="themeToggle" class="theme-btn" type="button">&#127769;</button>
   </div>
 
+  <!-- v3.11.1 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.11.1</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-new">Feature</span>
+    </div>
+    <div class="items">
+      <div class="item"><strong>תפריט שחקן = תפריט מדריך</strong> — שחקן רואה בדיוק את אותן פעולות תפריט כמו מדריך (קבוצת Instructor)</div>
+      <div class="item"><strong>הרשאות backend לשחקן</strong> — Role <code>Actor</code> נוסף לבדיקות הרשאה ב-<code>AvailabilityEndpoints</code> ו-<code>InstructorAvailabilityEndpoints</code></div>
+    </div>
+  </div>
+
+  <!-- v3.11.0 -->
+  <div class="version">
+    <div class="v-head">
+      <span class="v-tag">v3.11.0</span>
+      <span class="v-date">אוקטובר 2026</span>
+      <span class="v-badge badge-new">Feature</span>
+    </div>
+    <div class="items">
+      <div class="item"><strong>ניהול שחקנים (Standardized Patients)</strong> — הוספת מודול שחקנים מלא: CRUD ניהולי (<code>adminActors.html</code>), הגשת זמינות עצמאית (<code>actorAvailability.html</code>), שיבוץ שחקנים למפגשים</div>
+      <div class="item"><strong>מסד נתונים</strong> — נוספו טבלאות <code>dbo.Actors</code>, <code>dbo.ActorAvailability</code>, <code>dbo.ActorAssignments</code> עם migration אוטומטי</div>
+      <div class="item"><strong>API חדש</strong> — <code>/api/actors</code> (ציבורי) + <code>/api/admin/actors</code> (מנהל) + endpoints לזמינות ושיבוץ</div>
+      <div class="item"><strong>מסנן מדריך מרכז</strong> — ב-adminAddActivities מציג רק CourseManagers ברשימת מדריכי מרכז</div>
+      <div class="item"><strong>סדר פילטרים</strong> — כל תפריטי אדמין: סוג פעילות → קורס → שאר הפילטרים</div>
+    </div>
+  </div>
+
   <!-- v3.10.1 -->
   <div class="version">
     <div class="v-head">
